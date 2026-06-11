@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
+import Footer from '../components/Footer/Footer'
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore()
@@ -65,6 +66,7 @@ export default function DashboardPage() {
           <PRList />
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

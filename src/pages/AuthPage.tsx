@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { createGitHubClient, VIEWER_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
 import type { GitHubUser } from '../types/github'
+import Footer from '../components/Footer/Footer'
 
 interface ViewerResult {
   viewer: GitHubUser
@@ -33,7 +34,8 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[var(--color-surface)] flex flex-col">
+      <div className="flex-1 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo / title */}
         <div className="mb-8 text-center">
@@ -103,6 +105,8 @@ export default function AuthPage() {
           </p>
         </div>
       </div>
+      </div>
+      <Footer />
     </div>
   )
 }
