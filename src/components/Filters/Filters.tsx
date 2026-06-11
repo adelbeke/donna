@@ -105,7 +105,7 @@ export default function Filters() {
         </div>
       )}
 
-      {(filters.repos.length > 0 || filters.hiddenAuthors.length > 0) && hasNextPage && !truncated && (
+      {(filters.repos.length > 0 || filters.showDrafts || filters.showHidden) && hasNextPage && !truncated && (
         <p className="text-xs text-[var(--color-warning)]">
           ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
         </p>
