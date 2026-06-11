@@ -2,7 +2,7 @@
 
 # donna
 
-Self-hostable GitHub PR dashboard — filter, prioritise, and track review status across all your repositories.
+GitHub PR dashboard — runs in your browser, no backend, no signup. Filter, prioritise, and track review status across all your repositories.
 
 [![CI](https://github.com/adelbeke/donna/actions/workflows/ci.yml/badge.svg)](https://github.com/adelbeke/donna/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
