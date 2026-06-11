@@ -11,7 +11,7 @@ export interface Review {
   author: {
     login: string
     avatarUrl: string
-  }
+  } | null
   submittedAt: string
 }
 
@@ -26,7 +26,7 @@ export interface PullRequest {
   author: {
     login: string
     avatarUrl: string
-  }
+  } | null
   repository: {
     name: string
     nameWithOwner: string
