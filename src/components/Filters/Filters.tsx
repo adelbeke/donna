@@ -72,7 +72,7 @@ export default function Filters() {
         <select
           value={filters.sortOrder}
           onChange={(e) => setFilters({ sortOrder: e.target.value as 'newest' | 'oldest' })}
-          className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md px-2 py-1.5 text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors cursor-pointer"
+          className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md pl-2 pr-7 py-1.5 text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors cursor-pointer"
         >
           <option value="newest">Newest first</option>
           <option value="oldest">Oldest first</option>
