@@ -40,7 +40,6 @@ function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
         showDrafts: false,
         showHidden: false,
         search: '',
-        sortOrder: 'newest',
         ...filterOverrides,
       },
       priorityIds: [],

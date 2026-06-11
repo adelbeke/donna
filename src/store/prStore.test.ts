@@ -10,7 +10,6 @@ beforeEach(() => {
       showDrafts: false,
       showHidden: false,
       search: '',
-      sortOrder: 'newest',
     },
     priorityIds: [],
     hiddenIds: [],
@@ -18,21 +17,11 @@ beforeEach(() => {
 })
 
 describe('prStore', () => {
-  it('defaultFilters.sortOrder is newest', () => {
-    const { filters } = usePRStore.getState()
-    expect(filters.sortOrder).toBe('newest')
-  })
-
-  it('setFilters updates sortOrder', () => {
-    usePRStore.getState().setFilters({ sortOrder: 'oldest' })
-    expect(usePRStore.getState().filters.sortOrder).toBe('oldest')
-  })
-
   it('setFilters merges partial update', () => {
     usePRStore.getState().setFilters({ search: 'foo' })
     const { filters } = usePRStore.getState()
     expect(filters.search).toBe('foo')
-    expect(filters.sortOrder).toBe('newest')
+    expect(filters.section).toBe('review-requested')
   })
 
   it('togglePriority adds an id', () => {

@@ -44,12 +44,10 @@ function deriveMyReviewState(pr: PullRequest, login: string): ReviewState | null
 export function sortAndPartition(
   prs: PullRequest[],
   priorityIds: string[],
-  sortOrder: 'newest' | 'oldest',
 ): { regular: PullRequest[]; priorityPRs: PullRequest[] } {
-  const byDate = [...prs].sort((a, b) => {
-    const diff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    return sortOrder === 'oldest' ? -diff : diff
-  })
+  const byDate = [...prs].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
   return {
     priorityPRs: byDate.filter((pr) => priorityIds.includes(pr.id)),
     regular: byDate.filter((pr) => !priorityIds.includes(pr.id)),
@@ -131,7 +129,7 @@ export function usePullRequests() {
       return true
     })
 
-  const { priorityPRs, regular } = sortAndPartition(filtered, priorityIds, filters.sortOrder)
+  const { priorityPRs, regular } = sortAndPartition(filtered, priorityIds)
 
   const repos = [...new Set(allNodes.map((pr) => pr.repository.nameWithOwner))].sort()
 

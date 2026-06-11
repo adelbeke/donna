@@ -1,4 +1,4 @@
-import { LogOut, Search } from 'lucide-react'
+import { LogOut, Search, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
 import Filters from '../components/Filters/Filters'
@@ -24,8 +24,16 @@ export default function DashboardPage() {
               value={filters.search}
               onChange={(e) => setFilters({ search: e.target.value })}
               placeholder="Filter by title…"
-              className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md pl-7 pr-3 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors"
+              className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md pl-7 pr-7 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors"
             />
+            {filters.search && (
+              <button
+                onClick={() => setFilters({ search: '' })}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+              >
+                <X size={12} />
+              </button>
+            )}
           </div>
 
           {user && (

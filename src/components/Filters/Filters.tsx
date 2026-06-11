@@ -64,21 +64,6 @@ export default function Filters() {
 
       <div className="border-t border-[var(--color-border-subtle)]" />
 
-      {/* Sort */}
-      <div>
-        <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-          Sort
-        </p>
-        <select
-          value={filters.sortOrder}
-          onChange={(e) => setFilters({ sortOrder: e.target.value as 'newest' | 'oldest' })}
-          className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md px-2 py-1.5 text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors cursor-pointer"
-        >
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-        </select>
-      </div>
-
       {/* Review state filter */}
       <div>
         <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
