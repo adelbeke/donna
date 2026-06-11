@@ -3,6 +3,7 @@ import { RefreshCw } from 'lucide-react'
 import { usePullRequests } from '../../hooks/useGitHubPRs'
 import { usePRStore } from '../../store/prStore'
 import PRCard from '../PRCard/PRCard'
+import VisibilityToggles from './VisibilityToggles'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -11,14 +12,14 @@ const sectionLabels: Record<string, string> = {
 }
 
 export default function PRList() {
-  const { data: prs = [], priorityPRs = [], isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage, refetch, error, totalCount, loadedCount, truncated } = usePullRequests()
+  const { data: prs = [], priorityPRs = [], isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage, refetch, error, totalCount, truncated } = usePullRequests()
   const filters = usePRStore((s) => s.filters)
   const section = filters.section
   const loadAllRef = useRef(false)
 
   const hasActiveFilters =
     filters.repos.length > 0 ||
-    filters.reviewStates.length > 0 ||
+    (filters.hiddenAuthors?.length ?? 0) > 0 ||
     filters.showDrafts ||
     filters.search.length > 0
 
@@ -49,14 +50,17 @@ export default function PRList() {
           )}
         </div>
 
-        <button
-          onClick={() => refetch()}
-          disabled={isFetching}
-          title="Refresh"
-          className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-        >
-          <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
-        </button>
+        <div className="flex items-center gap-2">
+          <VisibilityToggles />
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            title="Refresh"
+            className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+          >
+            <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
+          </button>
+        </div>
       </div>
 
       {/* States */}
@@ -122,11 +126,6 @@ export default function PRList() {
 
       {!isLoading && !error && hasNextPage && !truncated && (
         <div className="mt-4 flex flex-col items-center gap-2">
-          {hasActiveFilters && (
-            <p className="text-xs text-[var(--color-warning)] flex items-center gap-1">
-              ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
-            </p>
-          )}
           <div className="flex gap-2">
             <button
               onClick={() => fetchNextPage()}

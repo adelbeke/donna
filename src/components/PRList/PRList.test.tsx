@@ -5,6 +5,7 @@ import type { PullRequest } from '../../types/github'
 
 vi.mock('../../hooks/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
 vi.mock('../../store/prStore', () => ({ usePRStore: vi.fn() }))
+vi.mock('./VisibilityToggles', () => ({ default: () => null }))
 
 import { usePullRequests } from '../../hooks/useGitHubPRs'
 import { usePRStore, type PRFilters } from '../../store/prStore'
@@ -36,7 +37,7 @@ function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
       filters: {
         section: 'review-requested',
         repos: [],
-        reviewStates: [],
+        hiddenAuthors: [],
         showDrafts: false,
         showHidden: false,
         search: '',
@@ -48,6 +49,8 @@ function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
       resetFilters: vi.fn(),
       toggleHide: vi.fn(),
       togglePriority: vi.fn(),
+      addHiddenAuthor: vi.fn(),
+      removeHiddenAuthor: vi.fn(),
     })
   )
 }
@@ -134,12 +137,11 @@ describe('PRList', () => {
       expect(fetchNextPage).toHaveBeenCalledOnce()
     })
 
-    it('GIVEN hasNextPage and active repo filter THEN shows warning and "Load all"', () => {
+    it('GIVEN hasNextPage and active filter THEN shows "Load all" button', () => {
       mockStoreFilters({ repos: ['org/repo'] })
       const prs = [makePR('1', 'PR')]
       mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: true, totalCount: 100, loadedCount: 50 } as never)
       render(<PRList />)
-      expect(screen.getByText(/Filters apply to 50 of ~100 PRs/)).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Load all' })).toBeInTheDocument()
     })
   })

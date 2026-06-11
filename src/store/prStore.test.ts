@@ -6,7 +6,7 @@ beforeEach(() => {
     filters: {
       section: 'review-requested',
       repos: [],
-      reviewStates: [],
+      hiddenAuthors: [],
       showDrafts: false,
       showHidden: false,
       search: '',
@@ -39,5 +39,34 @@ describe('prStore', () => {
     usePRStore.getState().togglePriority('pr-1')
     usePRStore.getState().togglePriority('pr-2')
     expect(usePRStore.getState().priorityIds).toHaveLength(2)
+  })
+
+  it('addHiddenAuthor adds a pattern', () => {
+    usePRStore.getState().addHiddenAuthor('renovate')
+    expect(usePRStore.getState().filters.hiddenAuthors).toContain('renovate')
+  })
+
+  it('addHiddenAuthor normalizes to lowercase', () => {
+    usePRStore.getState().addHiddenAuthor('Renovate')
+    expect(usePRStore.getState().filters.hiddenAuthors).toContain('renovate')
+    expect(usePRStore.getState().filters.hiddenAuthors).not.toContain('Renovate')
+  })
+
+  it('addHiddenAuthor does not duplicate case-insensitively', () => {
+    usePRStore.getState().addHiddenAuthor('Renovate')
+    usePRStore.getState().addHiddenAuthor('renovate')
+    expect(usePRStore.getState().filters.hiddenAuthors).toHaveLength(1)
+  })
+
+  it('removeHiddenAuthor removes an existing pattern', () => {
+    usePRStore.getState().addHiddenAuthor('dependabot')
+    usePRStore.getState().removeHiddenAuthor('dependabot')
+    expect(usePRStore.getState().filters.hiddenAuthors).not.toContain('dependabot')
+  })
+
+  it('removeHiddenAuthor is a no-op for unknown pattern', () => {
+    usePRStore.getState().addHiddenAuthor('renovate')
+    usePRStore.getState().removeHiddenAuthor('unknown')
+    expect(usePRStore.getState().filters.hiddenAuthors).toHaveLength(1)
   })
 })

@@ -1,6 +1,6 @@
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import { usePRStore, type PRSection } from '../../store/prStore'
-import type { ReviewState } from '../../types/github'
 import { usePullRequests } from '../../hooks/useGitHubPRs'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
@@ -9,22 +9,12 @@ const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'mentioned', label: 'Mentioned' },
 ]
 
-const REVIEW_STATES: { id: ReviewState; label: string }[] = [
-  { id: 'CHANGES_REQUESTED', label: 'Changes requested' },
-  { id: 'COMMENTED', label: 'Commented' },
-  { id: 'PENDING', label: 'Not reviewed' },
-]
-
 export default function Filters() {
-  const { filters, setFilters, resetFilters } = usePRStore()
-  const hiddenIds = usePRStore((s) => s.hiddenIds)
-  const { repos = [] } = usePullRequests()
-
-  const hasActiveFilters =
-    filters.repos.length > 0 ||
-    filters.reviewStates.length > 0 ||
-    filters.showDrafts ||
-    filters.search.length > 0
+  const { filters, setFilters } = usePRStore()
+  const addHiddenAuthor = usePRStore((s) => s.addHiddenAuthor)
+  const removeHiddenAuthor = usePRStore((s) => s.removeHiddenAuthor)
+  const { repos = [], hasNextPage, truncated, loadedCount, totalCount } = usePullRequests()
+  const [mutedInput, setMutedInput] = useState('')
 
   function toggleRepo(repo: string) {
     setFilters({
@@ -34,12 +24,14 @@ export default function Filters() {
     })
   }
 
-  function toggleReviewState(state: ReviewState) {
-    setFilters({
-      reviewStates: filters.reviewStates.includes(state)
-        ? filters.reviewStates.filter((s) => s !== state)
-        : [...filters.reviewStates, state],
-    })
+  function handleMutedKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      const trimmed = mutedInput.trim()
+      if (trimmed) {
+        addHiddenAuthor(trimmed)
+        setMutedInput('')
+      }
+    }
   }
 
   return (
@@ -63,31 +55,6 @@ export default function Filters() {
       </nav>
 
       <div className="border-t border-[var(--color-border-subtle)]" />
-
-      {/* Review state filter */}
-      <div>
-        <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-          My review
-        </p>
-        <div className="space-y-0.5">
-          {REVIEW_STATES.map((state) => (
-            <label
-              key={state.id}
-              className="flex items-center gap-2 px-1 py-1 rounded cursor-pointer hover:bg-[var(--color-surface-overlay)] group"
-            >
-              <input
-                type="checkbox"
-                checked={filters.reviewStates.includes(state.id)}
-                onChange={() => toggleReviewState(state.id)}
-                className="accent-[var(--color-accent)] cursor-pointer"
-              />
-              <span className="text-xs text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]">
-                {state.label}
-              </span>
-            </label>
-          ))}
-        </div>
-      </div>
 
       {/* Repo filter — only shown if multiple repos */}
       {repos.length > 1 && (
@@ -138,44 +105,46 @@ export default function Filters() {
         </div>
       )}
 
-      {/* Visibility toggles */}
-      <div className="space-y-1.5">
-        <label className="flex items-center gap-2 px-1 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={filters.showDrafts}
-            onChange={(e) => setFilters({ showDrafts: e.target.checked })}
-            className="accent-[var(--color-accent)] cursor-pointer"
-          />
-          <span className="text-xs text-[var(--color-text-secondary)]">Show drafts</span>
-        </label>
+      {(filters.repos.length > 0 || filters.hiddenAuthors.length > 0) && hasNextPage && !truncated && (
+        <p className="text-xs text-[var(--color-warning)]">
+          ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
+        </p>
+      )}
 
-        <label className="flex items-center gap-2 px-1 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={filters.showHidden}
-            onChange={(e) => setFilters({ showHidden: e.target.checked })}
-            className="accent-[var(--color-accent)] cursor-pointer"
-          />
-          <span className="text-xs text-[var(--color-text-secondary)]">
-            Show hidden
-            {hiddenIds.length > 0 && (
-              <span className="ml-1 text-[var(--color-text-muted)]">({hiddenIds.length})</span>
-            )}
-          </span>
-        </label>
+      {/* Muted authors — free-form pattern input */}
+      <div>
+        <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+          Muted authors{filters.hiddenAuthors.length > 0 && ` (${filters.hiddenAuthors.length})`}
+        </p>
+        <input
+          type="text"
+          value={mutedInput}
+          onChange={(e) => setMutedInput(e.target.value)}
+          onKeyDown={handleMutedKeyDown}
+          placeholder="e.g. renovate, dependabot"
+          className="w-full text-xs px-2 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+        />
+        {filters.hiddenAuthors.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {filters.hiddenAuthors.map((pattern) => (
+              <span
+                key={pattern}
+                className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-overlay)] text-[var(--color-text-secondary)]"
+              >
+                {pattern}
+                <button
+                  onClick={() => removeHiddenAuthor(pattern)}
+                  className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
+                  aria-label={`Remove ${pattern}`}
+                >
+                  <X size={10} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Reset */}
-      {hasActiveFilters && (
-        <button
-          onClick={resetFilters}
-          className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-        >
-          <X size={12} />
-          Reset filters
-        </button>
-      )}
     </aside>
   )
 }

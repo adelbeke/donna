@@ -1,8 +1,13 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
-import { createGitHubClient, PULL_REQUESTS_QUERY, VIEWER_QUERY } from '../lib/github'
+import { useInfiniteQuery } from '@tanstack/react-query'
+import { createGitHubClient, PULL_REQUESTS_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
-import type { PullRequest, GitHubUser, ReviewState } from '../types/github'
+import { buildSearchQuery, deriveMyReviewState, sortAndPartition } from '../lib/prUtils'
+import { applyFilters } from '../lib/prFilters'
+import type { PullRequest } from '../types/github'
+
+export { deriveMyReviewState, sortAndPartition } from '../lib/prUtils'
+export { useViewer } from './useViewer'
 
 const MAX_PAGES = 10
 
@@ -12,60 +17,6 @@ interface SearchResult {
     pageInfo: { hasNextPage: boolean; endCursor: string }
     nodes: PullRequest[]
   }
-}
-
-interface ViewerResult {
-  viewer: GitHubUser
-}
-
-function buildSearchQuery(section: string, login: string): string {
-  const base = 'is:open is:pr archived:false'
-  switch (section) {
-    case 'review-requested':
-      return `${base} review-requested:${login}`
-    case 'authored':
-      return `${base} author:${login}`
-    case 'mentioned':
-      return `${base} mentions:${login}`
-    default:
-      return `${base} review-requested:${login}`
-  }
-}
-
-export function deriveMyReviewState(pr: PullRequest, login: string): ReviewState | null {
-  const myReviews = pr.reviews.nodes.filter((r) => r.author?.login === login)
-  if (!myReviews.length) return null
-  const sorted = [...myReviews].sort(
-    (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
-  )
-  return sorted[0].state
-}
-
-export function sortAndPartition(
-  prs: PullRequest[],
-  priorityIds: string[],
-): { regular: PullRequest[]; priorityPRs: PullRequest[] } {
-  const byDate = [...prs].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
-  return {
-    priorityPRs: byDate.filter((pr) => priorityIds.includes(pr.id)),
-    regular: byDate.filter((pr) => !priorityIds.includes(pr.id)),
-  }
-}
-
-export function useViewer() {
-  const token = useAuthStore((s) => s.token)
-
-  return useQuery<GitHubUser>({
-    queryKey: ['viewer'],
-    enabled: !!token,
-    queryFn: async () => {
-      const client = createGitHubClient(token!)
-      const data = await client.request<ViewerResult>(VIEWER_QUERY)
-      return data.viewer
-    },
-  })
 }
 
 export function usePullRequests() {
@@ -108,27 +59,7 @@ export function usePullRequests() {
       isHidden: hiddenIds.includes(pr.id),
     }))
 
-  // Apply client-side filters
-  const filtered = allNodes
-    .map((pr) => ({
-      ...pr,
-      isHidden: hiddenIds.includes(pr.id),
-    }))
-    .filter((pr) => {
-      if (!filters.showHidden && pr.isHidden) return false
-      if (!filters.showDrafts && pr.isDraft) return false
-      if (filters.repos.length && !filters.repos.includes(pr.repository.nameWithOwner))
-        return false
-      if (
-        filters.reviewStates.length &&
-        !filters.reviewStates.includes(pr.myReviewState as ReviewState)
-      )
-        return false
-      if (filters.search && !pr.title.toLowerCase().includes(filters.search.toLowerCase()))
-        return false
-      return true
-    })
-
+  const filtered = applyFilters(allNodes, filters)
   const { priorityPRs, regular } = sortAndPartition(filtered, priorityIds)
 
   const repos = [...new Set(allNodes.map((pr) => pr.repository.nameWithOwner))].sort()
