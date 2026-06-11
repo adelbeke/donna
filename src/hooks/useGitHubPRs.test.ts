@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sortAndPartition } from './useGitHubPRs'
+import { sortAndPartition, deriveMyReviewState } from './useGitHubPRs'
 import type { PullRequest } from '../types/github'
 
 function makePR(id: string, createdAt: string): PullRequest {
@@ -23,6 +23,42 @@ function makePR(id: string, createdAt: string): PullRequest {
 const old = makePR('1', '2024-01-01T00:00:00Z')
 const mid = makePR('2', '2024-06-01T00:00:00Z')
 const newest = makePR('3', '2024-12-01T00:00:00Z')
+
+describe('deriveMyReviewState', () => {
+  function makePRWithReviews(reviews: PullRequest['reviews']['nodes']): PullRequest {
+    return { ...makePR('1', '2024-01-01T00:00:00Z'), reviews: { nodes: reviews } }
+  }
+
+  it('GIVEN review with null author WHEN filtering THEN does not crash', () => {
+    const pr = makePRWithReviews([
+      { state: 'APPROVED', submittedAt: '2024-01-01T00:00:00Z', author: null },
+    ])
+    const actual = deriveMyReviewState(pr, 'user')
+    expect(actual).toBeNull()
+  })
+
+  it('GIVEN mix of null and real author WHEN filtering THEN returns real author state', () => {
+    const pr = makePRWithReviews([
+      { state: 'COMMENTED', submittedAt: '2024-01-01T00:00:00Z', author: null },
+      { state: 'APPROVED', submittedAt: '2024-01-02T00:00:00Z', author: { login: 'user', avatarUrl: '' } },
+    ])
+    const actual = deriveMyReviewState(pr, 'user')
+    expect(actual).toBe('APPROVED')
+  })
+
+  it('GIVEN no reviews THEN returns null', () => {
+    const pr = makePRWithReviews([])
+    expect(deriveMyReviewState(pr, 'user')).toBeNull()
+  })
+
+  it('GIVEN multiple reviews by same user THEN returns most recent', () => {
+    const pr = makePRWithReviews([
+      { state: 'COMMENTED', submittedAt: '2024-01-01T00:00:00Z', author: { login: 'user', avatarUrl: '' } },
+      { state: 'APPROVED', submittedAt: '2024-01-03T00:00:00Z', author: { login: 'user', avatarUrl: '' } },
+    ])
+    expect(deriveMyReviewState(pr, 'user')).toBe('APPROVED')
+  })
+})
 
 describe('sortAndPartition', () => {
   describe('sort order', () => {

@@ -32,8 +32,8 @@ function buildSearchQuery(section: string, login: string): string {
   }
 }
 
-function deriveMyReviewState(pr: PullRequest, login: string): ReviewState | null {
-  const myReviews = pr.reviews.nodes.filter((r) => r.author.login === login)
+export function deriveMyReviewState(pr: PullRequest, login: string): ReviewState | null {
+  const myReviews = pr.reviews.nodes.filter((r) => r.author?.login === login)
   if (!myReviews.length) return null
   const sorted = [...myReviews].sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()

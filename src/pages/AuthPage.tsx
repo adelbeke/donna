@@ -89,6 +89,18 @@ export default function AuthPage() {
               Generate one →
             </a>
           </p>
+          <p className="text-xs text-[var(--color-text-muted)] text-center">
+            Using an organization with SSO?{' '}
+            <a
+              href="https://github.com/settings/tokens"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--color-accent)] hover:underline"
+            >
+              Authorize the token for SSO
+            </a>{' '}
+            after generating it.
+          </p>
         </div>
       </div>
     </div>
