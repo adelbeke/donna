@@ -5,6 +5,8 @@
 [![CI](https://github.com/adelbeke/donna/actions/workflows/ci.yml/badge.svg)](https://github.com/adelbeke/donna/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+**[→ Live demo](https://adelbeke.github.io/donna/)**
+
 ## Features
 
 - Filter by repository, review state (approved / commented / pending / changes requested)
@@ -35,10 +37,9 @@ Open http://localhost:5173, paste a GitHub PAT with `repo` and `read:org` scopes
 
 ## Deploying
 
-```bash
-npm run build
-# deploy the dist/ folder to Vercel, Netlify, GitHub Pages, etc.
-```
+The app deploys automatically to [GitHub Pages](https://adelbeke.github.io/donna/) on every push to `main` via `.github/workflows/deploy.yml`. The Vite `base` is set to `/donna/` in `vite.config.ts`.
+
+For any other static host: `npm run build` and drop the `dist/` folder.
 
 ## Roadmap
 
@@ -49,7 +50,15 @@ npm run build
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+Issues and PRs are welcome. Before opening a PR, run:
+
+```bash
+npm run lint
+npm run test:run
+npm run build
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
 
 ## License
 
