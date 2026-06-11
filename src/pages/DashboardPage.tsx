@@ -10,7 +10,7 @@ export default function DashboardPage() {
   const { filters, setFilters } = usePRStore()
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)]">
+    <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">
       {/* Top navbar */}
       <header className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/90 backdrop-blur-sm shadow-[0_1px_8px_0_rgba(0,0,0,0.4)] px-6 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
@@ -60,7 +60,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Main layout */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
         <div className="flex gap-8">
           <Filters />
           <PRList />
