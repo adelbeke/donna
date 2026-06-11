@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { usePullRequests } from '../../hooks/useGitHubPRs'
 import { usePRStore } from '../../store/prStore'
@@ -10,9 +11,25 @@ const sectionLabels: Record<string, string> = {
 }
 
 export default function PRList() {
-  const { data: prs = [], priorityPRs = [], isLoading, isFetching, refetch, error, totalCount, loadedCount, truncated } = usePullRequests()
-  const section = usePRStore((s) => s.filters.section)
-  const isPaging = isFetching && !isLoading
+  const { data: prs = [], priorityPRs = [], isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage, refetch, error, totalCount, loadedCount, truncated } = usePullRequests()
+  const filters = usePRStore((s) => s.filters)
+  const section = filters.section
+  const loadAllRef = useRef(false)
+
+  const hasActiveFilters =
+    filters.repos.length > 0 ||
+    filters.reviewStates.length > 0 ||
+    filters.showDrafts ||
+    filters.search.length > 0
+
+  useEffect(() => {
+    if (loadAllRef.current && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+    if (!hasNextPage) {
+      loadAllRef.current = false
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   return (
     <div className="flex-1 min-w-0">
@@ -60,12 +77,6 @@ export default function PRList() {
         </div>
       )}
 
-      {isPaging && (
-        <div className="text-xs text-[var(--color-text-muted)] mb-3">
-          Loading {loadedCount} of {totalCount}…
-        </div>
-      )}
-
       {truncated && !isFetching && (
         <div className="text-xs text-[var(--color-text-muted)] mb-3 px-3 py-2 rounded bg-[var(--color-surface-raised)] border border-[var(--color-border)]">
           Showing first 1000 PRs — refine filters on GitHub to narrow results.
@@ -95,6 +106,34 @@ export default function PRList() {
           {prs.map((pr) => (
             <PRCard key={pr.id} pr={pr} />
           ))}
+        </div>
+      )}
+
+      {!isLoading && !error && hasNextPage && !truncated && (
+        <div className="mt-4 flex flex-col items-center gap-2">
+          {hasActiveFilters && (
+            <p className="text-xs text-[var(--color-warning)] flex items-center gap-1">
+              ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
+            </p>
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="text-xs px-3 py-1.5 rounded border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer disabled:opacity-40"
+            >
+              {isFetchingNextPage ? 'Loading…' : 'Load more'}
+            </button>
+            {hasActiveFilters && (
+              <button
+                onClick={() => { loadAllRef.current = true; fetchNextPage() }}
+                disabled={isFetchingNextPage}
+                className="text-xs px-3 py-1.5 rounded border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)] transition-colors cursor-pointer disabled:opacity-40"
+              >
+                {isFetchingNextPage ? 'Loading…' : 'Load all'}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

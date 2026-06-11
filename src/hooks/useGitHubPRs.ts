@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { createGitHubClient, PULL_REQUESTS_QUERY, VIEWER_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
@@ -102,13 +101,6 @@ export function usePullRequests() {
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query
 
-  // Auto-fetch all pages
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
-
   const allNodes = (query.data?.pages ?? [])
     .flatMap((p) => p.search.nodes)
     .map((pr) => ({
@@ -145,7 +137,9 @@ export function usePullRequests() {
 
   const totalCount = query.data?.pages[0]?.search.issueCount ?? 0
   const loadedCount = allNodes.length
-  const truncated = !!query.hasNextPage
+  const lastPage = query.data?.pages[query.data.pages.length - 1]
+  const hitPageCap = (query.data?.pages.length ?? 0) >= MAX_PAGES
+  const truncated = hitPageCap && !!lastPage?.search.pageInfo.hasNextPage
 
-  return { ...query, data: regular, priorityPRs, repos, totalCount, loadedCount, truncated }
+  return { ...query, data: regular, priorityPRs, repos, totalCount, loadedCount, truncated, hasNextPage, isFetchingNextPage, fetchNextPage }
 }
