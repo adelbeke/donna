@@ -7,7 +7,7 @@ vi.mock('../../hooks/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
 vi.mock('../../store/prStore', () => ({ usePRStore: vi.fn() }))
 
 import { usePullRequests } from '../../hooks/useGitHubPRs'
-import { usePRStore } from '../../store/prStore'
+import { usePRStore, type PRFilters } from '../../store/prStore'
 const mockUsePullRequests = vi.mocked(usePullRequests)
 const mockUsePRStore = vi.mocked(usePRStore)
 
@@ -31,7 +31,7 @@ function makePR(id: string, title: string): PullRequest {
 }
 
 function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
-  mockUsePRStore.mockImplementation((selector: (s: unknown) => unknown) =>
+  mockUsePRStore.mockImplementation((selector) =>
     selector({
       filters: {
         section: 'review-requested',
@@ -41,9 +41,11 @@ function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
         showHidden: false,
         search: '',
         ...filterOverrides,
-      },
+      } as PRFilters,
       priorityIds: [],
       hiddenIds: [],
+      setFilters: vi.fn(),
+      resetFilters: vi.fn(),
       toggleHide: vi.fn(),
       togglePriority: vi.fn(),
     })

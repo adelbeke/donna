@@ -25,7 +25,7 @@ const pr: PullRequest = {
 beforeEach(() => {
   usePRStore.setState({ priorityIds: [], hiddenIds: [], filters: {
     section: 'review-requested', repos: [], reviewStates: [],
-    showDrafts: false, showHidden: false, search: '', sortOrder: 'newest',
+    showDrafts: false, showHidden: false, search: '',
   }})
 })
 
