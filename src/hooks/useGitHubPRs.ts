@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { createGitHubClient, PULL_REQUESTS_QUERY, VIEWER_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
@@ -45,12 +44,10 @@ export function deriveMyReviewState(pr: PullRequest, login: string): ReviewState
 export function sortAndPartition(
   prs: PullRequest[],
   priorityIds: string[],
-  sortOrder: 'newest' | 'oldest',
 ): { regular: PullRequest[]; priorityPRs: PullRequest[] } {
-  const byDate = [...prs].sort((a, b) => {
-    const diff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    return sortOrder === 'oldest' ? -diff : diff
-  })
+  const byDate = [...prs].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )
   return {
     priorityPRs: byDate.filter((pr) => priorityIds.includes(pr.id)),
     regular: byDate.filter((pr) => !priorityIds.includes(pr.id)),
@@ -102,13 +99,6 @@ export function usePullRequests() {
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query
 
-  // Auto-fetch all pages
-  useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
-
   const allNodes = (query.data?.pages ?? [])
     .flatMap((p) => p.search.nodes)
     .map((pr) => ({
@@ -139,13 +129,15 @@ export function usePullRequests() {
       return true
     })
 
-  const { priorityPRs, regular } = sortAndPartition(filtered, priorityIds, filters.sortOrder)
+  const { priorityPRs, regular } = sortAndPartition(filtered, priorityIds)
 
   const repos = [...new Set(allNodes.map((pr) => pr.repository.nameWithOwner))].sort()
 
   const totalCount = query.data?.pages[0]?.search.issueCount ?? 0
   const loadedCount = allNodes.length
-  const truncated = !!query.hasNextPage
+  const lastPage = query.data?.pages[query.data.pages.length - 1]
+  const hitPageCap = (query.data?.pages.length ?? 0) >= MAX_PAGES
+  const truncated = hitPageCap && !!lastPage?.search.pageInfo.hasNextPage
 
-  return { ...query, data: regular, priorityPRs, repos, totalCount, loadedCount, truncated }
+  return { ...query, data: regular, priorityPRs, repos, totalCount, loadedCount, truncated, hasNextPage, isFetchingNextPage, fetchNextPage }
 }

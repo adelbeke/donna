@@ -1,14 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import PRList from './PRList'
 import type { PullRequest } from '../../types/github'
 
-vi.mock('../../hooks/useGitHubPRs', () => ({
-  usePullRequests: vi.fn(),
-}))
+vi.mock('../../hooks/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
+vi.mock('../../store/prStore', () => ({ usePRStore: vi.fn() }))
 
 import { usePullRequests } from '../../hooks/useGitHubPRs'
+import { usePRStore, type PRFilters } from '../../store/prStore'
 const mockUsePullRequests = vi.mocked(usePullRequests)
+const mockUsePRStore = vi.mocked(usePRStore)
 
 function makePR(id: string, title: string): PullRequest {
   return {
@@ -29,9 +30,34 @@ function makePR(id: string, title: string): PullRequest {
   }
 }
 
+function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
+  mockUsePRStore.mockImplementation((selector) =>
+    selector({
+      filters: {
+        section: 'review-requested',
+        repos: [],
+        reviewStates: [],
+        showDrafts: false,
+        showHidden: false,
+        search: '',
+        ...filterOverrides,
+      } as PRFilters,
+      priorityIds: [],
+      hiddenIds: [],
+      setFilters: vi.fn(),
+      resetFilters: vi.fn(),
+      toggleHide: vi.fn(),
+      togglePriority: vi.fn(),
+    })
+  )
+}
+
 const defaultQuery = {
   isLoading: false,
   isFetching: false,
+  isFetchingNextPage: false,
+  fetchNextPage: vi.fn(),
+  hasNextPage: false,
   error: null,
   refetch: vi.fn(),
   totalCount: 0,
@@ -42,6 +68,7 @@ const defaultQuery = {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockStoreFilters()
 })
 
 describe('PRList', () => {
@@ -78,5 +105,42 @@ describe('PRList', () => {
     mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], totalCount: 500, loadedCount: 1 } as never)
     render(<PRList />)
     expect(screen.getByText(/of 500/)).toBeInTheDocument()
+  })
+
+  describe('pagination CTAs', () => {
+    it('GIVEN hasNextPage and no active filters THEN shows "Load more" only', () => {
+      const prs = [makePR('1', 'PR')]
+      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: true, totalCount: 100, loadedCount: 50 } as never)
+      render(<PRList />)
+      expect(screen.getByRole('button', { name: 'Load more' })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Load all' })).not.toBeInTheDocument()
+      expect(screen.queryByText(/Filters apply to/)).not.toBeInTheDocument()
+    })
+
+    it('GIVEN hasNextPage=false THEN no pagination CTAs', () => {
+      const prs = [makePR('1', 'PR')]
+      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: false } as never)
+      render(<PRList />)
+      expect(screen.queryByRole('button', { name: 'Load more' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Load all' })).not.toBeInTheDocument()
+    })
+
+    it('GIVEN "Load more" clicked THEN fetchNextPage is called', () => {
+      const fetchNextPage = vi.fn()
+      const prs = [makePR('1', 'PR')]
+      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: true, fetchNextPage, totalCount: 100, loadedCount: 50 } as never)
+      render(<PRList />)
+      fireEvent.click(screen.getByRole('button', { name: 'Load more' }))
+      expect(fetchNextPage).toHaveBeenCalledOnce()
+    })
+
+    it('GIVEN hasNextPage and active repo filter THEN shows warning and "Load all"', () => {
+      mockStoreFilters({ repos: ['org/repo'] })
+      const prs = [makePR('1', 'PR')]
+      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: true, totalCount: 100, loadedCount: 50 } as never)
+      render(<PRList />)
+      expect(screen.getByText(/Filters apply to 50 of ~100 PRs/)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Load all' })).toBeInTheDocument()
+    })
   })
 })

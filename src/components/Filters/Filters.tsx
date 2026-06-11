@@ -1,4 +1,4 @@
-import { Search, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { usePRStore, type PRSection } from '../../store/prStore'
 import type { ReviewState } from '../../types/github'
 import { usePullRequests } from '../../hooks/useGitHubPRs'
@@ -63,38 +63,6 @@ export default function Filters() {
       </nav>
 
       <div className="border-t border-[var(--color-border-subtle)]" />
-
-      {/* Sort */}
-      <div>
-        <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-          Sort
-        </p>
-        <select
-          value={filters.sortOrder}
-          onChange={(e) => setFilters({ sortOrder: e.target.value as 'newest' | 'oldest' })}
-          className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md pl-2 pr-7 py-1.5 text-xs text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors cursor-pointer"
-        >
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-        </select>
-      </div>
-
-      {/* Search */}
-      <div>
-        <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-          Search
-        </p>
-        <div className="relative">
-          <Search size={13} className="absolute left-2.5 top-2 text-[var(--color-text-muted)]" />
-          <input
-            type="text"
-            value={filters.search}
-            onChange={(e) => setFilters({ search: e.target.value })}
-            placeholder="Filter by title…"
-            className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md pl-7 pr-3 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors"
-          />
-        </div>
-      </div>
 
       {/* Review state filter */}
       <div>

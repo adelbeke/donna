@@ -11,7 +11,6 @@ export interface PRFilters {
   showDrafts: boolean
   showHidden: boolean
   search: string
-  sortOrder: 'newest' | 'oldest'
 }
 
 interface PRStore {
@@ -31,7 +30,6 @@ const defaultFilters: PRFilters = {
   showDrafts: false,
   showHidden: false,
   search: '',
-  sortOrder: 'newest',
 }
 
 export const usePRStore = create<PRStore>()(
