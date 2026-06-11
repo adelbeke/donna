@@ -106,16 +106,18 @@ export default function PRCard({ pr }: Props) {
             {/* Meta row */}
             <div className="flex items-center flex-wrap gap-2 mt-2">
               {/* Author */}
-              <div className="flex items-center gap-1.5">
-                <img
-                  src={pr.author.avatarUrl}
-                  alt={pr.author.login}
-                  className="w-4 h-4 rounded-full"
-                />
-                <span className="text-xs text-[var(--color-text-secondary)]">
-                  {pr.author.login}
-                </span>
-              </div>
+              {pr.author && (
+                <div className="flex items-center gap-1.5">
+                  <img
+                    src={pr.author.avatarUrl}
+                    alt={pr.author.login}
+                    className="w-4 h-4 rounded-full"
+                  />
+                  <span className="text-xs text-[var(--color-text-secondary)]">
+                    {pr.author.login}
+                  </span>
+                </div>
+              )}
 
               {/* Number + age */}
               <span className="text-xs text-[var(--color-text-muted)]">

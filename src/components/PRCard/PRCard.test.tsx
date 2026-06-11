@@ -30,6 +30,12 @@ beforeEach(() => {
 })
 
 describe('PRCard', () => {
+  it('GIVEN author is null WHEN rendered THEN does not crash', () => {
+    const prNoAuthor: PullRequest = { ...pr, author: null }
+    render(<PRCard pr={prNoAuthor} />)
+    expect(screen.getByText('Fix the thing')).toBeInTheDocument()
+  })
+
   it('renders opened timestamp', () => {
     render(<PRCard pr={pr} />)
     expect(screen.getByText(/opened/)).toBeInTheDocument()
