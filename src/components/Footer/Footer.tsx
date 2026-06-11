@@ -7,16 +7,16 @@ export default function Footer() {
         rel="noopener noreferrer"
         className="hover:text-[var(--color-accent)] transition-colors"
       >
-        arthurdelbeke.com
+        Made by Arthur
       </a>
-      <span className="mx-2">·</span>
+      <span className="mx-2">—</span>
       <a
         href="https://buymeacoffee.com/adelbeke"
         target="_blank"
         rel="noopener noreferrer"
         className="hover:text-[var(--color-accent)] transition-colors"
       >
-        buy me a coffee
+        Buy me a coffee
       </a>
     </footer>
   )
