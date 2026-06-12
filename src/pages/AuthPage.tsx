@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { Lock } from 'lucide-react'
 import { createGitHubClient, VIEWER_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
 import type { GitHubUser } from '../types/github'
@@ -43,7 +44,7 @@ export default function AuthPage() {
             Donna
           </h1>
           <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-            Your PR assistant
+            The GitHub PR inbox you actually want to open.
           </p>
         </div>
 
@@ -72,6 +73,21 @@ export default function AuthPage() {
             </p>
           )}
 
+          <div className="rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-3 py-3 flex flex-col items-center gap-2 text-center">
+            <Lock size={16} className="text-[var(--color-text-muted)]" />
+            <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+              Your GitHub token is never transmitted or shared. It only lives in your localStorage.{' '}
+              <a
+                href="https://github.com/settings/tokens/new?scopes=repo,read:org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[var(--color-accent)] hover:underline"
+              >
+                Generate one →
+              </a>
+            </p>
+          </div>
+
           <button
             onClick={handleConnect}
             disabled={loading || !token.trim()}
@@ -79,18 +95,6 @@ export default function AuthPage() {
           >
             {loading ? 'Connecting…' : 'Connect'}
           </button>
-
-          <p className="text-xs text-[var(--color-text-muted)] text-center">
-            Your token is stored locally and never sent to any server.{' '}
-            <a
-              href="https://github.com/settings/tokens/new?scopes=repo,read:org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--color-accent)] hover:underline"
-            >
-              Generate one →
-            </a>
-          </p>
           <p className="text-xs text-[var(--color-text-muted)] text-center">
             Using an organization with SSO?{' '}
             <a

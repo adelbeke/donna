@@ -23,7 +23,7 @@ Client-only GitHub PR dashboard. No backend. Talks directly to the GitHub GraphQ
 - Filter by your own review state: changes requested / commented / not reviewed
 - Star PRs as **top priority** — pinned to a separate section
 - Hide PRs you don't care about; toggle to show drafts / hidden
-- PR cards show repo, author, diff size, draft + review-state badges, relative timestamps
+- PR cards show repo, author, diff size, draft + review-state badges, CI status, conflict indicator, relative timestamps
 - PAT stored in `localStorage`, never sent to any server; auto sign-out on token expiry
 
 ## Quick start
