@@ -1,5 +1,17 @@
 import type { PullRequest, ReviewState } from '../types/github'
 
+export interface Reviewer {
+  login: string
+  avatarUrl: string
+}
+
+export interface ReviewerSummary {
+  approved: Reviewer[]
+  changesRequested: Reviewer[]
+  commented: Reviewer[]
+  pending: Reviewer[]
+}
+
 export function buildSearchQuery(section: string, login: string): string {
   const base = 'is:open is:pr archived:false'
   switch (section) {
@@ -21,6 +33,35 @@ export function deriveMyReviewState(pr: PullRequest, login: string): ReviewState
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
   )
   return sorted[0].state
+}
+
+export function deriveReviewerSummary(pr: PullRequest, authorLogin: string): ReviewerSummary {
+  const sorted = [...pr.reviews.nodes]
+    .filter((r) => r.author && r.author.login !== authorLogin)
+    .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+
+  const seen = new Set<string>()
+  const buckets: ReviewerSummary = { approved: [], changesRequested: [], commented: [], pending: [] }
+
+  for (const review of sorted) {
+    if (!review.author || seen.has(review.author.login)) continue
+    if (review.state === 'DISMISSED' || review.state === 'PENDING') continue
+    seen.add(review.author.login)
+    const reviewer: Reviewer = { login: review.author.login, avatarUrl: review.author.avatarUrl }
+    if (review.state === 'APPROVED') buckets.approved.push(reviewer)
+    else if (review.state === 'CHANGES_REQUESTED') buckets.changesRequested.push(reviewer)
+    else buckets.commented.push(reviewer)
+  }
+
+  for (const rr of pr.reviewRequests.nodes) {
+    if (rr.requestedReviewer.__typename !== 'User') continue
+    const r = rr.requestedReviewer as { __typename: 'User'; login: string; avatarUrl: string }
+    if (!seen.has(r.login)) {
+      buckets.pending.push({ login: r.login, avatarUrl: r.avatarUrl })
+    }
+  }
+
+  return buckets
 }
 
 export function sortAndPartition(

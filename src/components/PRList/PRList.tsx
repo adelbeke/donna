@@ -110,7 +110,7 @@ export default function PRList() {
           <p className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">Top priority</p>
           <div className="space-y-2">
             {priorityPRs.map((pr) => (
-              <PRCard key={pr.id} pr={pr} />
+              <PRCard key={pr.id} pr={pr} isAuthored={section === 'authored'} />
             ))}
           </div>
         </div>
@@ -119,7 +119,7 @@ export default function PRList() {
       {!isLoading && !error && prs.length > 0 && (
         <div className="space-y-2">
           {prs.map((pr) => (
-            <PRCard key={pr.id} pr={pr} />
+            <PRCard key={pr.id} pr={pr} isAuthored={section === 'authored'} />
           ))}
         </div>
       )}

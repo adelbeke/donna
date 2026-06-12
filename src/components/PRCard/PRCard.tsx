@@ -2,9 +2,12 @@ import type { ReactElement } from 'react'
 import { GitMerge, MessageSquare, Check, AlertCircle, Star, ExternalLink, FileCode, EyeOff, Eye } from 'lucide-react'
 import type { PullRequest, ReviewState } from '../../types/github'
 import { usePRStore } from '../../store/prStore'
+import { useAuthStore } from '../../store/authStore'
+import ReviewerAvatars from './ReviewerAvatars'
 
 interface Props {
   pr: PullRequest
+  isAuthored?: boolean
 }
 
 const reviewBadge: Record<
@@ -56,14 +59,14 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(days / 30)}mo ago`
 }
 
-export default function PRCard({ pr }: Props) {
+export default function PRCard({ pr, isAuthored = false }: Props) {
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
+  const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
   const isPriority = priorityIds.includes(pr.id)
   const isHidden = pr.isHidden ?? false
-
-  const badge = pr.myReviewState ? reviewBadge[pr.myReviewState] : null
+  const badge = !isAuthored && pr.myReviewState ? reviewBadge[pr.myReviewState] : null
 
   return (
     <div
@@ -154,7 +157,15 @@ export default function PRCard({ pr }: Props) {
                   {badge.label}
                 </span>
               )}
+
             </div>
+
+            {/* Reviewer avatars (authored section only) */}
+            {isAuthored && (
+              <div className="mt-2">
+                <ReviewerAvatars pr={pr} authorLogin={viewerLogin} />
+              </div>
+            )}
           </div>
         </div>
 
