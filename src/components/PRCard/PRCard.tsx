@@ -1,13 +1,24 @@
-import type { ReactElement } from 'react'
-import { GitMerge, MessageSquare, Check, AlertCircle, Star, ExternalLink, FileCode, EyeOff, Eye } from 'lucide-react'
-import type { PullRequest, ReviewState } from '../../types/github'
+import { useState, type ReactElement } from 'react'
+import { GitMerge, MessageSquare, Check, AlertCircle, Star, ExternalLink, FileCode, EyeOff, Eye, CheckCircle, XCircle, Clock } from 'lucide-react'
+import type { PullRequest, ReviewState, CheckRollupState } from '../../types/github'
 import { usePRStore } from '../../store/prStore'
 import { useAuthStore } from '../../store/authStore'
 import ReviewerAvatars from './ReviewerAvatars'
+import ChecksPanel from './ChecksPanel'
+import { deriveCheckState, deriveCheckContexts } from '../../lib/prUtils'
+import { timeAgo } from '../../lib/timeAgo'
 
 interface Props {
   pr: PullRequest
   isAuthored?: boolean
+}
+
+const ciStateBadge: Record<CheckRollupState, { label: string; color: string; bg: string; icon: ReactElement }> = {
+  SUCCESS:  { label: 'Checks pass',    color: 'text-[var(--color-success)]',  bg: 'bg-[var(--color-success-subtle)]',  icon: <CheckCircle size={11} /> },
+  FAILURE:  { label: 'Checks failed',  color: 'text-[var(--color-danger)]',   bg: 'bg-[var(--color-danger-subtle)]',   icon: <XCircle size={11} /> },
+  ERROR:    { label: 'Checks error',   color: 'text-[var(--color-danger)]',   bg: 'bg-[var(--color-danger-subtle)]',   icon: <XCircle size={11} /> },
+  PENDING:  { label: 'Checks pending', color: 'text-[var(--color-warning)]',  bg: 'bg-[var(--color-warning-subtle)]',  icon: <Clock size={11} /> },
+  EXPECTED: { label: 'Checks pending', color: 'text-[var(--color-warning)]',  bg: 'bg-[var(--color-warning-subtle)]',  icon: <Clock size={11} /> },
 }
 
 const reviewBadge: Record<
@@ -46,20 +57,9 @@ const reviewBadge: Record<
   },
 }
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const seconds = Math.floor(diff / 1000)
-  if (seconds < 60) return `${seconds}s ago`
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 30) return `${days}d ago`
-  return `${Math.floor(days / 30)}mo ago`
-}
 
 export default function PRCard({ pr, isAuthored = false }: Props) {
+  const [checksOpen, setChecksOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
@@ -67,6 +67,9 @@ export default function PRCard({ pr, isAuthored = false }: Props) {
   const isPriority = priorityIds.includes(pr.id)
   const isHidden = pr.isHidden ?? false
   const badge = !isAuthored && pr.myReviewState ? reviewBadge[pr.myReviewState] : null
+  const checkState = deriveCheckState(pr)
+  const ciBadge = checkState ? ciStateBadge[checkState] : null
+  const showConflict = pr.mergeable === 'CONFLICTING'
 
   return (
     <div
@@ -76,6 +79,7 @@ export default function PRCard({ pr, isAuthored = false }: Props) {
         shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]
         transition-all duration-150
         ${isHidden ? 'opacity-50' : ''}
+        ${checksOpen ? 'z-10' : ''}
         border-[var(--color-border)]
       `}
     >
@@ -155,6 +159,30 @@ export default function PRCard({ pr, isAuthored = false }: Props) {
                 >
                   {badge.icon}
                   {badge.label}
+                </span>
+              )}
+
+              {/* CI checks badge */}
+              {ciBadge && (
+                <div className="relative">
+                  <button
+                    onClick={() => setChecksOpen((o) => !o)}
+                    className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded cursor-pointer ${ciBadge.color} ${ciBadge.bg}`}
+                  >
+                    {ciBadge.icon}
+                    {ciBadge.label}
+                  </button>
+                  {checksOpen && (
+                    <ChecksPanel checks={deriveCheckContexts(pr)} rollupState={checkState} onClose={() => setChecksOpen(false)} />
+                  )}
+                </div>
+              )}
+
+              {/* Conflict badge */}
+              {showConflict && (
+                <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded text-[var(--color-warning)] bg-[var(--color-warning-subtle)]">
+                  <AlertCircle size={11} />
+                  Conflict
                 </span>
               )}
 

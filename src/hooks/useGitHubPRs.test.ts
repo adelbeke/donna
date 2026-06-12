@@ -17,6 +17,8 @@ function makePR(id: string, createdAt: string): PullRequest {
     reviews: { nodes: [] },
     additions: 10,
     deletions: 5,
+    mergeable: 'MERGEABLE',
+    commits: { nodes: [] },
   }
 }
 
