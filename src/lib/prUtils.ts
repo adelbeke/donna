@@ -1,4 +1,4 @@
-import type { PullRequest, ReviewState } from '../types/github'
+import type { PullRequest, ReviewState, CheckRollupState, CheckRunContext, StatusContextItem } from '../types/github'
 
 export interface Reviewer {
   login: string
@@ -62,6 +62,14 @@ export function deriveReviewerSummary(pr: PullRequest, authorLogin: string): Rev
   }
 
   return buckets
+}
+
+export function deriveCheckState(pr: PullRequest): CheckRollupState | null {
+  return pr.commits.nodes[0]?.commit?.statusCheckRollup?.state ?? null
+}
+
+export function deriveCheckContexts(pr: PullRequest): (CheckRunContext | StatusContextItem)[] {
+  return pr.commits.nodes[0]?.commit?.statusCheckRollup?.contexts.nodes ?? []
 }
 
 export function sortAndPartition(
