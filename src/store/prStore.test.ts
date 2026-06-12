@@ -69,4 +69,27 @@ describe('prStore', () => {
     usePRStore.getState().removeHiddenAuthor('unknown')
     expect(usePRStore.getState().filters.hiddenAuthors).toHaveLength(1)
   })
+
+  it('toggleHide adds id when not hidden', () => {
+    usePRStore.getState().toggleHide('pr-1')
+    expect(usePRStore.getState().hiddenIds).toContain('pr-1')
+  })
+
+  it('toggleHide removes id when already hidden', () => {
+    usePRStore.getState().toggleHide('pr-1')
+    usePRStore.getState().toggleHide('pr-1')
+    expect(usePRStore.getState().hiddenIds).not.toContain('pr-1')
+  })
+
+  it('resetFilters resets all filters to defaults', () => {
+    usePRStore.getState().setFilters({ search: 'foo', section: 'authored', showDrafts: true })
+    usePRStore.getState().resetFilters()
+    const { filters } = usePRStore.getState()
+    expect(filters.search).toBe('')
+    expect(filters.section).toBe('review-requested')
+    expect(filters.showDrafts).toBe(false)
+    expect(filters.repos).toEqual([])
+    expect(filters.hiddenAuthors).toEqual([])
+    expect(filters.showHidden).toBe(false)
+  })
 })

@@ -1,4 +1,24 @@
 export type ReviewState = 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'PENDING' | 'DISMISSED'
+export type MergeableState = 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN'
+export type CheckRollupState = 'SUCCESS' | 'FAILURE' | 'PENDING' | 'ERROR' | 'EXPECTED'
+export type CheckRunConclusion =
+  | 'ACTION_REQUIRED' | 'CANCELLED' | 'FAILURE' | 'NEUTRAL'
+  | 'SKIPPED' | 'STALE' | 'SUCCESS' | 'TIMED_OUT' | 'STARTUP_FAILURE' | null
+
+export interface CheckRunContext {
+  __typename: 'CheckRun'
+  name: string
+  status: 'QUEUED' | 'IN_PROGRESS' | 'COMPLETED' | 'WAITING' | 'REQUESTED' | 'PENDING'
+  conclusion: CheckRunConclusion
+  detailsUrl: string | null
+}
+
+export interface StatusContextItem {
+  __typename: 'StatusContext'
+  context: string
+  state: CheckRollupState
+  targetUrl: string | null
+}
 
 export interface ReviewRequest {
   requestedReviewer:
@@ -40,6 +60,17 @@ export interface PullRequest {
   }
   additions: number
   deletions: number
+  mergeable: MergeableState
+  commits: {
+    nodes: {
+      commit: {
+        statusCheckRollup: {
+          state: CheckRollupState
+          contexts: { nodes: (CheckRunContext | StatusContextItem)[] }
+        } | null
+      }
+    }[]
+  }
   // Derived / local fields (not from API)
   isTopPriority?: boolean
   myReviewState?: ReviewState | null

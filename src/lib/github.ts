@@ -51,6 +51,32 @@ export const PULL_REQUESTS_QUERY = /* GraphQL */ `
           updatedAt
           additions
           deletions
+          mergeable
+          commits(last: 1) {
+            nodes {
+              commit {
+                statusCheckRollup {
+                  state
+                  contexts(first: 100) {
+                    nodes {
+                      __typename
+                      ... on CheckRun {
+                        name
+                        status
+                        conclusion
+                        detailsUrl
+                      }
+                      ... on StatusContext {
+                        context
+                        state
+                        targetUrl
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
           author {
             login
             avatarUrl

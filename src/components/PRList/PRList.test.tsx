@@ -27,6 +27,8 @@ function makePR(id: string, title: string): PullRequest {
     reviews: { nodes: [] },
     additions: 0,
     deletions: 0,
+    mergeable: 'MERGEABLE',
+    commits: { nodes: [] },
     isHidden: false,
   }
 }

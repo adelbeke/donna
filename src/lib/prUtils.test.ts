@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { PullRequest } from '../types/github'
-import { deriveReviewerSummary } from './prUtils'
+import { deriveReviewerSummary, buildSearchQuery, deriveCheckState, deriveCheckContexts } from './prUtils'
 
 function makePR(overrides: Partial<PullRequest> = {}): PullRequest {
   return {
@@ -17,9 +17,108 @@ function makePR(overrides: Partial<PullRequest> = {}): PullRequest {
     reviews: { nodes: [] },
     additions: 0,
     deletions: 0,
+    mergeable: 'MERGEABLE',
+    commits: { nodes: [] },
     ...overrides,
   }
 }
+
+describe('buildSearchQuery', () => {
+  it('GIVEN review-requested section WHEN called THEN includes review-requested filter', () => {
+    const actual = buildSearchQuery('review-requested', 'alice')
+    expect(actual).toContain('review-requested:alice')
+    expect(actual).toContain('is:open is:pr archived:false')
+  })
+
+  it('GIVEN authored section WHEN called THEN includes author filter', () => {
+    const actual = buildSearchQuery('authored', 'alice')
+    expect(actual).toContain('author:alice')
+  })
+
+  it('GIVEN mentioned section WHEN called THEN includes mentions filter', () => {
+    const actual = buildSearchQuery('mentioned', 'alice')
+    expect(actual).toContain('mentions:alice')
+  })
+
+  it('GIVEN unknown section WHEN called THEN falls back to review-requested', () => {
+    const actual = buildSearchQuery('unknown', 'alice')
+    expect(actual).toContain('review-requested:alice')
+  })
+})
+
+describe('deriveCheckState', () => {
+  it('GIVEN PR with no commits WHEN called THEN returns null', () => {
+    const pr = makePR({ commits: { nodes: [] } })
+    expect(deriveCheckState(pr)).toBeNull()
+  })
+
+  it('GIVEN PR with null statusCheckRollup WHEN called THEN returns null', () => {
+    const pr = makePR({
+      commits: { nodes: [{ commit: { statusCheckRollup: null } }] },
+    })
+    expect(deriveCheckState(pr)).toBeNull()
+  })
+
+  it('GIVEN PR with SUCCESS rollup WHEN called THEN returns SUCCESS', () => {
+    const pr = makePR({
+      commits: {
+        nodes: [{
+          commit: {
+            statusCheckRollup: { state: 'SUCCESS', contexts: { nodes: [] } },
+          },
+        }],
+      },
+    })
+    expect(deriveCheckState(pr)).toBe('SUCCESS')
+  })
+
+  it('GIVEN PR with FAILURE rollup WHEN called THEN returns FAILURE', () => {
+    const pr = makePR({
+      commits: {
+        nodes: [{
+          commit: {
+            statusCheckRollup: { state: 'FAILURE', contexts: { nodes: [] } },
+          },
+        }],
+      },
+    })
+    expect(deriveCheckState(pr)).toBe('FAILURE')
+  })
+})
+
+describe('deriveCheckContexts', () => {
+  it('GIVEN PR with no commits WHEN called THEN returns empty array', () => {
+    const pr = makePR({ commits: { nodes: [] } })
+    expect(deriveCheckContexts(pr)).toEqual([])
+  })
+
+  it('GIVEN PR with null statusCheckRollup WHEN called THEN returns empty array', () => {
+    const pr = makePR({
+      commits: { nodes: [{ commit: { statusCheckRollup: null } }] },
+    })
+    expect(deriveCheckContexts(pr)).toEqual([])
+  })
+
+  it('GIVEN PR with check contexts WHEN called THEN returns those nodes', () => {
+    const checkNode = {
+      __typename: 'CheckRun' as const,
+      name: 'CI',
+      status: 'COMPLETED' as const,
+      conclusion: 'SUCCESS' as const,
+      detailsUrl: null,
+    }
+    const pr = makePR({
+      commits: {
+        nodes: [{
+          commit: {
+            statusCheckRollup: { state: 'SUCCESS', contexts: { nodes: [checkNode] } },
+          },
+        }],
+      },
+    })
+    expect(deriveCheckContexts(pr)).toEqual([checkNode])
+  })
+})
 
 describe('deriveReviewerSummary', () => {
   it('GIVEN empty reviews and requests WHEN called THEN all buckets are empty', () => {
