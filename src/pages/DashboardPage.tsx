@@ -14,9 +14,11 @@ export default function DashboardPage() {
       {/* Top navbar */}
       <header className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/90 backdrop-blur-sm shadow-[0_1px_8px_0_rgba(0,0,0,0.4)] px-6 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          <h1 className="text-sm font-semibold text-[var(--color-text-primary)] tracking-tight shrink-0">
-            Donna
-          </h1>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <h1 className="text-sm font-semibold text-[var(--color-text-primary)] tracking-tight">
+              Donna
+            </h1>
+          </div>
 
           <div className="relative flex-1 max-w-sm mx-auto">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
