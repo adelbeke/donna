@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createGitHubClient, PULL_REQUESTS_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
@@ -50,19 +51,25 @@ export function usePullRequests() {
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query
 
-  const allNodes = (query.data?.pages ?? [])
-    .flatMap((p) => p.search.nodes)
-    .map((pr) => ({
-      ...pr,
-      myReviewState: deriveMyReviewState(pr, user!.login),
-      isTopPriority: priorityIds.includes(pr.id),
-      isHidden: hiddenIds.includes(pr.id),
-    }))
+  const allNodes = useMemo(
+    () => (query.data?.pages ?? [])
+      .flatMap((p) => p.search.nodes)
+      .map((pr) => ({
+        ...pr,
+        myReviewState: deriveMyReviewState(pr, user!.login),
+        isTopPriority: priorityIds.includes(pr.id),
+        isHidden: hiddenIds.includes(pr.id),
+      })),
+    [query.data, user, priorityIds, hiddenIds]
+  )
 
-  const filtered = applyFilters(allNodes, filters)
-  const { priorityPRs, regular } = sortAndPartition(filtered, priorityIds)
+  const filtered = useMemo(() => applyFilters(allNodes, filters), [allNodes, filters])
+  const { priorityPRs, regular } = useMemo(() => sortAndPartition(filtered, priorityIds), [filtered, priorityIds])
 
-  const repos = [...new Set(allNodes.map((pr) => pr.repository.nameWithOwner))].sort()
+  const repos = useMemo(
+    () => [...new Set(allNodes.map((pr) => pr.repository.nameWithOwner))].sort(),
+    [allNodes]
+  )
 
   const totalCount = query.data?.pages[0]?.search.issueCount ?? 0
   const loadedCount = allNodes.length

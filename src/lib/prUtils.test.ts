@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { PullRequest } from '../types/github'
-import { deriveReviewerSummary, buildSearchQuery, deriveCheckState, deriveCheckContexts } from './prUtils'
+import { deriveReviewerSummary, buildSearchQuery, deriveCheckState } from './prUtils'
 
 function makePR(overrides: Partial<PullRequest> = {}): PullRequest {
   return {
@@ -83,40 +83,6 @@ describe('deriveCheckState', () => {
       },
     })
     expect(deriveCheckState(pr)).toBe('FAILURE')
-  })
-})
-
-describe('deriveCheckContexts', () => {
-  it('GIVEN PR with no commits WHEN called THEN returns empty array', () => {
-    const pr = makePR({ commits: { nodes: [] } })
-    expect(deriveCheckContexts(pr)).toEqual([])
-  })
-
-  it('GIVEN PR with null statusCheckRollup WHEN called THEN returns empty array', () => {
-    const pr = makePR({
-      commits: { nodes: [{ commit: { statusCheckRollup: null } }] },
-    })
-    expect(deriveCheckContexts(pr)).toEqual([])
-  })
-
-  it('GIVEN PR with check contexts WHEN called THEN returns those nodes', () => {
-    const checkNode = {
-      __typename: 'CheckRun' as const,
-      name: 'CI',
-      status: 'COMPLETED' as const,
-      conclusion: 'SUCCESS' as const,
-      detailsUrl: null,
-    }
-    const pr = makePR({
-      commits: {
-        nodes: [{
-          commit: {
-            statusCheckRollup: { state: 'SUCCESS', contexts: { nodes: [checkNode] } },
-          },
-        }],
-      },
-    })
-    expect(deriveCheckContexts(pr)).toEqual([checkNode])
   })
 })
 

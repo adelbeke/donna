@@ -17,6 +17,8 @@ export default function PRList() {
   const section = filters.section
   const loadAllRef = useRef(false)
 
+  const handleRefetch = () => void refetch()
+
   const hasActiveFilters =
     filters.repos.length > 0 ||
     (filters.hiddenAuthors?.length ?? 0) > 0 ||
@@ -53,7 +55,7 @@ export default function PRList() {
         <div className="flex items-center gap-2">
           <VisibilityToggles />
           <button
-            onClick={() => refetch()}
+            onClick={handleRefetch}
             disabled={isFetching}
             title="Refresh"
             className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"

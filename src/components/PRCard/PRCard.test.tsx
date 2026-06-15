@@ -1,9 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PRCard from './PRCard'
 import { usePRStore } from '../../store/prStore'
 import type { PullRequest, ReviewState } from '../../types/github'
+
+vi.mock('../../hooks/useCheckContexts', () => ({
+  useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false })),
+}))
 
 const pr: PullRequest = {
   id: 'pr-42',

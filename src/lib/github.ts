@@ -34,7 +34,7 @@ export const VIEWER_QUERY = /* GraphQL */ `
 
 export const PULL_REQUESTS_QUERY = /* GraphQL */ `
   query GetPullRequests($searchQuery: String!, $cursor: String) {
-    search(query: $searchQuery, type: ISSUE, first: 50, after: $cursor) {
+    search(query: $searchQuery, type: ISSUE, first: 20, after: $cursor) {
       issueCount
       pageInfo {
         hasNextPage
@@ -57,22 +57,6 @@ export const PULL_REQUESTS_QUERY = /* GraphQL */ `
               commit {
                 statusCheckRollup {
                   state
-                  contexts(first: 100) {
-                    nodes {
-                      __typename
-                      ... on CheckRun {
-                        name
-                        status
-                        conclusion
-                        detailsUrl
-                      }
-                      ... on StatusContext {
-                        context
-                        state
-                        targetUrl
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -108,6 +92,30 @@ export const PULL_REQUESTS_QUERY = /* GraphQL */ `
               author {
                 login
                 avatarUrl
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+export const PR_CHECK_CONTEXTS_QUERY = /* GraphQL */ `
+  query GetPRCheckContexts($nodeId: ID!) {
+    node(id: $nodeId) {
+      ... on PullRequest {
+        commits(last: 1) {
+          nodes {
+            commit {
+              statusCheckRollup {
+                contexts(first: 100) {
+                  nodes {
+                    __typename
+                    ... on CheckRun { name status conclusion detailsUrl }
+                    ... on StatusContext { context state targetUrl }
+                  }
+                }
               }
             }
           }
