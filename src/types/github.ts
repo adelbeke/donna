@@ -66,7 +66,7 @@ export interface PullRequest {
       commit: {
         statusCheckRollup: {
           state: CheckRollupState
-          contexts: { nodes: (CheckRunContext | StatusContextItem)[] }
+          contexts?: { nodes: (CheckRunContext | StatusContextItem)[] }
         } | null
       }
     }[]

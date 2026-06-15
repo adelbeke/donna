@@ -6,6 +6,7 @@ interface Props {
   checks: (CheckRunContext | StatusContextItem)[]
   rollupState?: CheckRollupState | null
   onClose: () => void
+  isLoading?: boolean
 }
 
 function CheckIcon({ check }: { check: CheckRunContext | StatusContextItem }) {
@@ -35,7 +36,7 @@ function CheckIcon({ check }: { check: CheckRunContext | StatusContextItem }) {
   return <Clock size={12} className="text-[var(--color-warning)] shrink-0" />
 }
 
-export default function ChecksPanel({ checks, rollupState, onClose }: Props) {
+export default function ChecksPanel({ checks, rollupState, onClose, isLoading }: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -53,7 +54,9 @@ export default function ChecksPanel({ checks, rollupState, onClose }: Props) {
       ref={panelRef}
       className="absolute left-0 top-full mt-1 z-50 min-w-60 max-w-80 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-[var(--shadow-card-hover)] py-1"
     >
-      {checks.length === 0 ? (
+      {isLoading ? (
+        <p className="px-3 py-2 text-xs text-[var(--color-text-muted)]">Loading…</p>
+      ) : checks.length === 0 ? (
         <p className="px-3 py-2 text-xs text-[var(--color-text-muted)]">No checks found</p>
       ) : (
         checks.map((check, i) => {

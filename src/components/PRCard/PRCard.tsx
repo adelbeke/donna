@@ -5,7 +5,8 @@ import { usePRStore } from '../../store/prStore'
 import { useAuthStore } from '../../store/authStore'
 import ReviewerAvatars from './ReviewerAvatars'
 import ChecksPanel from './ChecksPanel'
-import { deriveCheckState, deriveCheckContexts } from '../../lib/prUtils'
+import { deriveCheckState } from '../../lib/prUtils'
+import { useCheckContexts } from '../../hooks/useCheckContexts'
 import { timeAgo } from '../../lib/timeAgo'
 
 interface Props {
@@ -58,7 +59,7 @@ const reviewBadge: Record<
 }
 
 
-export default function PRCard({ pr, isAuthored = false }: Props) {
+function PRCard({ pr, isAuthored = false }: Props) {
   const [checksOpen, setChecksOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
@@ -70,6 +71,7 @@ export default function PRCard({ pr, isAuthored = false }: Props) {
   const checkState = deriveCheckState(pr)
   const ciBadge = checkState ? ciStateBadge[checkState] : null
   const showConflict = pr.mergeable === 'CONFLICTING'
+  const { checks, isLoading: checksLoading } = useCheckContexts(pr.id, checksOpen)
 
   return (
     <div
@@ -173,7 +175,7 @@ export default function PRCard({ pr, isAuthored = false }: Props) {
                     {ciBadge.label}
                   </button>
                   {checksOpen && (
-                    <ChecksPanel checks={deriveCheckContexts(pr)} rollupState={checkState} onClose={() => setChecksOpen(false)} />
+                    <ChecksPanel checks={checks} isLoading={checksLoading} rollupState={checkState} onClose={() => setChecksOpen(false)} />
                   )}
                 </div>
               )}
@@ -238,3 +240,5 @@ export default function PRCard({ pr, isAuthored = false }: Props) {
     </div>
   )
 }
+
+export default PRCard

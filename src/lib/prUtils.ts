@@ -1,4 +1,4 @@
-import type { PullRequest, ReviewState, CheckRollupState, CheckRunContext, StatusContextItem } from '../types/github'
+import type { PullRequest, ReviewState, CheckRollupState } from '../types/github'
 
 export interface Reviewer {
   login: string
@@ -68,16 +68,12 @@ export function deriveCheckState(pr: PullRequest): CheckRollupState | null {
   return pr.commits.nodes[0]?.commit?.statusCheckRollup?.state ?? null
 }
 
-export function deriveCheckContexts(pr: PullRequest): (CheckRunContext | StatusContextItem)[] {
-  return pr.commits.nodes[0]?.commit?.statusCheckRollup?.contexts.nodes ?? []
-}
-
 export function sortAndPartition(
   prs: PullRequest[],
   priorityIds: string[],
 ): { regular: PullRequest[]; priorityPRs: PullRequest[] } {
   const byDate = [...prs].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   )
   return {
     priorityPRs: byDate.filter((pr) => priorityIds.includes(pr.id)),
