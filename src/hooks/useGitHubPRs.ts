@@ -77,5 +77,5 @@ export function usePullRequests() {
   const hitPageCap = (query.data?.pages.length ?? 0) >= MAX_PAGES
   const truncated = hitPageCap && !!lastPage?.search.pageInfo.hasNextPage
 
-  return { ...query, data: regular, priorityPRs, repos, totalCount, loadedCount, truncated, hasNextPage, isFetchingNextPage, fetchNextPage }
+  return { ...query, data: regular, priorityPRs, allPRs: allNodes, repos, totalCount, loadedCount, truncated, hasNextPage, isFetchingNextPage, fetchNextPage }
 }

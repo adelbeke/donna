@@ -81,6 +81,7 @@ export const PULL_REQUESTS_QUERY = /* GraphQL */ `
           title
           url
           isDraft
+          headRefName
           createdAt
           updatedAt
           additions

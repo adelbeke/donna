@@ -50,9 +50,32 @@ ipcMain.handle('gh:rest', async (_e, endpoint: string) => {
   return JSON.parse(out)
 })
 
+function gitError(e: unknown): Error {
+  const stderr = (e as { stderr?: string }).stderr?.trim()
+  const msg = stderr || (e as Error).message || String(e)
+  return new Error(msg.split('\n')[0])
+}
+
 ipcMain.handle('worktrees:list', async (_e, repoPath: string) => {
-  const { stdout } = await execFileAsync('git', ['-C', repoPath, 'worktree', 'list', '--porcelain'])
-  return parseWorktrees(stdout)
+  try {
+    const { stdout } = await execFileAsync('git', ['-C', repoPath, 'worktree', 'list', '--porcelain'])
+    const worktrees = parseWorktrees(stdout)
+    return await Promise.all(worktrees.map(async (wt) => {
+      try {
+        const { stdout: status } = await execFileAsync('git', ['-C', wt.path, 'status', '--porcelain'])
+        return { ...wt, isDirty: status.trim().length > 0 }
+      } catch {
+        return { ...wt, isDirty: false }
+      }
+    }))
+  } catch (e) { throw gitError(e) }
+})
+
+ipcMain.handle('branches:list', async (_e, repoPath: string) => {
+  try {
+    const { stdout } = await execFileAsync('git', ['-C', repoPath, 'branch', '--format=%(refname:short)'])
+    return stdout.trim().split('\n').filter(Boolean)
+  } catch (e) { throw gitError(e) }
 })
 
 ipcMain.handle('dialog:open', async () => {
@@ -100,7 +123,6 @@ function createWindow() {
     const url = 'http://localhost:5173/donna/'
     win.webContents.on('did-fail-load', () => setTimeout(() => win.loadURL(url), 500))
     win.loadURL(url)
-    win.webContents.openDevTools()
   } else {
     win.loadFile(path.join(__dirname, '../renderer/index.html'))
   }

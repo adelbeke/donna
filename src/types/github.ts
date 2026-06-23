@@ -41,6 +41,7 @@ export interface PullRequest {
   title: string
   url: string
   isDraft: boolean
+  headRefName: string
   createdAt: string
   updatedAt: string
   author: {

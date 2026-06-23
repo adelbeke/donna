@@ -22,6 +22,7 @@ function makePR(id: string, title: string): PullRequest {
     title,
     url: `https://github.com/org/repo/pull/${id}`,
     isDraft: false,
+    headRefName: '',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
     author: { login: 'user', avatarUrl: 'https://example.com/avatar.png' },

@@ -9,6 +9,7 @@ function makePR(overrides: Partial<PullRequest> = {}): PullRequest {
     title: 'Test PR',
     url: 'https://github.com/org/repo/pull/1',
     isDraft: false,
+    headRefName: '',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
     author: { login: 'author', avatarUrl: 'https://example.com/author.png' },

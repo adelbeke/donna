@@ -3,4 +3,5 @@ export type Worktree = {
   branch: string
   commit: string
   isMain: boolean
+  isDirty: boolean
 }
