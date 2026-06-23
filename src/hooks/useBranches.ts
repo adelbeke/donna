@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/authStore'
-import { createGitHubClient, BRANCHES_QUERY } from '../lib/github'
+import { createClient, BRANCHES_QUERY } from '../lib/github'
 import type { Branch } from '../types/github'
 
 const DEFAULT_BRANCHES = new Set(['main', 'master', 'develop', 'development', 'staging', 'production'])
@@ -52,7 +52,7 @@ export function useBranches(repos: string[]) {
     enabled: !!token && repos.length > 0,
     staleTime: 60_000,
     queryFn: async () => {
-      const client = createGitHubClient(token!)
+      const client = createClient(token)
 
       const perRepo = await Promise.all(
         repos.map(async (repo) => {

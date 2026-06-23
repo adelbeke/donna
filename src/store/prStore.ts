@@ -13,11 +13,11 @@ export interface PRFilters {
 }
 
 interface PRStore {
-  view: 'prs' | 'branches'
+  view: 'prs' | 'branches' | 'worktrees'
   filters: PRFilters
   priorityIds: string[]
   hiddenIds: string[]
-  setView: (v: 'prs' | 'branches') => void
+  setView: (v: 'prs' | 'branches' | 'worktrees') => void
   setFilters: (filters: Partial<PRFilters>) => void
   togglePriority: (id: string) => void
   toggleHide: (id: string) => void

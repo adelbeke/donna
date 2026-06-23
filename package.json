@@ -7,12 +7,29 @@
   "license": "MIT",
   "author": "Arthur Delbeke",
   "homepage": "https://github.com/adelbeke/donna#readme",
-  "bugs": { "url": "https://github.com/adelbeke/donna/issues" },
-  "repository": { "type": "git", "url": "git+https://github.com/adelbeke/donna.git" },
-  "keywords": ["github", "pull-requests", "dashboard", "react", "typescript", "code-review"],
+  "bugs": {
+    "url": "https://github.com/adelbeke/donna/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adelbeke/donna.git"
+  },
+  "keywords": [
+    "github",
+    "pull-requests",
+    "dashboard",
+    "react",
+    "typescript",
+    "code-review"
+  ],
+  "main": "out/main/index.js",
   "scripts": {
     "dev": "vite",
+    "dev:web": "vite",
+    "dev:electron": "electron .",
     "build": "tsc -b && vite build",
+    "build:web": "tsc -b && vite build",
+    "build:electron": "electron-vite build && electron-builder",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
@@ -30,6 +47,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -37,14 +55,18 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "electron": "^42.5.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
     "eslint": "^10.5.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.6.0",
+    "graphql": "^17.0.1",
     "jsdom": "^29.1.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.61.1",
-    "vite": "^8.0.12",
+    "vite": "^8.1.0",
     "vitest": "^4.1.9"
   }
 }

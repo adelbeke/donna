@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { createGitHubClient, VIEWER_QUERY } from '../lib/github'
+import { createClient, VIEWER_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
 import type { GitHubUser } from '../types/github'
 
@@ -14,7 +14,7 @@ export function useViewer() {
     queryKey: ['viewer'],
     enabled: !!token,
     queryFn: async () => {
-      const client = createGitHubClient(token!)
+      const client = createClient(token)
       const data = await client.request<ViewerResult>(VIEWER_QUERY)
       return data.viewer
     },
