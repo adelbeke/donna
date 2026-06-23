@@ -21,7 +21,7 @@ function CopyButton({ text, title }: { text: string; title: string }) {
   )
 }
 
-function BranchCard({ branch }: { branch: Branch }) {
+export function BranchCard({ branch }: { branch: Branch }) {
   const { mutate: deleteBranch, isPending, isError } = useDeleteBranch()
   const [confirming, setConfirming] = useState(false)
 
