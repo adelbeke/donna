@@ -13,9 +13,11 @@ export interface PRFilters {
 }
 
 interface PRStore {
+  view: 'prs' | 'branches'
   filters: PRFilters
   priorityIds: string[]
   hiddenIds: string[]
+  setView: (v: 'prs' | 'branches') => void
   setFilters: (filters: Partial<PRFilters>) => void
   togglePriority: (id: string) => void
   toggleHide: (id: string) => void
@@ -36,9 +38,11 @@ const defaultFilters: PRFilters = {
 export const usePRStore = create<PRStore>()(
   persist(
     (set) => ({
+      view: 'prs' as const,
       filters: defaultFilters,
       priorityIds: [],
       hiddenIds: [],
+      setView: (v) => set({ view: v }),
       setFilters: (partial) =>
         set((state) => ({ filters: { ...state.filters, ...partial } })),
       togglePriority: (id) =>
@@ -74,7 +78,7 @@ export const usePRStore = create<PRStore>()(
         const p = persisted as Partial<PRStore>
         return {
           ...current,
-          ...p,
+          ...(p.view ? { view: p.view } : {}),
           filters: { ...current.filters, ...(p.filters ?? {}) },
         }
       },

@@ -4,10 +4,11 @@ import { usePRStore } from '../store/prStore'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
 import Footer from '../components/Footer/Footer'
+import { BRANCHES_ENABLED } from '../config'
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore()
-  const { filters, setFilters } = usePRStore()
+  const { filters, setFilters, view, setView } = usePRStore()
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">
@@ -20,13 +21,28 @@ export default function DashboardPage() {
             </h1>
           </div>
 
+          {BRANCHES_ENABLED && (
+            <div className="flex items-center gap-1 shrink-0">
+              {(['prs', 'branches'] as const).map((v) => (
+                <button key={v} onClick={() => setView(v)}
+                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+                    ${view === v
+                      ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
+                    }`}>
+                  {v === 'prs' ? 'Pull Requests' : 'Branches'}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="relative flex-1 max-w-sm mx-auto">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
             <input
               type="text"
               value={filters.search}
               onChange={(e) => setFilters({ search: e.target.value })}
-              placeholder="Filter by title…"
+              placeholder={view === 'branches' ? 'Filter by branch…' : 'Filter by title…'}
               className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md pl-7 pr-7 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors"
             />
             {filters.search && (
@@ -63,10 +79,15 @@ export default function DashboardPage() {
 
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
-        <div className="flex gap-8">
-          <Filters />
-          <PRList />
-        </div>
+        {view === 'branches'
+          ? <div />
+          : (
+            <div className="flex gap-8">
+              <Filters />
+              <PRList />
+            </div>
+          )
+        }
       </main>
       <Footer />
     </div>
