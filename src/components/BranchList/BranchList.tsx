@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Copy, RefreshCw } from 'lucide-react'
+import { Copy, Loader2, RefreshCw, Trash2 } from 'lucide-react'
 import { useBranches } from '../../hooks/useBranches'
+import { useDeleteBranch } from '../../hooks/useDeleteBranch'
 import { useRecentRepos } from '../../hooks/useRecentRepos'
 import { usePRStore } from '../../store/prStore'
 import { useBranchStore } from '../../store/branchStore'
@@ -21,13 +22,61 @@ function CopyButton({ text, title }: { text: string; title: string }) {
 }
 
 function BranchCard({ branch }: { branch: Branch }) {
+  const { mutate: deleteBranch, isPending, isError } = useDeleteBranch()
+  const [confirming, setConfirming] = useState(false)
+
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 space-y-2">
-      <div className="flex items-baseline gap-2">
-        <span className="text-xs text-[var(--color-text-muted)]">{branch.repo}</span>
-        <span className="text-sm font-medium text-[var(--color-text-primary)] font-mono">{branch.name}</span>
-        <span className="ml-auto text-xs text-[var(--color-text-muted)]">{timeAgo(branch.lastCommitDate)}</span>
+      <div className="flex items-center gap-2">
+        <div className="flex items-baseline gap-2 min-w-0 flex-1">
+          <span className="text-xs text-[var(--color-text-muted)] shrink-0">{branch.repo}</span>
+          <span className="text-sm font-medium text-[var(--color-text-primary)] font-mono truncate">{branch.name}</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 h-6">
+          {confirming ? (
+            <>
+              {branch.linkedPr?.state === 'OPEN' && (
+                <span className="text-xs text-[var(--color-danger)]">
+                  Has open PR #{branch.linkedPr.number}
+                </span>
+              )}
+              <span className="text-xs text-[var(--color-text-muted)]">Delete branch?</span>
+              <button
+                onClick={() => setConfirming(false)}
+                className="text-xs px-2 py-0.5 rounded border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() =>
+                  deleteBranch(
+                    { repo: branch.repo, name: branch.name },
+                    { onSettled: () => setConfirming(false) }
+                  )
+                }
+                disabled={isPending}
+                className="text-xs px-2 py-0.5 rounded border border-[var(--color-danger)] text-[var(--color-danger)] hover:bg-[var(--color-danger)] hover:text-white transition-colors cursor-pointer disabled:opacity-40"
+              >
+                {isPending ? <Loader2 size={12} className="animate-spin" /> : 'Delete'}
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="text-xs text-[var(--color-text-muted)]">{timeAgo(branch.lastCommitDate)}</span>
+              <button
+                onClick={() => setConfirming(true)}
+                title="Delete branch"
+                className="transition-colors cursor-pointer text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
+              >
+                <Trash2 size={14} />
+              </button>
+            </>
+          )}
+        </div>
       </div>
+      {isError && (
+        <span className="text-xs text-[var(--color-danger)]">Delete failed. Try again.</span>
+      )}
       <div className="flex gap-2 flex-wrap">
         <CopyButton text={`git switch ${branch.name}`} title="Copy git switch command" />
         {branch.linkedPr?.state === 'OPEN' && (
