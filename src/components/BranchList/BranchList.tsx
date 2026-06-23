@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Copy } from 'lucide-react'
+import { Copy, RefreshCw } from 'lucide-react'
 import { useBranches } from '../../hooks/useBranches'
-import { useRepos } from '../../hooks/useRepos'
+import { useRecentRepos } from '../../hooks/useRecentRepos'
 import { usePRStore } from '../../store/prStore'
 import { useBranchStore } from '../../store/branchStore'
 import { timeAgo } from '../../lib/timeAgo'
@@ -31,7 +31,14 @@ function BranchCard({ branch }: { branch: Branch }) {
       <div className="flex gap-2 flex-wrap">
         <CopyButton text={`git switch ${branch.name}`} title="Copy git switch command" />
         {branch.linkedPr?.state === 'OPEN' && (
-          <CopyButton text={`gh pr checkout ${branch.linkedPr.number}`} title="Copy gh pr checkout command" />
+          <a
+            href={branch.linkedPr.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)] transition-colors font-mono"
+          >
+            #{branch.linkedPr.number} open PR
+          </a>
         )}
       </div>
     </div>
@@ -125,8 +132,8 @@ function Modal({ open, onClose, children }: { open: boolean; onClose: () => void
 export default function BranchList() {
   const { selectedRepos: selectedBranchRepos, setSelectedRepos: setSelectedBranchRepos } = useBranchStore()
   const { filters } = usePRStore()
-  const { data: repos, isLoading: reposLoading } = useRepos()
-  const { data: branches, isLoading: branchesLoading, isError } = useBranches(selectedBranchRepos)
+  const { data: repos, isLoading: reposLoading } = useRecentRepos()
+  const { data: branches, isLoading: branchesLoading, isFetching: branchesFetching, isError, refetch } = useBranches(selectedBranchRepos)
   const [pickerOpen, setPickerOpen] = useState(selectedBranchRepos.length === 0)
 
   const visible = (branches ?? []).filter(
@@ -163,12 +170,22 @@ export default function BranchList() {
         )
       ) : (
         <>
-          <button
-            onClick={() => setPickerOpen(true)}
-            className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
-          >
-            {selectedBranchRepos.length} repo{selectedBranchRepos.length > 1 ? 's' : ''} · Edit
-          </button>
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={() => setPickerOpen(true)}
+              className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+            >
+              {selectedBranchRepos.length} repo{selectedBranchRepos.length > 1 ? 's' : ''} · Edit
+            </button>
+            <button
+              onClick={() => void refetch()}
+              disabled={branchesFetching}
+              title="Refresh"
+              className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+            >
+              <RefreshCw size={14} className={branchesFetching ? 'animate-spin' : ''} />
+            </button>
+          </div>
 
           {branchesLoading && <p className="text-sm text-[var(--color-text-muted)]">Loading branches…</p>}
           {isError && <p className="text-sm text-[var(--color-danger)]">Failed to load branches.</p>}

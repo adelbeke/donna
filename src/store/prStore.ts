@@ -42,7 +42,7 @@ export const usePRStore = create<PRStore>()(
       filters: defaultFilters,
       priorityIds: [],
       hiddenIds: [],
-      setView: (v) => set({ view: v }),
+      setView: (v) => set((state) => ({ view: v, filters: { ...state.filters, search: '' } })),
       setFilters: (partial) =>
         set((state) => ({ filters: { ...state.filters, ...partial } })),
       togglePriority: (id) =>

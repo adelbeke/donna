@@ -87,5 +87,5 @@ export type Branch = {
   name: string
   repo: string
   lastCommitDate: string
-  linkedPr?: { number: number; state: string }
+  linkedPr?: { number: number; state: string; url: string }
 }

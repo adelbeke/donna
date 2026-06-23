@@ -19,17 +19,17 @@ export function useRepos() {
         'X-GitHub-Api-Version': '2022-11-28',
       }
       const repos: Repo[] = []
-      for (let page = 1; page <= 3; page++) {
+      for (let page = 1; page <= 10; page++) {
         const r = await fetch(
-          `${GH}/user/repos?affiliation=owner,collaborator&sort=pushed&per_page=100&page=${page}`,
+          `${GH}/user/repos?affiliation=owner,collaborator,organization_member&sort=pushed&per_page=100&page=${page}`,
           { headers }
         )
         if (!r.ok) break
         const chunk = await r.json()
-        repos.push(...chunk)
+        repos.push(...chunk.map((r: { full_name: string; name: string }) => ({ full_name: r.full_name, name: r.name })))
         if (chunk.length < 100) break
       }
-      return repos.map((r) => ({ full_name: r.full_name, name: r.name }))
+      return repos
     },
   })
 }
