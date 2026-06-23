@@ -53,6 +53,8 @@ function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
       togglePriority: vi.fn(),
       addHiddenAuthor: vi.fn(),
       removeHiddenAuthor: vi.fn(),
+      setView: vi.fn(),
+      view: 'prs' as const,
     })
   )
 }

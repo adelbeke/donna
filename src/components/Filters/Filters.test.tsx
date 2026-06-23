@@ -39,6 +39,8 @@ function mockStore(filterOverrides: Partial<PRFilters> = {}) {
     togglePriority: vi.fn(),
     addHiddenAuthor: vi.fn(),
     removeHiddenAuthor: vi.fn(),
+    setView: vi.fn(),
+    view: 'prs' as const,
   }
   mockUsePRStore.mockImplementation((selector?: (s: typeof state) => unknown) =>
     selector ? selector(state) : state
