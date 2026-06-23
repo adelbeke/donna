@@ -47,7 +47,10 @@
   },
   "overrides": {
     "electron-vite": {
-      "vite": "^7.0.0"
+      "vite": "$vite"
+    },
+    "graphql-request": {
+      "graphql": "$graphql"
     }
   },
   "devDependencies": {
