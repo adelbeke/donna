@@ -27,7 +27,7 @@ const branch: Branch = {
   name: 'feat-x',
   repo: 'org/repo',
   lastCommitDate: '2024-01-01T00:00:00Z',
-  linkedPr: null,
+  linkedPr: undefined,
 }
 
 beforeEach(() => {
