@@ -2,15 +2,17 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 interface BranchStore {
-  selectedRepos: string[]
-  setSelectedRepos: (repos: string[]) => void
+  localPaths: string[]
+  addLocalPath: (path: string) => void
+  removeLocalPath: (path: string) => void
 }
 
 export const useBranchStore = create<BranchStore>()(
   persist(
     (set) => ({
-      selectedRepos: [],
-      setSelectedRepos: (repos) => set({ selectedRepos: repos }),
+      localPaths: [],
+      addLocalPath: (path) => set((state) => ({ localPaths: [...state.localPaths, path] })),
+      removeLocalPath: (path) => set((state) => ({ localPaths: state.localPaths.filter((p) => p !== path) })),
     }),
     { name: 'branch-dashboard-state' }
   )

@@ -13,11 +13,11 @@ export interface PRFilters {
 }
 
 interface PRStore {
-  view: 'prs' | 'branches' | 'worktrees'
+  view: 'prs' | 'branches'
   filters: PRFilters
   priorityIds: string[]
   hiddenIds: string[]
-  setView: (v: 'prs' | 'branches' | 'worktrees') => void
+  setView: (v: 'prs' | 'branches') => void
   setFilters: (filters: Partial<PRFilters>) => void
   togglePriority: (id: string) => void
   toggleHide: (id: string) => void
@@ -76,9 +76,10 @@ export const usePRStore = create<PRStore>()(
       name: 'pr-dashboard-state',
       merge: (persisted, current) => {
         const p = persisted as Partial<PRStore>
+        const validViews = new Set<string>(['prs', 'branches'])
         return {
           ...current,
-          ...(p.view ? { view: p.view } : {}),
+          ...(p.view && validViews.has(p.view) ? { view: p.view } : {}),
           filters: { ...current.filters, ...(p.filters ?? {}) },
         }
       },

@@ -4,7 +4,6 @@ import { usePRStore } from '../store/prStore'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
 import BranchList from '../components/BranchList/BranchList'
-import WorktreeList from '../components/WorktreeList/WorktreeList'
 import Footer from '../components/Footer/Footer'
 
 export default function DashboardPage() {
@@ -23,14 +22,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-              {(['prs', 'branches', ...(window.electronAPI ? ['worktrees' as const] : [])] as const).map((v) => (
+              {(['prs', ...(window.electronAPI ? ['branches' as const] : [])] as const).map((v) => (
                 <button key={v} onClick={() => setView(v)}
                   className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${view === v
                       ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
                       : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
                     }`}>
-                  {v === 'prs' ? 'Pull Requests' : v === 'branches' ? 'Branches' : 'Worktrees'}
+                  {v === 'prs' ? 'Pull Requests' : 'Branches'}
                 </button>
               ))}
             </div>
@@ -82,8 +81,6 @@ export default function DashboardPage() {
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
         {view === 'branches'
           ? <BranchList />
-          : view === 'worktrees'
-          ? <WorktreeList />
           : (
             <div className="flex gap-8">
               <Filters />
