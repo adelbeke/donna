@@ -26,15 +26,26 @@ Client-only GitHub PR dashboard. No backend. Talks directly to the GitHub GraphQ
 - PR cards show repo, author, diff size, draft + review-state badges, relative timestamps
 - PAT stored in `localStorage`, never sent to any server; auto sign-out on token expiry
 
+## Generate a token
+
+Create a **classic** Personal Access Token with these two scopes:
+
+| Scope | Why |
+|---|---|
+| `repo` | Read PRs, reviews, and diffs |
+| `read:org` | Resolve team review requests |
+
+[Generate token →](https://github.com/settings/tokens/new?scopes=repo,read:org)
+
+> Your token is stored in `localStorage` and only used to call the GitHub API directly — it never touches any server.
+
 ## Quick start
 
 ```bash
 npm install && npm run dev
 ```
 
-Open `http://localhost:5173`, paste a PAT with `repo` + `read:org` scopes.
-
-[Generate a token →](https://github.com/settings/tokens/new?scopes=repo,read:org)
+Open `http://localhost:5173` and paste your token.
 
 ## Self-hosting / deploy
 
