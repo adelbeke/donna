@@ -11,17 +11,14 @@ function BranchCard({
   branch,
   repo,
   worktree,
-  isCurrent,
   pr,
 }: {
   branch: string
   repo: string
   worktree?: Worktree
-  isCurrent: boolean
   pr?: PullRequest
 }) {
   const shortPath = worktree?.path.replace(/^\/Users\/[^/]+/, '~')
-  const copyCmd = worktree ? `cd ${worktree.path}` : `git switch ${branch}`
 
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 space-y-2">
@@ -33,11 +30,6 @@ function BranchCard({
         {worktree && (
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
             worktree
-          </span>
-        )}
-        {isCurrent && (
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-success-subtle,#d1fae5)] text-[var(--color-success,#059669)]">
-            HEAD
           </span>
         )}
         {worktree?.isDirty && (
@@ -56,13 +48,23 @@ function BranchCard({
         )}
       </div>
       <div className="flex gap-2 items-center">
+        {worktree && (
+          <button
+            onClick={() => navigator.clipboard.writeText(`cd ${worktree.path}`)}
+            title={`Copy: cd ${worktree.path}`}
+            className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)] transition-colors cursor-pointer font-mono"
+          >
+            <Copy size={11} />
+            cd {shortPath}
+          </button>
+        )}
         <button
-          onClick={() => navigator.clipboard.writeText(copyCmd)}
-          title={`Copy: ${copyCmd}`}
+          onClick={() => navigator.clipboard.writeText(`git switch ${branch}`)}
+          title={`Copy: git switch ${branch}`}
           className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)] transition-colors cursor-pointer font-mono"
         >
           <Copy size={11} />
-          {worktree ? `cd ${shortPath}` : `git switch ${branch}`}
+          git switch {branch}
         </button>
       </div>
     </div>
@@ -129,7 +131,7 @@ export default function BranchList() {
   type FlatItem =
     | { key: string; loading: true; repoLabel: string }
     | { key: string; error: string; repoLabel: string }
-    | { key: string; branch: string; repoLabel: string; worktree?: Worktree; isCurrent: boolean; pr?: PullRequest }
+    | { key: string; branch: string; repoLabel: string; worktree?: Worktree; pr?: PullRequest }
 
   const flatBranches: FlatItem[] = []
   for (let i = 0; i < localPaths.length; i++) {
@@ -147,10 +149,8 @@ export default function BranchList() {
 
     const wtByBranch = new Map<string, Worktree>()
     for (const wt of worktrees ?? []) {
-      if (wt.branch) wtByBranch.set(wt.branch, wt)
+      if (wt.branch && !wt.isMain) wtByBranch.set(wt.branch, wt)
     }
-
-    const headBranch = (worktrees ?? []).find((w) => w.isMain)?.branch
 
     for (const branch of (branches ?? []).filter(
       (b) => !filters.search || b.toLowerCase().includes(filters.search.toLowerCase())
@@ -160,7 +160,6 @@ export default function BranchList() {
         branch,
         repoLabel,
         worktree: wtByBranch.get(branch),
-        isCurrent: branch === headBranch,
         pr: prMap.get(`${repoLabel}/${branch}`),
       })
     }
@@ -211,7 +210,6 @@ export default function BranchList() {
               branch={item.branch}
               repo={item.repoLabel}
               worktree={item.worktree}
-              isCurrent={item.isCurrent}
               pr={item.pr}
             />
           )
