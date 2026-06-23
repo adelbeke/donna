@@ -82,3 +82,10 @@ export interface GitHubUser {
   avatarUrl: string
   name: string
 }
+
+export type Branch = {
+  name: string
+  repo: string
+  lastCommitDate: string
+  linkedPr?: { number: number; state: string }
+}

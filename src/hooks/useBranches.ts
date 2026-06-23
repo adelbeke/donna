@@ -35,7 +35,7 @@ export function useBranches(repos: string[]) {
             if (chunk.length < 100) break
           }
 
-          const filtered = allBranches.filter((b) => !DEFAULT_BRANCHES.has(b.name))
+          const filtered = allBranches.filter((b) => !DEFAULT_BRANCHES.has(b.name as string))
           if (filtered.length === 0) return []
 
           const allPrs: Record<string, unknown>[] = []
