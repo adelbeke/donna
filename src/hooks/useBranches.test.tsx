@@ -42,9 +42,9 @@ function makePage(nodes: ReturnType<typeof makeNode>[], hasNextPage: boolean, en
 }
 
 beforeEach(() => {
-  vi.mocked(createGitHubClient).mockReturnValue({ request: mockRequest } as ReturnType<typeof createGitHubClient>)
-  vi.mocked(useAuthStore).mockImplementation((selector: (s: { token: string; user: { login: string } }) => unknown) =>
-    selector({ token: 'tok', user: { login: 'alice' } })
+  vi.mocked(createGitHubClient).mockReturnValue({ request: mockRequest } as unknown as ReturnType<typeof createGitHubClient>)
+  vi.mocked(useAuthStore).mockImplementation((selector) =>
+    selector({ token: 'tok', user: { login: 'alice' } } as never)
   )
   mockRequest.mockReset()
 })
@@ -98,8 +98,8 @@ describe('useBranches', () => {
   })
 
   it('GIVEN no token WHEN rendering THEN query is idle', () => {
-    vi.mocked(useAuthStore).mockImplementation((selector: (s: { token: null; user: null }) => unknown) =>
-      selector({ token: null, user: null })
+    vi.mocked(useAuthStore).mockImplementation((selector) =>
+      selector({ token: null, user: null } as never)
     )
 
     const { result } = renderHook(() => useBranches(['org/repo']), { wrapper: makeWrapper() })

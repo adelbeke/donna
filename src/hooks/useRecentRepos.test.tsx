@@ -21,8 +21,8 @@ function makeEvents(repoNames: string[]) {
 }
 
 beforeEach(() => {
-  vi.mocked(useAuthStore).mockImplementation((selector: (s: { token: string; user: { login: string } }) => unknown) =>
-    selector({ token: 'tok', user: { login: 'alice' } })
+  vi.mocked(useAuthStore).mockImplementation((selector) =>
+    selector({ token: 'tok', user: { login: 'alice' } } as never)
   )
   vi.stubGlobal('fetch', vi.fn())
 })
@@ -61,8 +61,8 @@ describe('useRecentRepos', () => {
   })
 
   it('GIVEN no token WHEN rendering THEN query is idle', () => {
-    vi.mocked(useAuthStore).mockImplementation((selector: (s: { token: null; user: null }) => unknown) =>
-      selector({ token: null, user: null })
+    vi.mocked(useAuthStore).mockImplementation((selector) =>
+      selector({ token: null, user: null } as never)
     )
 
     const { result } = renderHook(() => useRecentRepos(), { wrapper: makeWrapper() })
