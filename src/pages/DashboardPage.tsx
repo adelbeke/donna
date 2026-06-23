@@ -3,6 +3,7 @@ import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
+import BranchList from '../components/BranchList/BranchList'
 import Footer from '../components/Footer/Footer'
 import { BRANCHES_ENABLED } from '../config'
 
@@ -50,7 +51,7 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-
+          
           <div className="relative flex-1 max-w-sm mx-auto">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
             <input
@@ -95,7 +96,7 @@ export default function DashboardPage() {
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
         {view === 'branches'
-          ? <div />
+          ? <BranchList />
           : (
             <div className="flex gap-8">
               <Filters />
