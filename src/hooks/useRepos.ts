@@ -18,7 +18,7 @@ export function useRepos() {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
       }
-      const repos: any[] = []
+      const repos: Repo[] = []
       for (let page = 1; page <= 3; page++) {
         const r = await fetch(
           `${GH}/user/repos?affiliation=owner,collaborator&sort=pushed&per_page=100&page=${page}`,
