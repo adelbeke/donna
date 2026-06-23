@@ -4,6 +4,7 @@ import { usePRStore } from '../store/prStore'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
 import Footer from '../components/Footer/Footer'
+import { BRANCHES_ENABLED } from '../config'
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore()
@@ -18,18 +19,20 @@ export default function DashboardPage() {
             Donna
           </h1>
 
-          <div className="flex items-center gap-1 shrink-0">
-            {(['prs', 'branches'] as const).map((v) => (
-              <button key={v} onClick={() => setView(v)}
-                className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
-                  ${view === v
-                    ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
-                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
-                  }`}>
-                {v === 'prs' ? 'Pull Requests' : 'Branches'}
-              </button>
-            ))}
-          </div>
+          {BRANCHES_ENABLED && (
+            <div className="flex items-center gap-1 shrink-0">
+              {(['prs', 'branches'] as const).map((v) => (
+                <button key={v} onClick={() => setView(v)}
+                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+                    ${view === v
+                      ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
+                    }`}>
+                  {v === 'prs' ? 'Pull Requests' : 'Branches'}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="relative flex-1 max-w-sm mx-auto">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
