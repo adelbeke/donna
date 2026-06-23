@@ -69,7 +69,8 @@ function AppContent() {
   }, [setToken, setUser])
 
   useEffect(() => {
-    if (!isElectron || token) { setGhChecking(false); return }
+    if (!isElectron || token) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     runElectronAuth()
   // ponytail: run once; token excluded so re-auth on next open uses cached token
   // eslint-disable-next-line react-hooks/exhaustive-deps

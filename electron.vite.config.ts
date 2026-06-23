@@ -18,6 +18,6 @@ export default defineConfig({
   renderer: {
     root: '.',
     plugins: [react(), tailwindcss()],
-    build: { base: './', rollupOptions: { input: 'index.html' } },
+    build: { rollupOptions: { input: 'index.html' } },
   },
 })
