@@ -5,7 +5,7 @@ const makeNode = (
   name: string,
   login: string | null,
   date: string,
-  pr?: { number: number; state: string }
+  pr?: { number: number; state: string; url: string }
 ) => ({
   name,
   target: {
@@ -20,7 +20,7 @@ describe('mapBranchNodes', () => {
     const nodes = [
       makeNode('main', 'alice', '2024-01-01T00:00:00Z'),
       makeNode('feature-x', 'bob', '2024-01-02T00:00:00Z'),
-      makeNode('feature-y', 'alice', '2024-01-03T00:00:00Z', { number: 42, state: 'OPEN' }),
+      makeNode('feature-y', 'alice', '2024-01-03T00:00:00Z', { number: 42, state: 'OPEN', url: 'https://github.com/org/repo/pull/42' }),
     ]
 
     const result = mapBranchNodes(nodes, 'org/repo', 'alice')
@@ -30,7 +30,7 @@ describe('mapBranchNodes', () => {
       name: 'feature-y',
       repo: 'org/repo',
       lastCommitDate: '2024-01-03T00:00:00Z',
-      linkedPr: { number: 42, state: 'OPEN' },
+      linkedPr: { number: 42, state: 'OPEN', url: 'https://github.com/org/repo/pull/42' },
     })
   })
 
