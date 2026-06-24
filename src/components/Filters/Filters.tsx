@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Lock, X } from 'lucide-react'
 import { usePRStore, type PRSection } from '../../store/prStore'
 import { usePullRequests } from '../../hooks/useGitHubPRs'
-
-const isElectron = !!window.electronAPI
+import { isElectron } from '../../lib/electron'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'review-requested', label: 'Review requested' },

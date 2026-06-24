@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-qu
 import { Terminal } from 'lucide-react'
 import { useAuthStore } from './store/authStore'
 import { isAuthError, VIEWER_QUERY } from './lib/github'
+import { isElectron } from './lib/electron'
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
 import type { GitHubUser } from './types/github'
@@ -35,8 +36,6 @@ function ElectronAuthError({ message, onRetry }: { message: string; onRetry: () 
     </div>
   )
 }
-
-const isElectron = !!window.electronAPI
 
 async function tryElectronAuth(
   setToken: (t: string) => void,
