@@ -26,3 +26,26 @@
 html, body {
   background-color: var(--color-surface);
 }
+
+[data-theme="light"] {
+  --color-surface: #ffffff;
+  --color-surface-raised: #f6f8fa;
+  --color-surface-overlay: #eaeef2;
+  --color-border: #d0d7de;
+  --color-border-subtle: #eaeef2;
+  --color-text-primary: #1f2328;
+  --color-text-secondary: #57606a;
+  --color-text-muted: #5c6370;
+  --color-accent: #0969da;
+  --color-accent-subtle: #ddf4ff;
+  --color-success: #1a7f37;
+  --color-success-subtle: #dafbe1;
+  --color-warning: #9a6700;
+  --color-warning-subtle: #fff8c5;
+  --color-danger: #cf222e;
+  --color-danger-subtle: #ffebe9;
+  --color-priority: #8250df;
+  --color-priority-subtle: #fbefff;
+  --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.1);
+  --shadow-card-hover: 0 4px 12px 0 rgba(0,0,0,0.15);
+}
