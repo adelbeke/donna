@@ -5,6 +5,7 @@ directories:
 files:
   - out/**/*
 mac:
+  icon: resources/icon.icns
   target:
     - target: dmg
       arch: [x64, arm64]
