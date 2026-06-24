@@ -3,6 +3,8 @@ import { Lock, X } from 'lucide-react'
 import { usePRStore, type PRSection } from '../../store/prStore'
 import { usePullRequests } from '../../hooks/useGitHubPRs'
 
+const isElectron = !!window.electronAPI
+
 const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'review-requested', label: 'Review requested' },
   { id: 'authored', label: 'My PRs' },
@@ -145,12 +147,14 @@ export default function Filters() {
         )}
       </div>
 
-      <div className="rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-3 py-3 flex flex-col items-center gap-2 text-center cursor-default">
-        <Lock size={16} className="text-[var(--color-text-muted)]" />
-        <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
-          Your GitHub token is never transmitted or shared. It only lives in your localStorage.
-        </p>
-      </div>
+      {!isElectron && (
+        <div className="rounded-md border border-[var(--color-border-subtle)] bg-[var(--color-surface)] px-3 py-3 flex flex-col items-center gap-2 text-center cursor-default">
+          <Lock size={16} className="text-[var(--color-text-muted)]" />
+          <p className="text-xs text-[var(--color-text-muted)] leading-relaxed">
+            Your GitHub token is never transmitted or shared. It only lives in your localStorage.
+          </p>
+        </div>
+      )}
     </aside>
   )
 }
