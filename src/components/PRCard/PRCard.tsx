@@ -1,5 +1,5 @@
 import { useState, type ReactElement } from 'react'
-import { GitMerge, MessageSquare, Check, AlertCircle, Star, ExternalLink, FileCode, EyeOff, Eye, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { GitMerge, MessageSquare, Check, AlertCircle, Star, ExternalLink, FileCode, EyeOff, Eye, CheckCircle, XCircle, Clock, Link2 } from 'lucide-react'
 import type { PullRequest, ReviewState, CheckRollupState } from '../../types/github'
 import { usePRStore } from '../../store/prStore'
 import { useAuthStore } from '../../store/authStore'
@@ -61,6 +61,7 @@ const reviewBadge: Record<
 
 function PRCard({ pr, isAuthored = false }: Props) {
   const [checksOpen, setChecksOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
@@ -225,6 +226,18 @@ function PRCard({ pr, isAuthored = false }: Props) {
               }`}
           >
             <Star size={14} fill={isPriority ? 'currentColor' : 'none'} />
+          </button>
+
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(pr.url)
+              setCopied(true)
+              setTimeout(() => setCopied(false), 1500)
+            }}
+            title="Copy PR link"
+            className="p-1.5 rounded text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+          >
+            {copied ? <Check size={14} /> : <Link2 size={14} />}
           </button>
 
           <a
