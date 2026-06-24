@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { LogOut, Search, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
@@ -11,12 +11,21 @@ import { useUpdateCheck, isNewer } from '../hooks/useUpdateCheck'
 
 function UpdateBanner({ version }: { version: string }) {
   const [dismissed, setDismissed] = useState(false)
+  const [downloaded, setDownloaded] = useState(false)
+
+  useEffect(() => {
+    window.electronAPI?.updater?.onUpdateDownloaded(() => setDownloaded(true))
+  }, [])
+
   if (dismissed) return null
   return (
     <div className="flex items-center justify-between px-4 py-2 text-xs bg-[var(--color-accent)] text-white">
       <span>Version {version} is available.</span>
       <span className="flex items-center gap-3">
-        <a href="https://github.com/adelbeke/donna/releases/latest" target="_blank" rel="noopener noreferrer" className="underline">Download</a>
+        {downloaded
+          ? <button className="underline" onClick={() => window.electronAPI?.updater?.installUpdate()}>Restart to install</button>
+          : <a href="https://github.com/adelbeke/donna/releases/latest" target="_blank" rel="noopener noreferrer" className="underline">Download</a>
+        }
         <button onClick={() => setDismissed(true)}>✕</button>
       </span>
     </div>

@@ -16,4 +16,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   dialog: {
     openDirectory: (): Promise<string | null> => ipcRenderer.invoke('dialog:open'),
   },
+  updater: {
+    onUpdateDownloaded: (cb: () => void) => ipcRenderer.on('update:downloaded', cb),
+    installUpdate: (): Promise<void> => ipcRenderer.invoke('update:install'),
+  },
 })

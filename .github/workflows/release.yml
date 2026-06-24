@@ -66,6 +66,8 @@ jobs:
           path: |
             release/*.dmg
             release/*.blockmap
+            release/*.zip
+            release/*.yml
           retention-days: 1
 
   release:

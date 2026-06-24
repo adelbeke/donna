@@ -4,9 +4,15 @@ directories:
   output: release
 files:
   - out/**/*
+publish:
+  provider: github
+  owner: adelbeke
+  repo: donna
 mac:
   icon: resources/icon.icns
   target:
     - target: dmg
+      arch: [x64, arm64]
+    - target: zip
       arch: [x64, arm64]
   category: public.app-category.developer-tools
