@@ -1,0 +1,15 @@
+appId: com.dbkable.donna
+productName: Donna
+directories:
+  output: release
+files:
+  - out/**/*
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  category: public.app-category.developer-tools
+win:
+  target: nsis
+linux:
+  target: AppImage
