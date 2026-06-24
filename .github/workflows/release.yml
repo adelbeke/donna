@@ -90,11 +90,43 @@ jobs:
           pattern: release-mac
           merge-multiple: true
           path: artifacts
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --sort=-v:refname | grep -v "^v${{ needs.bump.outputs.version }}$" | head -1)
+          echo "Previous tag: $PREV_TAG"
+
+          get_entries() {
+            local prefix="$1"
+            git log --pretty=format:"%s" "${PREV_TAG}..HEAD" \
+              | grep "^${prefix}:" \
+              | sed "s/^${prefix}: //" \
+              | sed 's/ (#[0-9]*)//' \
+              | sed 's/^/- /'
+          }
+
+          FEATURES=$(get_entries "feat")
+          FIXES=$(get_entries "fix")
+          DOCS=$(get_entries "docs")
+
+          BODY=""
+          if [ -n "$FEATURES" ]; then
+            BODY="${BODY}### Features\n${FEATURES}\n\n"
+          fi
+          if [ -n "$FIXES" ]; then
+            BODY="${BODY}### Bug Fixes\n${FIXES}\n\n"
+          fi
+          if [ -n "$DOCS" ]; then
+            BODY="${BODY}### Documentation\n${DOCS}\n\n"
+          fi
+
+          printf "%b" "$BODY" > /tmp/changelog.md
+          cat /tmp/changelog.md
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.bump.outputs.version }}
           name: v${{ needs.bump.outputs.version }}
-          generate_release_notes: true
+          body_path: /tmp/changelog.md
           target_commitish: main
           files: artifacts/**/*
         env:
