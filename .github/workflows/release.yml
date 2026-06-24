@@ -99,6 +99,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  cleanup:
+    needs: [bump, build, release]
+    if: failure() && needs.bump.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete release branch
+        run: git push origin --delete "${{ needs.bump.outputs.branch }}" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   pr:
     needs: [bump, release]
     if: github.actor == 'adelbeke'
