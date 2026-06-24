@@ -1,6 +1,7 @@
 import { GraphQLClient, ClientError } from 'graphql-request'
 
 const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
+const GH_BASE = 'https://api.github.com'
 
 export function isAuthError(error: unknown): boolean {
   if (error instanceof ClientError) {
@@ -20,6 +21,39 @@ export function createGitHubClient(token: string) {
       Authorization: `Bearer ${token}`,
     },
   })
+}
+
+type GQLClient = { request: <T>(query: string, variables?: Record<string, unknown>) => Promise<T> }
+
+function createElectronClient(): GQLClient {
+  return {
+    request: async <T>(query: string, variables?: Record<string, unknown>): Promise<T> => {
+      const result = await window.electronAPI!.gh.graphql(query, variables ?? {}) as { data: T; errors?: { message: string }[] }
+      if (result.errors?.length) throw new Error(result.errors[0].message)
+      return result.data
+    },
+  }
+}
+
+export function createClient(token?: string | null): GQLClient {
+  if (typeof window !== 'undefined' && window.electronAPI) return createElectronClient()
+  return createGitHubClient(token!) as unknown as GQLClient
+}
+
+export async function restFetch<T>(url: string, token?: string): Promise<T> {
+  if (typeof window !== 'undefined' && window.electronAPI) {
+    const path = url.startsWith(GH_BASE) ? url.slice(GH_BASE.length) : url
+    return window.electronAPI.gh.rest(path) as Promise<T>
+  }
+  const r = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token!}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    },
+  })
+  if (!r.ok) throw new Error(`HTTP ${r.status}`)
+  return r.json() as Promise<T>
 }
 
 export const VIEWER_QUERY = /* GraphQL */ `
@@ -47,6 +81,7 @@ export const PULL_REQUESTS_QUERY = /* GraphQL */ `
           title
           url
           isDraft
+          headRefName
           createdAt
           updatedAt
           additions

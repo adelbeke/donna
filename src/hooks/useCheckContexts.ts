@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { createGitHubClient, PR_CHECK_CONTEXTS_QUERY } from '../lib/github'
+import { createClient, PR_CHECK_CONTEXTS_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
 import type { CheckRunContext, StatusContextItem } from '../types/github'
 
@@ -26,7 +26,7 @@ export function useCheckContexts(prId: string, enabled: boolean) {
     enabled: enabled && !!token,
     staleTime: 30_000,
     queryFn: async () => {
-      const client = createGitHubClient(token!)
+      const client = createClient(token)
       return client.request<CheckContextsResult>(PR_CHECK_CONTEXTS_QUERY, { nodeId: prId })
     },
   })

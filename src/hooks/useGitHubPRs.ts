@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { createGitHubClient, PULL_REQUESTS_QUERY } from '../lib/github'
+import { createClient, PULL_REQUESTS_QUERY } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
 import { buildSearchQuery, deriveMyReviewState, sortAndPartition } from '../lib/prUtils'
@@ -35,7 +35,7 @@ export function usePullRequests() {
     staleTime: 60_000,
     initialPageParam: null,
     queryFn: async ({ pageParam }) => {
-      const client = createGitHubClient(token!)
+      const client = createClient(token)
       return client.request<SearchResult>(PULL_REQUESTS_QUERY, {
         searchQuery,
         cursor: pageParam ?? undefined,
@@ -77,5 +77,5 @@ export function usePullRequests() {
   const hitPageCap = (query.data?.pages.length ?? 0) >= MAX_PAGES
   const truncated = hitPageCap && !!lastPage?.search.pageInfo.hasNextPage
 
-  return { ...query, data: regular, priorityPRs, repos, totalCount, loadedCount, truncated, hasNextPage, isFetchingNextPage, fetchNextPage }
+  return { ...query, data: regular, priorityPRs, allPRs: allNodes, repos, totalCount, loadedCount, truncated, hasNextPage, isFetchingNextPage, fetchNextPage }
 }

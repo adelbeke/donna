@@ -76,9 +76,10 @@ export const usePRStore = create<PRStore>()(
       name: 'pr-dashboard-state',
       merge: (persisted, current) => {
         const p = persisted as Partial<PRStore>
+        const validViews = new Set<string>(['prs', 'branches'])
         return {
           ...current,
-          ...(p.view ? { view: p.view } : {}),
+          ...(p.view && validViews.has(p.view) ? { view: p.view } : {}),
           filters: { ...current.filters, ...(p.filters ?? {}) },
         }
       },

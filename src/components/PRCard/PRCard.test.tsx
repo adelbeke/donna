@@ -15,6 +15,7 @@ const pr: PullRequest = {
   title: 'Fix the thing',
   url: 'https://github.com/org/repo/pull/42',
   isDraft: false,
+  headRefName: 'fix-the-thing',
   createdAt: '2024-01-15T10:00:00Z',
   updatedAt: '2024-02-20T12:00:00Z',
   author: { login: 'alice', avatarUrl: 'https://example.com/alice.png' },

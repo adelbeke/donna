@@ -22,7 +22,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-              {(['prs', 'branches'] as const).map((v) => (
+              {(['prs', ...(window.electronAPI ? ['branches' as const] : [])] as const).map((v) => (
                 <button key={v} onClick={() => setView(v)}
                   className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${view === v
@@ -63,13 +63,15 @@ export default function DashboardPage() {
               <span className="text-xs text-[var(--color-text-secondary)]">
                 {user.login}
               </span>
-              <button
-                onClick={logout}
-                title="Disconnect"
-                className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-subtle)] transition-colors cursor-pointer"
-              >
-                <LogOut size={14} />
-              </button>
+              {!window.electronAPI && (
+                <button
+                  onClick={logout}
+                  title="Disconnect"
+                  className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-subtle)] transition-colors cursor-pointer"
+                >
+                  <LogOut size={14} />
+                </button>
+              )}
             </div>
           )}
         </div>

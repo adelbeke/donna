@@ -3,11 +3,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import React from 'react'
 import { useBranches, mapBranchNodes } from './useBranches'
-import { createGitHubClient } from '../lib/github'
+import { createClient } from '../lib/github'
 import { useAuthStore } from '../store/authStore'
 
 vi.mock('../lib/github', () => ({
-  createGitHubClient: vi.fn(),
+  createClient: vi.fn(),
   BRANCHES_QUERY: 'BRANCHES_QUERY',
 }))
 
@@ -42,7 +42,7 @@ function makePage(nodes: ReturnType<typeof makeNode>[], hasNextPage: boolean, en
 }
 
 beforeEach(() => {
-  vi.mocked(createGitHubClient).mockReturnValue({ request: mockRequest } as unknown as ReturnType<typeof createGitHubClient>)
+  vi.mocked(createClient).mockReturnValue({ request: mockRequest } as unknown as ReturnType<typeof createClient>)
   vi.mocked(useAuthStore).mockImplementation((selector) =>
     selector({ token: 'tok', user: { login: 'alice' } } as never)
   )
