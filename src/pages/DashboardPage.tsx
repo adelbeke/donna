@@ -1,6 +1,7 @@
 import { LogOut, Search, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
+import { IS_ELECTRON } from '../lib/electron'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
 import BranchList from '../components/BranchList/BranchList'
@@ -22,7 +23,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-              {(['prs', ...(window.electronAPI ? ['branches' as const] : [])] as const).map((v) => (
+              {(['prs', ...(IS_ELECTRON ? ['branches' as const] : [])] as const).map((v) => (
                 <button key={v} onClick={() => setView(v)}
                   className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${view === v
@@ -63,7 +64,7 @@ export default function DashboardPage() {
               <span className="text-xs text-[var(--color-text-secondary)]">
                 {user.login}
               </span>
-              {!window.electronAPI && (
+              {!IS_ELECTRON && (
                 <button
                   onClick={logout}
                   title="Disconnect"
