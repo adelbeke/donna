@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-qu
 import { Terminal } from 'lucide-react'
 import { useAuthStore } from './store/authStore'
 import { isAuthError, VIEWER_QUERY } from './lib/github'
-import { isElectron } from './lib/electron'
+import { IS_ELECTRON } from './lib/electron'
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
 import type { GitHubUser } from './types/github'
@@ -56,7 +56,7 @@ async function tryElectronAuth(
 
 function AppContent() {
   const { token, setToken, setUser } = useAuthStore()
-  const [ghChecking, setGhChecking] = useState(() => isElectron && !token)
+  const [ghChecking, setGhChecking] = useState(() => IS_ELECTRON && !token)
   const [ghError, setGhError] = useState<string | null>(null)
 
   const runElectronAuth = useCallback(() => {
@@ -68,7 +68,7 @@ function AppContent() {
   }, [setToken, setUser])
 
   useEffect(() => {
-    if (!isElectron || token) return
+    if (!IS_ELECTRON || token) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
     runElectronAuth()
   // ponytail: run once; token excluded so re-auth on next open uses cached token
@@ -77,7 +77,7 @@ function AppContent() {
 
   if (ghChecking) return null
 
-  if (isElectron) {
+  if (IS_ELECTRON) {
     if (ghError) return <ElectronAuthError message={ghError} onRetry={runElectronAuth} />
     return <DashboardPage />
   }

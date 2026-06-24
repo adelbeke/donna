@@ -1,1 +1,1 @@
-export const isElectron = !!window.electronAPI
+export const IS_ELECTRON = !!window.electronAPI
