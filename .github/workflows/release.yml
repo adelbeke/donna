@@ -81,6 +81,7 @@ jobs:
         with:
           ref: ${{ needs.bump.outputs.branch }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
       - name: Create and push tag
         run: |
           git config user.email "${{ secrets.GIT_USER_EMAIL }}"
