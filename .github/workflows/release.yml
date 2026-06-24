@@ -95,17 +95,21 @@ jobs:
           path: artifacts
       - name: Generate changelog
         id: changelog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PREV_TAG=$(git tag --sort=-v:refname | grep -v "^v${{ needs.bump.outputs.version }}$" | head -1)
           echo "Previous tag: $PREV_TAG"
 
           get_entries() {
             local prefix="$1"
-            git log --pretty=format:"%s" "${PREV_TAG}..HEAD" \
+            git log --pretty=format:"%s|%H" "${PREV_TAG}..HEAD" \
               | grep "^${prefix}:" \
-              | sed "s/^${prefix}: //" \
-              | sed 's/ (#[0-9]*)//' \
-              | sed 's/^/- /'
+              | while IFS='|' read -r subject sha; do
+                  CLEAN=$(echo "$subject" | sed "s/^${prefix}: //")
+                  AUTHOR=$(gh api "/repos/$GITHUB_REPOSITORY/commits/$sha" --jq '.author.login // .commit.author.name' 2>/dev/null)
+                  echo "- $CLEAN @$AUTHOR"
+                done
           }
 
           FEATURES=$(get_entries "feat")
