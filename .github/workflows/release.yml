@@ -63,7 +63,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: release-mac
-          path: release/**/*
+          path: |
+            release/*.dmg
+            release/*.blockmap
           retention-days: 1
 
   release:
