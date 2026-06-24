@@ -18,6 +18,8 @@ export default function Footer() {
       >
         Buy me a coffee
       </a>
+      <span className="mx-2">—</span>
+      <span>v{__APP_VERSION__}</span>
     </footer>
   )
 }
