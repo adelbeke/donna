@@ -2,78 +2,68 @@
 
 # donna
 
-GitHub PR dashboard — runs in your browser, no backend, no signup. Filter, prioritise, and track review status across all your repositories.
+Your GitHub companion — track PRs, manage branches and worktrees, all from a native macOS app.
 
 [![CI](https://github.com/adelbeke/donna/actions/workflows/ci.yml/badge.svg)](https://github.com/adelbeke/donna/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**[→ Live demo](https://adelbeke.github.io/donna/)**
-
 </div>
 
-<!-- TODO: replace with a real app screenshot -->
 ![donna screenshot](docs/screenshot.png)
 
-Client-only GitHub PR dashboard. No backend. Talks directly to the GitHub GraphQL API; your PAT is stored in `localStorage` and never leaves your browser.
+## Requirements
+
+- macOS (arm64 or x64)
+- [GitHub CLI (`gh`)](https://cli.github.com/) installed and authenticated (`gh auth login`)
+
+## Install
+
+Download the latest `.dmg` from [Releases](https://github.com/adelbeke/donna/releases), mount it, drag Donna to Applications.
 
 ## Features
 
+**Pull Requests**
 - Three sections: **Review requested** · **My PRs** · **Mentioned**
-- Filter by repository (multi-select), search by title, sort newest/oldest
+- Filter by repository, search by title, sort newest/oldest
 - Filter by your own review state: changes requested / commented / not reviewed
-- Star PRs as **top priority** — pinned to a separate section
-- Hide PRs you don't care about; toggle to show drafts / hidden
-- PR cards show repo, author, diff size, draft + review-state badges, CI status, conflict indicator, relative timestamps
-- PAT stored in `localStorage`, never sent to any server; auto sign-out on token expiry
+- Star PRs as top priority — pinned at the top
+- Hide PRs you don't care about; toggle drafts / hidden
+- Cards show repo, author, diff size, review-state badges, CI status, conflict indicator, relative timestamps
 
-## Generate a token
+**Branches**
+- Add local repositories via directory picker
+- Lists all branches across your repos, with worktree detection
+- Shows dirty state and linked PR per branch
+- One-click copy for `git switch <branch>` or `cd <worktree>`
 
-Create a **classic** Personal Access Token with these two scopes:
+## Auth
 
-| Scope | Why |
-|---|---|
-| `repo` | Read PRs, reviews, and diffs |
-| `read:org` | Resolve team review requests |
+Donna delegates all GitHub API calls to the `gh` CLI — no token to manage, no PAT stored anywhere. Run `gh auth login` once and you're done.
 
-[Generate token →](https://github.com/settings/tokens/new?scopes=repo,read:org)
+## Web version
 
-> Your token is stored in `localStorage` and only used to call the GitHub API directly — it never touches any server.
+A browser-only build is live at [adelbeke.github.io/donna](https://adelbeke.github.io/donna/). It uses a classic PAT (`repo` + `read:org` scopes, stored in `localStorage`) and does not include the Branches tab.
 
-## Quick start
-
-```bash
-npm install && npm run dev
-```
-
-Open `http://localhost:5173` and paste your token.
-
-## Self-hosting / deploy
-
-Auto-deploys to GitHub Pages on push to `main` via `.github/workflows/deploy.yml`. `base: '/donna/'` is set in `vite.config.ts`.
-
-For any static host:
+## Dev
 
 ```bash
-npm run build
-```
+npm install
 
-Serve the `dist/` folder.
+npm run dev            # web only (localhost:5173)
+npm run dev:electron   # Electron window (requires vite dev server running)
+
+npm run lint
+npm run test:run
+npm run build:electron
+```
 
 ## Tech stack
 
-React 19, Vite, TypeScript, Tailwind v4, Zustand (persist), TanStack Query, graphql-request, lucide-react.
+Electron, React 19, electron-vite, TypeScript, Tailwind v4, Zustand, TanStack Query, graphql-request.
 
 ## Contributing
 
-Run before opening a PR:
-
-```bash
-npm run lint
-npm run test:run
-npm run build
-```
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
