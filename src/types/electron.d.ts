@@ -16,5 +16,9 @@ interface Window {
     dialog: {
       openDirectory: () => Promise<string | null>
     }
+    updater: {
+      onUpdateDownloaded: (cb: () => void) => void
+      installUpdate: () => Promise<void>
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
+import { autoUpdater } from 'electron-updater'
 import { spawn, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import path from 'node:path'
@@ -133,7 +134,17 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow)
+ipcMain.handle('update:install', () => autoUpdater.quitAndInstall())
+
+app.whenReady().then(() => {
+  createWindow()
+  if (app.isPackaged) {
+    autoUpdater.checkForUpdates()
+    autoUpdater.on('update-downloaded', () => {
+      BrowserWindow.getAllWindows().forEach(w => w.webContents.send('update:downloaded'))
+    })
+  }
+})
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
