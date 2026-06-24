@@ -21,6 +21,7 @@ const queryClient = new QueryClient({
   },
 })
 
+
 function ElectronAuthError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="min-h-screen bg-[var(--color-surface)] flex flex-col items-center justify-center gap-4 p-8">

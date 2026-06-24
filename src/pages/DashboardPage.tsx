@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { LogOut, Search, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
@@ -5,10 +6,27 @@ import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
 import BranchList from '../components/BranchList/BranchList'
 import Footer from '../components/Footer/Footer'
+import { useUpdateCheck, isNewer } from '../hooks/useUpdateCheck'
+
+function UpdateBanner({ version }: { version: string }) {
+  const [dismissed, setDismissed] = useState(false)
+  if (dismissed) return null
+  return (
+    <div className="flex items-center justify-between px-4 py-2 text-xs bg-[var(--color-accent)] text-white">
+      <span>Version {version} is available.</span>
+      <span className="flex items-center gap-3">
+        <a href="https://github.com/adelbeke/donna/releases/latest" target="_blank" rel="noopener noreferrer" className="underline">Download</a>
+        <button onClick={() => setDismissed(true)}>✕</button>
+      </span>
+    </div>
+  )
+}
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore()
   const { filters, setFilters, view, setView } = usePRStore()
+  const { data: latestVersion } = useUpdateCheck()
+  const showBanner = latestVersion && isNewer(latestVersion, __APP_VERSION__)
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">
@@ -76,6 +94,8 @@ export default function DashboardPage() {
           )}
         </div>
       </header>
+
+      {showBanner && <UpdateBanner version={latestVersion} />}
 
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">

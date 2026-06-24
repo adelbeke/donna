@@ -1,4 +1,5 @@
 // Global augmentation — no imports/exports so TypeScript treats this as a script
+declare const __APP_VERSION__: string
 interface Window {
   electronAPI?: {
     gh: {
