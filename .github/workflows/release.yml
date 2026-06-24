@@ -95,6 +95,7 @@ jobs:
           tag_name: v${{ needs.bump.outputs.version }}
           name: v${{ needs.bump.outputs.version }}
           generate_release_notes: true
+          target_commitish: main
           files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
