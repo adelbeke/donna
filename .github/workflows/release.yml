@@ -44,17 +44,7 @@ jobs:
     if: github.actor == 'adelbeke'
     permissions:
       contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-latest
-            platform: mac
-          - os: windows-latest
-            platform: win
-          - os: ubuntu-latest
-            platform: linux
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -63,17 +53,19 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm install
       - run: npx electron-vite build
-      - run: npx electron-builder --${{ matrix.platform }}
+      - run: npx electron-builder --mac --publish never
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       - uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.platform }}
-          path: release/**/*
+          name: release-mac
+          path: |
+            release/*.dmg
+            release/*.blockmap
           retention-days: 1
 
   release:
@@ -95,7 +87,7 @@ jobs:
           git push origin "v${{ needs.bump.outputs.version }}"
       - uses: actions/download-artifact@v4
         with:
-          pattern: release-*
+          pattern: release-mac
           merge-multiple: true
           path: artifacts
       - uses: softprops/action-gh-release@v2
@@ -106,6 +98,21 @@ jobs:
           files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cleanup:
+    needs: [bump, build, release]
+    if: failure() && needs.bump.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete release branch
+        run: git push origin --delete "${{ needs.bump.outputs.branch }}" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   pr:
     needs: [bump, release]
