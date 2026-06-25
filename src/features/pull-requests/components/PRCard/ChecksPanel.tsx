@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react'
 import { CheckCircle, XCircle, Clock, ExternalLink } from 'lucide-react'
-import type { CheckRunContext, StatusContextItem, CheckRollupState } from '../../types/github'
+import type { CheckRunContext, StatusContextItem, CheckRollupState } from '@/types/github'
 
 interface Props {
   checks: (CheckRunContext | StatusContextItem)[]
@@ -38,7 +38,7 @@ function CheckIcon({ check }: { check: CheckRunContext | StatusContextItem }) {
   return <Clock size={12} className="text-[var(--color-warning)] shrink-0" />
 }
 
-export default function ChecksPanel({ checks, rollupState, onClose, isLoading }: Props) {
+export function ChecksPanel({ checks, rollupState, onClose, isLoading }: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
