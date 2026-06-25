@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { usePullRequests } from '@/features/pull-requests/queries/useGitHubPRs'
-import { usePRStore } from '@/features/pull-requests/stores/prStore'
+import { usePullRequests } from '../../queries/useGitHubPRs'
+import { usePRStore } from '../../stores/prStore'
 import { PRCard } from '../PRCard/PRCard'
 import { VisibilityToggles } from './VisibilityToggles'
 

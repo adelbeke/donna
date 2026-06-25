@@ -16,12 +16,12 @@ import {
 } from 'lucide-react'
 import { CopyWithFeedback } from '@/components/shared/CopyWithFeedback'
 import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
-import { usePRStore } from '@/features/pull-requests/stores/prStore'
+import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/store/authStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
 import { ChecksPanel } from './ChecksPanel'
 import { deriveCheckState } from '@/lib/prUtils'
-import { useCheckContexts } from '@/features/pull-requests/queries/useCheckContexts'
+import { useCheckContexts } from '../../queries/useCheckContexts'
 import { timeAgo } from '@/lib/timeAgo'
 
 interface Props {

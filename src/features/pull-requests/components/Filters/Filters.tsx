@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Lock, X } from 'lucide-react'
-import { usePRStore, type PRSection } from '@/features/pull-requests/stores/prStore'
-import { usePullRequests } from '@/features/pull-requests/queries/useGitHubPRs'
+import { usePRStore, type PRSection } from '../../stores/prStore'
+import { usePullRequests } from '../../queries/useGitHubPRs'
 import { useFeatures } from '@/lib/features'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
