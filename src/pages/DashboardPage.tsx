@@ -68,20 +68,22 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {(['prs', ...(features.has('branches') ? ['branches' as const] : [])] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+            {(['prs', ...(features.has('branches') ? ['branches' as const] : [])] as const).map(
+              (v) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${
                       view === v
                         ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
                         : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
                     }`}
-              >
-                {v === 'prs' ? 'Pull Requests' : 'Branches'}
-              </button>
-            ))}
+                >
+                  {v === 'prs' ? 'Pull Requests' : 'Branches'}
+                </button>
+              )
+            )}
           </div>
 
           <div className="relative flex-1 max-w-sm mx-auto">
