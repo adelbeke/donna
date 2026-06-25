@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Terminal } from 'lucide-react'
-import { useAuthStore } from './store/authStore'
-import { VIEWER_QUERY } from './lib/github'
-import DashboardPage from './pages/DashboardPage'
-import { FeaturesContext, type Feature } from './lib/features'
-import type { GitHubUser } from './types/github'
+import { useAuthStore } from '../store/authStore.ts'
+import { VIEWER_QUERY } from '../lib/github.ts'
+import DashboardPage from '../pages/DashboardPage.tsx'
+import { FeaturesContext, type Feature } from '../lib/features.ts'
+import type { GitHubUser } from '../types/github.ts'
 
 const APP_FEATURES = new Set<Feature>(['branches'])
 
