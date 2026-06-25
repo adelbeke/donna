@@ -12,9 +12,12 @@ interface Window {
     }
     branches: {
       list: (repoPath: string) => Promise<string[]>
+      delete: (repoPath: string, branch: string) => Promise<void>
+      switchToDefault: (repoPath: string) => Promise<void>
     }
     worktrees: {
       list: (repoPath: string) => Promise<import('./worktree').Worktree[]>
+      remove: (repoPath: string, worktreePath: string, force: boolean) => Promise<void>
     }
     dialog: {
       openDirectory: () => Promise<string | null>
