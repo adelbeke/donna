@@ -103,7 +103,7 @@ const reviewBadge: Record<
 
 function PRCard({ pr, isAuthored = false }: Props) {
   const [checksOpen, setChecksOpen] = useState(false)
-    const togglePriority = usePRStore((s) => s.togglePriority)
+  const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
