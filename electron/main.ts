@@ -7,12 +7,9 @@ import path from 'node:path'
 const execFileAsync = promisify(execFile)
 
 // ponytail: augment PATH so macOS .app bundles find gh via Homebrew/nix paths
-const GH_PATH = [
-  '/opt/homebrew/bin',
-  '/usr/local/bin',
-  '/usr/bin',
-  process.env.PATH,
-].filter(Boolean).join(':')
+const GH_PATH = ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', process.env.PATH]
+  .filter(Boolean)
+  .join(':')
 
 function runGh(args: string[], stdinData?: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -59,24 +56,46 @@ function gitError(e: unknown): Error {
 
 ipcMain.handle('worktrees:list', async (_e, repoPath: string) => {
   try {
-    const { stdout } = await execFileAsync('git', ['-C', repoPath, 'worktree', 'list', '--porcelain'])
+    const { stdout } = await execFileAsync('git', [
+      '-C',
+      repoPath,
+      'worktree',
+      'list',
+      '--porcelain',
+    ])
     const worktrees = parseWorktrees(stdout)
-    return await Promise.all(worktrees.map(async (wt) => {
-      try {
-        const { stdout: status } = await execFileAsync('git', ['-C', wt.path, 'status', '--porcelain'])
-        return { ...wt, isDirty: status.trim().length > 0 }
-      } catch {
-        return { ...wt, isDirty: false }
-      }
-    }))
-  } catch (e) { throw gitError(e) }
+    return await Promise.all(
+      worktrees.map(async (wt) => {
+        try {
+          const { stdout: status } = await execFileAsync('git', [
+            '-C',
+            wt.path,
+            'status',
+            '--porcelain',
+          ])
+          return { ...wt, isDirty: status.trim().length > 0 }
+        } catch {
+          return { ...wt, isDirty: false }
+        }
+      })
+    )
+  } catch (e) {
+    throw gitError(e)
+  }
 })
 
 ipcMain.handle('branches:list', async (_e, repoPath: string) => {
   try {
-    const { stdout } = await execFileAsync('git', ['-C', repoPath, 'branch', '--format=%(refname:short)'])
+    const { stdout } = await execFileAsync('git', [
+      '-C',
+      repoPath,
+      'branch',
+      '--format=%(refname:short)',
+    ])
     return stdout.trim().split('\n').filter(Boolean)
-  } catch (e) { throw gitError(e) }
+  } catch (e) {
+    throw gitError(e)
+  }
 })
 
 ipcMain.handle('dialog:open', async () => {
@@ -145,7 +164,7 @@ app.whenReady().then(() => {
     autoUpdater.checkForUpdates()
     autoUpdater.on('update-downloaded', () => {
       updateDownloaded = true
-      BrowserWindow.getAllWindows().forEach(w => w.webContents.send('update:downloaded'))
+      BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('update:downloaded'))
     })
   }
 })

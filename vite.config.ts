@@ -7,10 +7,7 @@ import pkg from './package.json'
 export default defineConfig({
   base: '/donna/',
   server: { port: 5173 },
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
   test: {
     environment: 'jsdom',

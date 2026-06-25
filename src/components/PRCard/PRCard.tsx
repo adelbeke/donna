@@ -1,5 +1,19 @@
 import { useState, type ReactElement } from 'react'
-import { GitMerge, MessageSquare, Check, AlertCircle, Star, ExternalLink, FileCode, EyeOff, Eye, CheckCircle, XCircle, Clock, Link2 } from 'lucide-react'
+import {
+  GitMerge,
+  MessageSquare,
+  Check,
+  AlertCircle,
+  Star,
+  ExternalLink,
+  FileCode,
+  EyeOff,
+  Eye,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Link2,
+} from 'lucide-react'
 import type { PullRequest, ReviewState, CheckRollupState } from '../../types/github'
 import { usePRStore } from '../../store/prStore'
 import { useAuthStore } from '../../store/authStore'
@@ -14,12 +28,40 @@ interface Props {
   isAuthored?: boolean
 }
 
-const ciStateBadge: Record<CheckRollupState, { label: string; color: string; bg: string; icon: ReactElement }> = {
-  SUCCESS:  { label: 'Checks pass',    color: 'text-[var(--color-success)]',  bg: 'bg-[var(--color-success-subtle)]',  icon: <CheckCircle size={11} /> },
-  FAILURE:  { label: 'Checks failed',  color: 'text-[var(--color-danger)]',   bg: 'bg-[var(--color-danger-subtle)]',   icon: <XCircle size={11} /> },
-  ERROR:    { label: 'Checks error',   color: 'text-[var(--color-danger)]',   bg: 'bg-[var(--color-danger-subtle)]',   icon: <XCircle size={11} /> },
-  PENDING:  { label: 'Checks pending', color: 'text-[var(--color-warning)]',  bg: 'bg-[var(--color-warning-subtle)]',  icon: <Clock size={11} /> },
-  EXPECTED: { label: 'Checks pending', color: 'text-[var(--color-warning)]',  bg: 'bg-[var(--color-warning-subtle)]',  icon: <Clock size={11} /> },
+const ciStateBadge: Record<
+  CheckRollupState,
+  { label: string; color: string; bg: string; icon: ReactElement }
+> = {
+  SUCCESS: {
+    label: 'Checks pass',
+    color: 'text-[var(--color-success)]',
+    bg: 'bg-[var(--color-success-subtle)]',
+    icon: <CheckCircle size={11} />,
+  },
+  FAILURE: {
+    label: 'Checks failed',
+    color: 'text-[var(--color-danger)]',
+    bg: 'bg-[var(--color-danger-subtle)]',
+    icon: <XCircle size={11} />,
+  },
+  ERROR: {
+    label: 'Checks error',
+    color: 'text-[var(--color-danger)]',
+    bg: 'bg-[var(--color-danger-subtle)]',
+    icon: <XCircle size={11} />,
+  },
+  PENDING: {
+    label: 'Checks pending',
+    color: 'text-[var(--color-warning)]',
+    bg: 'bg-[var(--color-warning-subtle)]',
+    icon: <Clock size={11} />,
+  },
+  EXPECTED: {
+    label: 'Checks pending',
+    color: 'text-[var(--color-warning)]',
+    bg: 'bg-[var(--color-warning-subtle)]',
+    icon: <Clock size={11} />,
+  },
 }
 
 const reviewBadge: Record<
@@ -57,7 +99,6 @@ const reviewBadge: Record<
     icon: <MessageSquare size={11} />,
   },
 }
-
 
 function PRCard({ pr, isAuthored = false }: Props) {
   const [checksOpen, setChecksOpen] = useState(false)
@@ -136,8 +177,7 @@ function PRCard({ pr, isAuthored = false }: Props) {
 
               {/* Diff size */}
               <span className="text-xs font-mono">
-                <span className="text-[var(--color-success)]">+{pr.additions}</span>
-                {' '}
+                <span className="text-[var(--color-success)]">+{pr.additions}</span>{' '}
                 <span className="text-[var(--color-danger)]">-{pr.deletions}</span>
               </span>
 
@@ -176,7 +216,12 @@ function PRCard({ pr, isAuthored = false }: Props) {
                     {ciBadge.label}
                   </button>
                   {checksOpen && (
-                    <ChecksPanel checks={checks} isLoading={checksLoading} rollupState={checkState} onClose={() => setChecksOpen(false)} />
+                    <ChecksPanel
+                      checks={checks}
+                      isLoading={checksLoading}
+                      rollupState={checkState}
+                      onClose={() => setChecksOpen(false)}
+                    />
                   )}
                 </div>
               )}
@@ -188,7 +233,6 @@ function PRCard({ pr, isAuthored = false }: Props) {
                   Conflict
                 </span>
               )}
-
             </div>
 
             {/* Reviewer avatars (authored section only) */}

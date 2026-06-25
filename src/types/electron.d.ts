@@ -4,7 +4,10 @@ interface Window {
   electronAPI?: {
     gh: {
       isInstalled: () => Promise<boolean>
-      graphql: (query: string, variables: Record<string, unknown>) => Promise<{ data: unknown; errors?: { message: string }[] }>
+      graphql: (
+        query: string,
+        variables: Record<string, unknown>
+      ) => Promise<{ data: unknown; errors?: { message: string }[] }>
       rest: (path: string) => Promise<unknown>
     }
     branches: {

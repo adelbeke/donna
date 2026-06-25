@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-surface: #0d1117;
@@ -19,15 +19,16 @@
   --color-danger-subtle: #3d1010;
   --color-priority: #bf91f3;
   --color-priority-subtle: #2d1f4e;
-  --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.3);
-  --shadow-card-hover: 0 4px 12px 0 rgba(0,0,0,0.4);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
 }
 
-html, body {
+html,
+body {
   background-color: var(--color-surface);
 }
 
-[data-theme="light"] {
+[data-theme='light'] {
   --color-surface: #ffffff;
   --color-surface-raised: #f6f8fa;
   --color-surface-overlay: #eaeef2;
@@ -46,6 +47,6 @@ html, body {
   --color-danger-subtle: #ffebe9;
   --color-priority: #8250df;
   --color-priority-subtle: #fbefff;
-  --shadow-card: 0 1px 3px 0 rgba(0,0,0,0.1);
-  --shadow-card-hover: 0 4px 12px 0 rgba(0,0,0,0.15);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 }

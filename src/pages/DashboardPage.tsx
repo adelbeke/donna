@@ -25,10 +25,23 @@ function UpdateBanner({ version }: { version: string }) {
     <div className="flex items-center justify-between px-4 py-2 text-xs bg-[var(--color-accent)] text-white">
       <span>Version {version} is available.</span>
       <span className="flex items-center gap-3">
-        {downloaded
-          ? <button className="underline cursor-pointer" onClick={() => window.electronAPI?.updater?.installUpdate()}>Restart to install</button>
-          : <a href="https://github.com/adelbeke/donna/releases/latest" target="_blank" rel="noopener noreferrer" className="underline">Download</a>
-        }
+        {downloaded ? (
+          <button
+            className="underline cursor-pointer"
+            onClick={() => window.electronAPI?.updater?.installUpdate()}
+          >
+            Restart to install
+          </button>
+        ) : (
+          <a
+            href="https://github.com/adelbeke/donna/releases/latest"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Download
+          </a>
+        )}
         <button onClick={() => setDismissed(true)}>✕</button>
       </span>
     </div>
@@ -54,20 +67,27 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-              {(['prs', ...(IS_ELECTRON ? ['branches' as const] : [])] as const).map((v) => (
-                <button key={v} onClick={() => setView(v)}
-                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
-                    ${view === v
-                      ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
-                      : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
-                    }`}>
-                  {v === 'prs' ? 'Pull Requests' : 'Branches'}
-                </button>
-              ))}
-            </div>
+            {(['prs', ...(IS_ELECTRON ? ['branches' as const] : [])] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+                    ${
+                      view === v
+                        ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
+                    }`}
+              >
+                {v === 'prs' ? 'Pull Requests' : 'Branches'}
+              </button>
+            ))}
+          </div>
 
           <div className="relative flex-1 max-w-sm mx-auto">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+            <Search
+              size={13}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+            />
             <input
               type="text"
               value={filters.search}
@@ -87,14 +107,8 @@ export default function DashboardPage() {
 
           {user && (
             <div className="flex items-center gap-3 shrink-0">
-              <img
-                src={user.avatarUrl}
-                alt={user.login}
-                className="w-6 h-6 rounded-full"
-              />
-              <span className="text-xs text-[var(--color-text-secondary)]">
-                {user.login}
-              </span>
+              <img src={user.avatarUrl} alt={user.login} className="w-6 h-6 rounded-full" />
+              <span className="text-xs text-[var(--color-text-secondary)]">{user.login}</span>
               <button
                 onClick={toggle}
                 title="Toggle theme"
@@ -120,15 +134,14 @@ export default function DashboardPage() {
 
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
-        {view === 'branches'
-          ? <BranchList />
-          : (
-            <div className="flex gap-8">
-              <Filters />
-              <PRList />
-            </div>
-          )
-        }
+        {view === 'branches' ? (
+          <BranchList />
+        ) : (
+          <div className="flex gap-8">
+            <Filters />
+            <PRList />
+          </div>
+        )}
       </main>
       <Footer />
     </div>

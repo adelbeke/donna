@@ -42,7 +42,9 @@ function makePage(nodes: ReturnType<typeof makeNode>[], hasNextPage: boolean, en
 }
 
 beforeEach(() => {
-  vi.mocked(createClient).mockReturnValue({ request: mockRequest } as unknown as ReturnType<typeof createClient>)
+  vi.mocked(createClient).mockReturnValue({ request: mockRequest } as unknown as ReturnType<
+    typeof createClient
+  >)
   vi.mocked(useAuthStore).mockImplementation((selector) =>
     selector({ token: 'tok', user: { login: 'alice' } } as never)
   )
@@ -51,7 +53,9 @@ beforeEach(() => {
 
 describe('useBranches', () => {
   it('GIVEN single page WHEN fetching THEN returns mapped branches', async () => {
-    mockRequest.mockResolvedValueOnce(makePage([makeNode('feat-x', 'alice', '2024-01-01T00:00:00Z')], false))
+    mockRequest.mockResolvedValueOnce(
+      makePage([makeNode('feat-x', 'alice', '2024-01-01T00:00:00Z')], false)
+    )
 
     const { result } = renderHook(() => useBranches(['org/repo']), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -63,20 +67,28 @@ describe('useBranches', () => {
 
   it('GIVEN two pages WHEN fetching THEN paginates with cursor and accumulates nodes', async () => {
     mockRequest
-      .mockResolvedValueOnce(makePage([makeNode('feat-a', 'alice', '2024-01-02T00:00:00Z')], true, 'cursor1'))
+      .mockResolvedValueOnce(
+        makePage([makeNode('feat-a', 'alice', '2024-01-02T00:00:00Z')], true, 'cursor1')
+      )
       .mockResolvedValueOnce(makePage([makeNode('feat-b', 'alice', '2024-01-01T00:00:00Z')], false))
 
     const { result } = renderHook(() => useBranches(['org/repo']), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(mockRequest).toHaveBeenCalledTimes(2)
-    expect(mockRequest).toHaveBeenNthCalledWith(2, expect.anything(), expect.objectContaining({ cursor: 'cursor1' }))
+    expect(mockRequest).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ cursor: 'cursor1' })
+    )
     expect(result.current.data!.map((b) => b.name)).toEqual(['feat-a', 'feat-b'])
   })
 
   it('GIVEN always hasNextPage WHEN fetching THEN caps at 10 pages and warns', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    mockRequest.mockResolvedValue(makePage([makeNode('feat-x', 'alice', '2024-01-01T00:00:00Z')], true, 'cursor'))
+    mockRequest.mockResolvedValue(
+      makePage([makeNode('feat-x', 'alice', '2024-01-01T00:00:00Z')], true, 'cursor')
+    )
 
     const { result } = renderHook(() => useBranches(['org/repo']), { wrapper: makeWrapper() })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -88,10 +100,16 @@ describe('useBranches', () => {
 
   it('GIVEN branches from two repos WHEN fetching THEN sorts by date descending', async () => {
     mockRequest
-      .mockResolvedValueOnce(makePage([makeNode('feat-old', 'alice', '2024-01-01T00:00:00Z')], false))
-      .mockResolvedValueOnce(makePage([makeNode('feat-new', 'alice', '2024-06-01T00:00:00Z')], false))
+      .mockResolvedValueOnce(
+        makePage([makeNode('feat-old', 'alice', '2024-01-01T00:00:00Z')], false)
+      )
+      .mockResolvedValueOnce(
+        makePage([makeNode('feat-new', 'alice', '2024-06-01T00:00:00Z')], false)
+      )
 
-    const { result } = renderHook(() => useBranches(['org/repo1', 'org/repo2']), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useBranches(['org/repo1', 'org/repo2']), {
+      wrapper: makeWrapper(),
+    })
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
     expect(result.current.data!.map((b) => b.name)).toEqual(['feat-new', 'feat-old'])
@@ -114,7 +132,11 @@ describe('mapBranchNodes', () => {
     const nodes = [
       makeNode('main', 'alice', '2024-01-01T00:00:00Z'),
       makeNode('feature-x', 'bob', '2024-01-02T00:00:00Z'),
-      makeNode('feature-y', 'alice', '2024-01-03T00:00:00Z', { number: 42, state: 'OPEN', url: 'https://github.com/org/repo/pull/42' }),
+      makeNode('feature-y', 'alice', '2024-01-03T00:00:00Z', {
+        number: 42,
+        state: 'OPEN',
+        url: 'https://github.com/org/repo/pull/42',
+      }),
     ]
 
     const actual = mapBranchNodes(nodes, 'org/repo', 'alice')

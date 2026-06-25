@@ -41,7 +41,12 @@ export function deriveReviewerSummary(pr: PullRequest, authorLogin: string): Rev
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
 
   const seen = new Set<string>()
-  const buckets: ReviewerSummary = { approved: [], changesRequested: [], commented: [], pending: [] }
+  const buckets: ReviewerSummary = {
+    approved: [],
+    changesRequested: [],
+    commented: [],
+    pending: [],
+  }
 
   for (const review of sorted) {
     if (!review.author || seen.has(review.author.login)) continue
@@ -70,7 +75,7 @@ export function deriveCheckState(pr: PullRequest): CheckRollupState | null {
 
 export function sortAndPartition(
   prs: PullRequest[],
-  priorityIds: string[],
+  priorityIds: string[]
 ): { regular: PullRequest[]; priorityPRs: PullRequest[] } {
   const byDate = [...prs].sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()

@@ -29,12 +29,17 @@ function BranchCard({
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
         <span
-          style={{ backgroundColor: `hsla(${hue}, 65%, 50%, 0.18)`, color: `hsl(${hue}, 70%, 65%)` }}
+          style={{
+            backgroundColor: `hsla(${hue}, 65%, 50%, 0.18)`,
+            color: `hsl(${hue}, 70%, 65%)`,
+          }}
           className="text-[10px] font-medium px-1.5 py-0.5 rounded"
         >
           {repo}
         </span>
-        <span className="text-sm font-medium text-[var(--color-text-primary)] font-mono">{branch}</span>
+        <span className="text-sm font-medium text-[var(--color-text-primary)] font-mono">
+          {branch}
+        </span>
         <CopyWithFeedback text={branch} label="Copy branch name" />
         {worktree && (
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
@@ -42,7 +47,10 @@ function BranchCard({
           </span>
         )}
         {worktree?.isDirty && (
-          <span title="Uncommitted changes" className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
+          <span
+            title="Uncommitted changes"
+            className="w-2 h-2 rounded-full bg-yellow-400 inline-block"
+          />
         )}
         {pr && (
           <a
@@ -120,7 +128,8 @@ export default function BranchList() {
     worktreeQueries.forEach((q) => q.refetch())
   }
 
-  const isFetching = branchQueries.some((q) => q.isFetching) || worktreeQueries.some((q) => q.isFetching)
+  const isFetching =
+    branchQueries.some((q) => q.isFetching) || worktreeQueries.some((q) => q.isFetching)
 
   if (localPaths.length === 0) {
     return (
@@ -140,16 +149,36 @@ export default function BranchList() {
   type FlatItem =
     | { key: string; loading: true; repoLabel: string }
     | { key: string; error: string; repoLabel: string }
-    | { key: string; branch: string; repoLabel: string; hue: number; worktree?: Worktree; pr?: PullRequest }
+    | {
+        key: string
+        branch: string
+        repoLabel: string
+        hue: number
+        worktree?: Worktree
+        pr?: PullRequest
+      }
 
   const flatBranches: FlatItem[] = []
   for (let i = 0; i < localPaths.length; i++) {
     const localPath = localPaths[i]
     const repoLabel = localPath.split('/').pop() ?? localPath
-    const { data: branches, isLoading: bLoading, isError: bError, error: bErrObj } = branchQueries[i]
-    const { data: worktrees, isLoading: wLoading, isError: wError, error: wErrObj } = worktreeQueries[i]
+    const {
+      data: branches,
+      isLoading: bLoading,
+      isError: bError,
+      error: bErrObj,
+    } = branchQueries[i]
+    const {
+      data: worktrees,
+      isLoading: wLoading,
+      isError: wError,
+      error: wErrObj,
+    } = worktreeQueries[i]
 
-    if (bLoading || wLoading) { flatBranches.push({ key: localPath, loading: true, repoLabel }); continue }
+    if (bLoading || wLoading) {
+      flatBranches.push({ key: localPath, loading: true, repoLabel })
+      continue
+    }
     if (bError || wError) {
       const errMsg = ((bErrObj || wErrObj) as Error)?.message ?? 'Failed to load.'
       flatBranches.push({ key: localPath, error: errMsg, repoLabel })
@@ -202,8 +231,12 @@ export default function BranchList() {
               onClick={() => removeLocalPath(p)}
               title={`Remove ${label}`}
               style={{ color }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-danger)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = color }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--color-danger)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = color
+              }}
               className="flex items-center gap-1 text-xs transition-colors cursor-pointer"
             >
               <X size={12} />
@@ -216,10 +249,18 @@ export default function BranchList() {
       <div className="space-y-2">
         {flatBranches.map((item) => {
           if ('loading' in item) {
-            return <p key={item.key} className="text-xs text-[var(--color-text-muted)]">Loading {item.repoLabel}…</p>
+            return (
+              <p key={item.key} className="text-xs text-[var(--color-text-muted)]">
+                Loading {item.repoLabel}…
+              </p>
+            )
           }
           if ('error' in item) {
-            return <p key={item.key} className="text-xs text-[var(--color-danger)]">{item.repoLabel}: {item.error}</p>
+            return (
+              <p key={item.key} className="text-xs text-[var(--color-danger)]">
+                {item.repoLabel}: {item.error}
+              </p>
+            )
           }
           return (
             <BranchCard

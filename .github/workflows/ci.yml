@@ -6,16 +6,46 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
       - run: npm install
-      - run: npm run lint
-      - run: npm run test:run
-      - run: npm run build
+
+      - name: Format
+        id: format
+        run: |
+          npm run format
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "style: auto-format with prettier"
+            git push origin HEAD:${{ github.head_ref || github.ref_name }}
+            echo "formatted=true" >> $GITHUB_OUTPUT
+          else
+            echo "formatted=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Lint
+        if: steps.format.outputs.formatted == 'false'
+        run: npm run lint
+
+      - name: Test
+        if: steps.format.outputs.formatted == 'false'
+        run: npm run test:run
+
+      - name: Build
+        if: steps.format.outputs.formatted == 'false'
+        run: npm run build

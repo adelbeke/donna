@@ -35,7 +35,9 @@ export function CopyWithFeedback({
       >
         {showCopied ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
       </button>
-      <span className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-xs rounded bg-[var(--color-surface-overlay)] text-[var(--color-text-primary)] whitespace-nowrap pointer-events-none transition-opacity ${copied ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+      <span
+        className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-xs rounded bg-[var(--color-surface-overlay)] text-[var(--color-text-primary)] whitespace-nowrap pointer-events-none transition-opacity ${copied ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+      >
         {showCopied ? 'Copied!' : label}
       </span>
     </div>

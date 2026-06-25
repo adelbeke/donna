@@ -5,8 +5,8 @@ export type PRSection = 'review-requested' | 'authored' | 'mentioned'
 
 export interface PRFilters {
   section: PRSection
-  repos: string[]          // empty = all
-  hiddenAuthors: string[]  // empty = all
+  repos: string[] // empty = all
+  hiddenAuthors: string[] // empty = all
   showDrafts: boolean
   showHidden: boolean
   search: string
@@ -43,8 +43,7 @@ export const usePRStore = create<PRStore>()(
       priorityIds: [],
       hiddenIds: [],
       setView: (v) => set((state) => ({ view: v, filters: { ...state.filters, search: '' } })),
-      setFilters: (partial) =>
-        set((state) => ({ filters: { ...state.filters, ...partial } })),
+      setFilters: (partial) => set((state) => ({ filters: { ...state.filters, ...partial } })),
       togglePriority: (id) =>
         set((state) => ({
           priorityIds: state.priorityIds.includes(id)
@@ -61,7 +60,12 @@ export const usePRStore = create<PRStore>()(
         set((state) => {
           const normalized = pattern.toLowerCase()
           if (state.filters.hiddenAuthors.includes(normalized)) return state
-          return { filters: { ...state.filters, hiddenAuthors: [...state.filters.hiddenAuthors, normalized] } }
+          return {
+            filters: {
+              ...state.filters,
+              hiddenAuthors: [...state.filters.hiddenAuthors, normalized],
+            },
+          }
         }),
       removeHiddenAuthor: (pattern) =>
         set((state) => ({

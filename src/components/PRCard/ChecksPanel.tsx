@@ -31,8 +31,10 @@ function CheckIcon({ check }: { check: CheckRunContext | StatusContextItem }) {
   }
 
   const { state } = check
-  if (state === 'SUCCESS') return <CheckCircle size={12} className="text-[var(--color-success)] shrink-0" />
-  if (state === 'ERROR' || state === 'FAILURE') return <XCircle size={12} className="text-[var(--color-danger)] shrink-0" />
+  if (state === 'SUCCESS')
+    return <CheckCircle size={12} className="text-[var(--color-success)] shrink-0" />
+  if (state === 'ERROR' || state === 'FAILURE')
+    return <XCircle size={12} className="text-[var(--color-danger)] shrink-0" />
   return <Clock size={12} className="text-[var(--color-warning)] shrink-0" />
 }
 
@@ -68,7 +70,9 @@ export default function ChecksPanel({ checks, rollupState, onClose, isLoading }:
               className="flex items-center gap-2 px-3 py-1.5 hover:bg-[var(--color-surface-overlay)]"
             >
               <CheckIcon check={check} />
-              <span className="text-xs text-[var(--color-text-secondary)] flex-1 truncate">{name}</span>
+              <span className="text-xs text-[var(--color-text-secondary)] flex-1 truncate">
+                {name}
+              </span>
               {url && (
                 <a
                   href={url}
@@ -86,7 +90,9 @@ export default function ChecksPanel({ checks, rollupState, onClose, isLoading }:
       {(rollupState === 'PENDING' || rollupState === 'EXPECTED') && (
         <div className="flex items-center gap-2 px-3 py-1.5 border-t border-[var(--color-border)]">
           <Clock size={12} className="text-[var(--color-warning)] shrink-0" />
-          <span className="text-xs text-[var(--color-text-muted)]">Some checks may still be pending or not yet shown</span>
+          <span className="text-xs text-[var(--color-text-muted)]">
+            Some checks may still be pending or not yet shown
+          </span>
         </div>
       )}
     </div>

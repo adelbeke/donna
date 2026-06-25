@@ -2,8 +2,16 @@ export type ReviewState = 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'PEND
 export type MergeableState = 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN'
 export type CheckRollupState = 'SUCCESS' | 'FAILURE' | 'PENDING' | 'ERROR' | 'EXPECTED'
 export type CheckRunConclusion =
-  | 'ACTION_REQUIRED' | 'CANCELLED' | 'FAILURE' | 'NEUTRAL'
-  | 'SKIPPED' | 'STALE' | 'SUCCESS' | 'TIMED_OUT' | 'STARTUP_FAILURE' | null
+  | 'ACTION_REQUIRED'
+  | 'CANCELLED'
+  | 'FAILURE'
+  | 'NEUTRAL'
+  | 'SKIPPED'
+  | 'STALE'
+  | 'SUCCESS'
+  | 'TIMED_OUT'
+  | 'STARTUP_FAILURE'
+  | null
 
 export interface CheckRunContext {
   __typename: 'CheckRun'

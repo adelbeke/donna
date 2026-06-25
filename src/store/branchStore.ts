@@ -12,7 +12,8 @@ export const useBranchStore = create<BranchStore>()(
     (set) => ({
       localPaths: [],
       addLocalPath: (path) => set((state) => ({ localPaths: [...state.localPaths, path] })),
-      removeLocalPath: (path) => set((state) => ({ localPaths: state.localPaths.filter((p) => p !== path) })),
+      removeLocalPath: (path) =>
+        set((state) => ({ localPaths: state.localPaths.filter((p) => p !== path) })),
     }),
     { name: 'branch-dashboard-state' }
   )

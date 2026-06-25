@@ -3,7 +3,14 @@ import { useAuthStore } from '../store/authStore'
 import { createClient, BRANCHES_QUERY } from '../lib/github'
 import type { Branch } from '../types/github'
 
-const DEFAULT_BRANCHES = new Set(['main', 'master', 'develop', 'development', 'staging', 'production'])
+const DEFAULT_BRANCHES = new Set([
+  'main',
+  'master',
+  'develop',
+  'development',
+  'staging',
+  'production',
+])
 
 interface BranchNode {
   name: string
@@ -35,12 +42,14 @@ export function mapBranchNodes(
       const authorLogin = n.target.author?.user?.login
       return !login || authorLogin === login
     })
-    .map((n): Branch => ({
-      name: n.name,
-      repo,
-      lastCommitDate: n.target!.committedDate!,
-      linkedPr: n.associatedPullRequests.nodes[0],
-    }))
+    .map(
+      (n): Branch => ({
+        name: n.name,
+        repo,
+        lastCommitDate: n.target!.committedDate!,
+        linkedPr: n.associatedPullRequests.nodes[0],
+      })
+    )
 }
 
 export function useBranches(repos: string[]) {
@@ -61,7 +70,11 @@ export function useBranches(repos: string[]) {
           let cursor: string | undefined
 
           for (let page = 0; page < 10; page++) {
-            const data = await client.request<BranchesResult>(BRANCHES_QUERY, { owner, name, cursor })
+            const data = await client.request<BranchesResult>(BRANCHES_QUERY, {
+              owner,
+              name,
+              cursor,
+            })
             const { nodes: chunk, pageInfo } = data.repository.refs
             nodes.push(...chunk)
             if (!pageInfo.hasNextPage) break
