@@ -30,10 +30,18 @@ const pr: PullRequest = {
 }
 
 beforeEach(() => {
-  usePRStore.setState({ priorityIds: [], hiddenIds: [], filters: {
-    section: 'review-requested', repos: [], hiddenAuthors: [],
-    showDrafts: false, showHidden: false, search: '',
-  }})
+  usePRStore.setState({
+    priorityIds: [],
+    hiddenIds: [],
+    filters: {
+      section: 'review-requested',
+      repos: [],
+      hiddenAuthors: [],
+      showDrafts: false,
+      showHidden: false,
+      search: '',
+    },
+  })
 })
 
 describe('PRCard', () => {
@@ -93,14 +101,16 @@ describe('PRCard', () => {
       return {
         ...pr,
         commits: {
-          nodes: [{
-            commit: {
-              statusCheckRollup: {
-                state,
-                contexts: { nodes: [greenCheck] },
+          nodes: [
+            {
+              commit: {
+                statusCheckRollup: {
+                  state,
+                  contexts: { nodes: [greenCheck] },
+                },
               },
             },
-          }],
+          ],
         },
       }
     }
@@ -109,21 +119,27 @@ describe('PRCard', () => {
       const user = userEvent.setup()
       render(<PRCard pr={makePrWithRollup('EXPECTED')} />)
       await user.click(screen.getByText('Checks pending'))
-      expect(screen.getByText('Some checks may still be pending or not yet shown')).toBeInTheDocument()
+      expect(
+        screen.getByText('Some checks may still be pending or not yet shown')
+      ).toBeInTheDocument()
     })
 
     it('GIVEN rollup PENDING with all-green contexts WHEN checks opened THEN footer note appears', async () => {
       const user = userEvent.setup()
       render(<PRCard pr={makePrWithRollup('PENDING')} />)
       await user.click(screen.getByText('Checks pending'))
-      expect(screen.getByText('Some checks may still be pending or not yet shown')).toBeInTheDocument()
+      expect(
+        screen.getByText('Some checks may still be pending or not yet shown')
+      ).toBeInTheDocument()
     })
 
     it('GIVEN rollup SUCCESS WHEN checks opened THEN no footer note', async () => {
       const user = userEvent.setup()
       render(<PRCard pr={makePrWithRollup('SUCCESS')} />)
       await user.click(screen.getByText('Checks pass'))
-      expect(screen.queryByText('Some checks may still be pending or not yet shown')).not.toBeInTheDocument()
+      expect(
+        screen.queryByText('Some checks may still be pending or not yet shown')
+      ).not.toBeInTheDocument()
     })
   })
 
@@ -164,11 +180,13 @@ describe('PRCard', () => {
       return {
         ...pr,
         commits: {
-          nodes: [{
-            commit: {
-              statusCheckRollup: { state, contexts: { nodes: [] } },
+          nodes: [
+            {
+              commit: {
+                statusCheckRollup: { state, contexts: { nodes: [] } },
+              },
             },
-          }],
+          ],
         },
       }
     }

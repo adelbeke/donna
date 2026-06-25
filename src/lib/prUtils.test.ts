@@ -63,11 +63,13 @@ describe('deriveCheckState', () => {
   it('GIVEN PR with SUCCESS rollup WHEN called THEN returns SUCCESS', () => {
     const pr = makePR({
       commits: {
-        nodes: [{
-          commit: {
-            statusCheckRollup: { state: 'SUCCESS', contexts: { nodes: [] } },
+        nodes: [
+          {
+            commit: {
+              statusCheckRollup: { state: 'SUCCESS', contexts: { nodes: [] } },
+            },
           },
-        }],
+        ],
       },
     })
     expect(deriveCheckState(pr)).toBe('SUCCESS')
@@ -76,11 +78,13 @@ describe('deriveCheckState', () => {
   it('GIVEN PR with FAILURE rollup WHEN called THEN returns FAILURE', () => {
     const pr = makePR({
       commits: {
-        nodes: [{
-          commit: {
-            statusCheckRollup: { state: 'FAILURE', contexts: { nodes: [] } },
+        nodes: [
+          {
+            commit: {
+              statusCheckRollup: { state: 'FAILURE', contexts: { nodes: [] } },
+            },
           },
-        }],
+        ],
       },
     })
     expect(deriveCheckState(pr)).toBe('FAILURE')
@@ -101,8 +105,16 @@ describe('deriveReviewerSummary', () => {
     const pr = makePR({
       reviews: {
         nodes: [
-          { state: 'COMMENTED', author: { login: 'bob', avatarUrl: 'https://example.com/bob.png' }, submittedAt: '2024-01-01T09:00:00Z' },
-          { state: 'APPROVED', author: { login: 'bob', avatarUrl: 'https://example.com/bob.png' }, submittedAt: '2024-01-01T10:00:00Z' },
+          {
+            state: 'COMMENTED',
+            author: { login: 'bob', avatarUrl: 'https://example.com/bob.png' },
+            submittedAt: '2024-01-01T09:00:00Z',
+          },
+          {
+            state: 'APPROVED',
+            author: { login: 'bob', avatarUrl: 'https://example.com/bob.png' },
+            submittedAt: '2024-01-01T10:00:00Z',
+          },
         ],
       },
     })
@@ -116,7 +128,11 @@ describe('deriveReviewerSummary', () => {
     const pr = makePR({
       reviews: {
         nodes: [
-          { state: 'APPROVED', author: { login: 'author', avatarUrl: 'https://example.com/author.png' }, submittedAt: '2024-01-01T10:00:00Z' },
+          {
+            state: 'APPROVED',
+            author: { login: 'author', avatarUrl: 'https://example.com/author.png' },
+            submittedAt: '2024-01-01T10:00:00Z',
+          },
         ],
       },
     })
@@ -128,7 +144,11 @@ describe('deriveReviewerSummary', () => {
     const pr = makePR({
       reviews: {
         nodes: [
-          { state: 'DISMISSED', author: { login: 'carol', avatarUrl: 'https://example.com/carol.png' }, submittedAt: '2024-01-01T10:00:00Z' },
+          {
+            state: 'DISMISSED',
+            author: { login: 'carol', avatarUrl: 'https://example.com/carol.png' },
+            submittedAt: '2024-01-01T10:00:00Z',
+          },
         ],
       },
     })
@@ -143,7 +163,11 @@ describe('deriveReviewerSummary', () => {
     const pr = makePR({
       reviews: {
         nodes: [
-          { state: 'PENDING', author: { login: 'dave', avatarUrl: 'https://example.com/dave.png' }, submittedAt: '2024-01-01T10:00:00Z' },
+          {
+            state: 'PENDING',
+            author: { login: 'dave', avatarUrl: 'https://example.com/dave.png' },
+            submittedAt: '2024-01-01T10:00:00Z',
+          },
         ],
       },
     })
@@ -156,7 +180,13 @@ describe('deriveReviewerSummary', () => {
     const pr = makePR({
       reviewRequests: {
         nodes: [
-          { requestedReviewer: { __typename: 'User', login: 'eve', avatarUrl: 'https://example.com/eve.png' } },
+          {
+            requestedReviewer: {
+              __typename: 'User',
+              login: 'eve',
+              avatarUrl: 'https://example.com/eve.png',
+            },
+          },
         ],
       },
     })
@@ -169,12 +199,22 @@ describe('deriveReviewerSummary', () => {
     const pr = makePR({
       reviews: {
         nodes: [
-          { state: 'APPROVED', author: { login: 'frank', avatarUrl: 'https://example.com/frank.png' }, submittedAt: '2024-01-01T10:00:00Z' },
+          {
+            state: 'APPROVED',
+            author: { login: 'frank', avatarUrl: 'https://example.com/frank.png' },
+            submittedAt: '2024-01-01T10:00:00Z',
+          },
         ],
       },
       reviewRequests: {
         nodes: [
-          { requestedReviewer: { __typename: 'User', login: 'frank', avatarUrl: 'https://example.com/frank.png' } },
+          {
+            requestedReviewer: {
+              __typename: 'User',
+              login: 'frank',
+              avatarUrl: 'https://example.com/frank.png',
+            },
+          },
         ],
       },
     })
@@ -187,12 +227,22 @@ describe('deriveReviewerSummary', () => {
     const pr = makePR({
       reviews: {
         nodes: [
-          { state: 'DISMISSED', author: { login: 'grace', avatarUrl: 'https://example.com/grace.png' }, submittedAt: '2024-01-01T10:00:00Z' },
+          {
+            state: 'DISMISSED',
+            author: { login: 'grace', avatarUrl: 'https://example.com/grace.png' },
+            submittedAt: '2024-01-01T10:00:00Z',
+          },
         ],
       },
       reviewRequests: {
         nodes: [
-          { requestedReviewer: { __typename: 'User', login: 'grace', avatarUrl: 'https://example.com/grace.png' } },
+          {
+            requestedReviewer: {
+              __typename: 'User',
+              login: 'grace',
+              avatarUrl: 'https://example.com/grace.png',
+            },
+          },
         ],
       },
     })

@@ -91,14 +91,26 @@ describe('PRList', () => {
 
   it('GIVEN priorityPRs THEN shows Top priority heading', () => {
     const p = makePR('1', 'Priority PR')
-    mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: [], priorityPRs: [p], totalCount: 1, loadedCount: 1 } as never)
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: [],
+      priorityPRs: [p],
+      totalCount: 1,
+      loadedCount: 1,
+    } as never)
     render(<PRList />)
     expect(screen.getByText('Top priority')).toBeInTheDocument()
   })
 
   it('GIVEN no priorityPRs THEN Top priority heading absent', () => {
     const p = makePR('1', 'Regular PR')
-    mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: [p], priorityPRs: [], totalCount: 1, loadedCount: 1 } as never)
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: [p],
+      priorityPRs: [],
+      totalCount: 1,
+      loadedCount: 1,
+    } as never)
     render(<PRList />)
     expect(screen.queryByText('Top priority')).not.toBeInTheDocument()
   })
@@ -106,14 +118,26 @@ describe('PRList', () => {
   it('GIVEN regular + priority PRs THEN count badge shows combined total', () => {
     const r = makePR('1', 'Regular')
     const p = makePR('2', 'Priority')
-    mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: [r], priorityPRs: [p], totalCount: 2, loadedCount: 2 } as never)
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: [r],
+      priorityPRs: [p],
+      totalCount: 2,
+      loadedCount: 2,
+    } as never)
     render(<PRList />)
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
   it('GIVEN truncated THEN shows of {totalCount}', () => {
     const prs = [makePR('1', 'PR')]
-    mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], totalCount: 500, loadedCount: 1 } as never)
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: prs,
+      priorityPRs: [],
+      totalCount: 500,
+      loadedCount: 1,
+    } as never)
     render(<PRList />)
     expect(screen.getByText(/of 500/)).toBeInTheDocument()
   })
@@ -121,7 +145,14 @@ describe('PRList', () => {
   describe('pagination CTAs', () => {
     it('GIVEN hasNextPage and no active filters THEN shows "Load more" only', () => {
       const prs = [makePR('1', 'PR')]
-      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: true, totalCount: 100, loadedCount: 50 } as never)
+      mockUsePullRequests.mockReturnValue({
+        ...defaultQuery,
+        data: prs,
+        priorityPRs: [],
+        hasNextPage: true,
+        totalCount: 100,
+        loadedCount: 50,
+      } as never)
       render(<PRList />)
       expect(screen.getByRole('button', { name: 'Load more' })).toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Load all' })).not.toBeInTheDocument()
@@ -130,7 +161,12 @@ describe('PRList', () => {
 
     it('GIVEN hasNextPage=false THEN no pagination CTAs', () => {
       const prs = [makePR('1', 'PR')]
-      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: false } as never)
+      mockUsePullRequests.mockReturnValue({
+        ...defaultQuery,
+        data: prs,
+        priorityPRs: [],
+        hasNextPage: false,
+      } as never)
       render(<PRList />)
       expect(screen.queryByRole('button', { name: 'Load more' })).not.toBeInTheDocument()
       expect(screen.queryByRole('button', { name: 'Load all' })).not.toBeInTheDocument()
@@ -139,7 +175,15 @@ describe('PRList', () => {
     it('GIVEN "Load more" clicked THEN fetchNextPage is called', () => {
       const fetchNextPage = vi.fn()
       const prs = [makePR('1', 'PR')]
-      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: true, fetchNextPage, totalCount: 100, loadedCount: 50 } as never)
+      mockUsePullRequests.mockReturnValue({
+        ...defaultQuery,
+        data: prs,
+        priorityPRs: [],
+        hasNextPage: true,
+        fetchNextPage,
+        totalCount: 100,
+        loadedCount: 50,
+      } as never)
       render(<PRList />)
       fireEvent.click(screen.getByRole('button', { name: 'Load more' }))
       expect(fetchNextPage).toHaveBeenCalledOnce()
@@ -148,7 +192,14 @@ describe('PRList', () => {
     it('GIVEN hasNextPage and active filter THEN shows "Load all" button', () => {
       mockStoreFilters({ repos: ['org/repo'] })
       const prs = [makePR('1', 'PR')]
-      mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: prs, priorityPRs: [], hasNextPage: true, totalCount: 100, loadedCount: 50 } as never)
+      mockUsePullRequests.mockReturnValue({
+        ...defaultQuery,
+        data: prs,
+        priorityPRs: [],
+        hasNextPage: true,
+        totalCount: 100,
+        loadedCount: 50,
+      } as never)
       render(<PRList />)
       expect(screen.getByRole('button', { name: 'Load all' })).toBeInTheDocument()
     })

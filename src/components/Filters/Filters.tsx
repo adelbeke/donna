@@ -80,9 +80,10 @@ export default function Filters() {
                 <label
                   key={repo}
                   className={`flex items-center gap-2 px-1 py-1 rounded cursor-pointer group
-                    ${selected
-                      ? 'bg-[var(--color-accent-subtle)]'
-                      : 'hover:bg-[var(--color-surface-overlay)]'
+                    ${
+                      selected
+                        ? 'bg-[var(--color-accent-subtle)]'
+                        : 'hover:bg-[var(--color-surface-overlay)]'
                     }`}
                 >
                   <input
@@ -91,10 +92,12 @@ export default function Filters() {
                     onChange={() => toggleRepo(repo)}
                     className="accent-[var(--color-accent)] cursor-pointer"
                   />
-                  <span className={`text-xs truncate
-                    ${selected
-                      ? 'text-[var(--color-text-primary)] font-medium'
-                      : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'
+                  <span
+                    className={`text-xs truncate
+                    ${
+                      selected
+                        ? 'text-[var(--color-text-primary)] font-medium'
+                        : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'
                     }`}
                   >
                     {repo.split('/')[1]}
@@ -106,11 +109,13 @@ export default function Filters() {
         </div>
       )}
 
-      {(filters.repos.length > 0 || filters.showDrafts || filters.showHidden) && hasNextPage && !truncated && (
-        <p className="text-xs text-[var(--color-warning)]">
-          ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
-        </p>
-      )}
+      {(filters.repos.length > 0 || filters.showDrafts || filters.showHidden) &&
+        hasNextPage &&
+        !truncated && (
+          <p className="text-xs text-[var(--color-warning)]">
+            ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
+          </p>
+        )}
 
       {/* Muted authors — free-form pattern input */}
       <div>

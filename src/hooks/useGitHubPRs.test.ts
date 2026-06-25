@@ -43,7 +43,11 @@ describe('deriveMyReviewState', () => {
   it('GIVEN mix of null and real author WHEN filtering THEN returns real author state', () => {
     const pr = makePRWithReviews([
       { state: 'COMMENTED', submittedAt: '2024-01-01T00:00:00Z', author: null },
-      { state: 'APPROVED', submittedAt: '2024-01-02T00:00:00Z', author: { login: 'user', avatarUrl: '' } },
+      {
+        state: 'APPROVED',
+        submittedAt: '2024-01-02T00:00:00Z',
+        author: { login: 'user', avatarUrl: '' },
+      },
     ])
     const actual = deriveMyReviewState(pr, 'user')
     expect(actual).toBe('APPROVED')
@@ -56,8 +60,16 @@ describe('deriveMyReviewState', () => {
 
   it('GIVEN multiple reviews by same user THEN returns most recent', () => {
     const pr = makePRWithReviews([
-      { state: 'COMMENTED', submittedAt: '2024-01-01T00:00:00Z', author: { login: 'user', avatarUrl: '' } },
-      { state: 'APPROVED', submittedAt: '2024-01-03T00:00:00Z', author: { login: 'user', avatarUrl: '' } },
+      {
+        state: 'COMMENTED',
+        submittedAt: '2024-01-01T00:00:00Z',
+        author: { login: 'user', avatarUrl: '' },
+      },
+      {
+        state: 'APPROVED',
+        submittedAt: '2024-01-03T00:00:00Z',
+        author: { login: 'user', avatarUrl: '' },
+      },
     ])
     expect(deriveMyReviewState(pr, 'user')).toBe('APPROVED')
   })

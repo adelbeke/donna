@@ -33,7 +33,14 @@ describe('UpdateBanner', () => {
 
   it('calls onDismiss when ✕ is clicked', () => {
     let dismissed = false
-    render(<UpdateBanner version="v1.2.3" onDismiss={() => { dismissed = true }} />)
+    render(
+      <UpdateBanner
+        version="v1.2.3"
+        onDismiss={() => {
+          dismissed = true
+        }}
+      />
+    )
     fireEvent.click(screen.getByText('✕'))
     expect(dismissed).toBe(true)
   })

@@ -28,7 +28,10 @@ type GQLClient = { request: <T>(query: string, variables?: Record<string, unknow
 function createElectronClient(): GQLClient {
   return {
     request: async <T>(query: string, variables?: Record<string, unknown>): Promise<T> => {
-      const result = await window.electronAPI!.gh.graphql(query, variables ?? {}) as { data: T; errors?: { message: string }[] }
+      const result = (await window.electronAPI!.gh.graphql(query, variables ?? {})) as {
+        data: T
+        errors?: { message: string }[]
+      }
       if (result.errors?.length) throw new Error(result.errors[0].message)
       return result.data
     },
@@ -147,8 +150,17 @@ export const PR_CHECK_CONTEXTS_QUERY = /* GraphQL */ `
                 contexts(first: 100) {
                   nodes {
                     __typename
-                    ... on CheckRun { name status conclusion detailsUrl }
-                    ... on StatusContext { context state targetUrl }
+                    ... on CheckRun {
+                      name
+                      status
+                      conclusion
+                      detailsUrl
+                    }
+                    ... on StatusContext {
+                      context
+                      state
+                      targetUrl
+                    }
                   }
                 }
               }
@@ -163,18 +175,35 @@ export const PR_CHECK_CONTEXTS_QUERY = /* GraphQL */ `
 export const BRANCHES_QUERY = /* GraphQL */ `
   query GetBranches($owner: String!, $name: String!, $cursor: String) {
     repository(owner: $owner, name: $name) {
-      refs(refPrefix: "refs/heads/", first: 100, after: $cursor,
-           orderBy: { field: TAG_COMMIT_DATE, direction: DESC }) {
-        pageInfo { hasNextPage endCursor }
+      refs(
+        refPrefix: "refs/heads/"
+        first: 100
+        after: $cursor
+        orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
+      ) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
         nodes {
           name
           target {
             ... on Commit {
               committedDate
-              author { user { login } }
+              author {
+                user {
+                  login
+                }
+              }
             }
           }
-          associatedPullRequests(first: 1) { nodes { number state url } }
+          associatedPullRequests(first: 1) {
+            nodes {
+              number
+              state
+              url
+            }
+          }
         }
       }
     }

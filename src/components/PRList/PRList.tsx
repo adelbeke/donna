@@ -12,7 +12,19 @@ const sectionLabels: Record<string, string> = {
 }
 
 export default function PRList() {
-  const { data: prs = [], priorityPRs = [], isLoading, isFetching, isFetchingNextPage, fetchNextPage, hasNextPage, refetch, error, totalCount, truncated } = usePullRequests()
+  const {
+    data: prs = [],
+    priorityPRs = [],
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+    error,
+    totalCount,
+    truncated,
+  } = usePullRequests()
   const filters = usePRStore((s) => s.filters)
   const section = filters.section
   const loadAllRef = useRef(false)
@@ -109,7 +121,9 @@ export default function PRList() {
 
       {!isLoading && !error && priorityPRs.length > 0 && (
         <div className="mb-4">
-          <p className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">Top priority</p>
+          <p className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">
+            Top priority
+          </p>
           <div className="space-y-2">
             {priorityPRs.map((pr) => (
               <PRCard key={pr.id} pr={pr} isAuthored={section === 'authored'} />
@@ -138,7 +152,10 @@ export default function PRList() {
             </button>
             {hasActiveFilters && (
               <button
-                onClick={() => { loadAllRef.current = true; fetchNextPage() }}
+                onClick={() => {
+                  loadAllRef.current = true
+                  fetchNextPage()
+                }}
                 disabled={isFetchingNextPage}
                 className="text-xs px-3 py-1.5 rounded border border-[var(--color-accent)] text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)] transition-colors cursor-pointer disabled:opacity-40"
               >

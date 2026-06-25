@@ -30,7 +30,9 @@ beforeEach(() => {
 describe('useRecentRepos', () => {
   it('GIVEN events with duplicate repos WHEN fetching THEN deduplicates', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
-      new Response(JSON.stringify(makeEvents(['org/repo-a', 'org/repo-b', 'org/repo-a'])), { status: 200 })
+      new Response(JSON.stringify(makeEvents(['org/repo-a', 'org/repo-b', 'org/repo-a'])), {
+        status: 200,
+      })
     )
 
     const { result } = renderHook(() => useRecentRepos(), { wrapper: makeWrapper() })

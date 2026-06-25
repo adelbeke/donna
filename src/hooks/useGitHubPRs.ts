@@ -43,28 +43,30 @@ export function usePullRequests() {
     },
     getNextPageParam: (lastPage, pages) => {
       if (pages.length >= MAX_PAGES) return undefined
-      return lastPage.search.pageInfo.hasNextPage
-        ? lastPage.search.pageInfo.endCursor
-        : undefined
+      return lastPage.search.pageInfo.hasNextPage ? lastPage.search.pageInfo.endCursor : undefined
     },
   })
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = query
 
   const allNodes = useMemo(
-    () => (query.data?.pages ?? [])
-      .flatMap((p) => p.search.nodes)
-      .map((pr) => ({
-        ...pr,
-        myReviewState: deriveMyReviewState(pr, user!.login),
-        isTopPriority: priorityIds.includes(pr.id),
-        isHidden: hiddenIds.includes(pr.id),
-      })),
+    () =>
+      (query.data?.pages ?? [])
+        .flatMap((p) => p.search.nodes)
+        .map((pr) => ({
+          ...pr,
+          myReviewState: deriveMyReviewState(pr, user!.login),
+          isTopPriority: priorityIds.includes(pr.id),
+          isHidden: hiddenIds.includes(pr.id),
+        })),
     [query.data, user, priorityIds, hiddenIds]
   )
 
   const filtered = useMemo(() => applyFilters(allNodes, filters), [allNodes, filters])
-  const { priorityPRs, regular } = useMemo(() => sortAndPartition(filtered, priorityIds), [filtered, priorityIds])
+  const { priorityPRs, regular } = useMemo(
+    () => sortAndPartition(filtered, priorityIds),
+    [filtered, priorityIds]
+  )
 
   const repos = useMemo(
     () => [...new Set(allNodes.map((pr) => pr.repository.nameWithOwner))].sort(),
@@ -77,5 +79,17 @@ export function usePullRequests() {
   const hitPageCap = (query.data?.pages.length ?? 0) >= MAX_PAGES
   const truncated = hitPageCap && !!lastPage?.search.pageInfo.hasNextPage
 
-  return { ...query, data: regular, priorityPRs, allPRs: allNodes, repos, totalCount, loadedCount, truncated, hasNextPage, isFetchingNextPage, fetchNextPage }
+  return {
+    ...query,
+    data: regular,
+    priorityPRs,
+    allPRs: allNodes,
+    repos,
+    totalCount,
+    loadedCount,
+    truncated,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  }
 }

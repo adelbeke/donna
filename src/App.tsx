@@ -22,7 +22,6 @@ const queryClient = new QueryClient({
   },
 })
 
-
 function ElectronAuthError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="min-h-screen bg-[var(--color-surface)] flex flex-col items-center justify-center gap-4 p-8">
@@ -40,7 +39,7 @@ function ElectronAuthError({ message, onRetry }: { message: string; onRetry: () 
 
 async function tryElectronAuth(
   setToken: (t: string) => void,
-  setUser: (u: GitHubUser) => void,
+  setUser: (u: GitHubUser) => void
 ): Promise<string | null> {
   const installed = await window.electronAPI!.gh.isInstalled()
   if (!installed) return 'gh CLI not found. Install it at cli.github.com then relaunch.'
@@ -72,8 +71,8 @@ function AppContent() {
     if (!IS_ELECTRON || token) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
     runElectronAuth()
-  // ponytail: run once; token excluded so re-auth on next open uses cached token
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // ponytail: run once; token excluded so re-auth on next open uses cached token
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (ghChecking) return null
