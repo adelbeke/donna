@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { BranchCard } from './BranchList'
+import { BranchCard } from './BranchCard/BranchCard'
 
 const mockDelete = vi.fn().mockResolvedValue(undefined)
 const mockSwitchToDefault = vi.fn().mockResolvedValue(undefined)
