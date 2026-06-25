@@ -38,11 +38,11 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.1",
     "electron-updater": "^6.6.2",
     "@tanstack/react-query": "^5.101.0",
     "graphql-request": "^7.4.0",
-    "lucide-react": "^1.17.0",
+    "lucide-react": "^1.21.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "tailwindcss": "^4.3.1",
@@ -74,7 +74,7 @@
     "prettier": "^3.5.3",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
-    "globals": "^17.6.0",
+    "globals": "^17.7.0",
     "graphql": "^17.0.1",
     "jsdom": "^29.1.1",
     "typescript": "~6.0.2",
