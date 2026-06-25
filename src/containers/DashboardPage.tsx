@@ -3,7 +3,7 @@ import { useAuthStore } from '@/features/auth/exports'
 import { usePRStore, PRDashboard } from '@/features/pull-requests/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures } from '@/shared/features'
-import {BranchDashboard} from '@/features/branches/exports'
+import { BranchDashboard } from '@/features/branches/exports'
 import Footer from '@/shared/components/Footer/Footer'
 import { useUpdateCheck, isNewer, UpdateBanner } from '@/features/updates/exports'
 
@@ -28,24 +28,23 @@ export default function DashboardPage() {
 
             <div className="flex items-center gap-1 shrink-0">
               {(['prs', ...(features.has('branches') ? ['branches' as const] : [])] as const).map(
-                  (v) => (
-                      <button
-                          key={v}
-                          onClick={() => setView(v)}
-                          className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+                (v) => (
+                  <button
+                    key={v}
+                    onClick={() => setView(v)}
+                    className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${
-                              view === v
-                                  ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
-                                  : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
-                          }`}
-                      >
-                        {v === 'prs' ? 'Pull Requests' : 'Branches'}
-                      </button>
-                  )
+                      view === v
+                        ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
+                    }`}
+                  >
+                    {v === 'prs' ? 'Pull Requests' : 'Branches'}
+                  </button>
+                )
               )}
             </div>
           </div>
-
 
           {user && (
             <div className="flex items-center gap-3 shrink-0">
@@ -76,9 +75,7 @@ export default function DashboardPage() {
 
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
-        {view === 'branches' ? (
-          <BranchDashboard />
-        ) : <PRDashboard />}
+        {view === 'branches' ? <BranchDashboard /> : <PRDashboard />}
       </main>
       <Footer />
     </div>

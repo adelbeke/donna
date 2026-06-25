@@ -17,7 +17,7 @@ import { ChecksPanel } from './ChecksPanel'
 import { deriveCheckState } from '../../lib/prUtils'
 import { useCheckContexts } from '../../queries/useCheckContexts'
 import { timeAgo } from '../../lib/timeAgo'
-import {PRCardActions} from "@/features/pull-requests/components/PRCard/PRCardActions/PRCardActions.tsx";
+import { PRCardActions } from '@/features/pull-requests/components/PRCard/PRCardActions/PRCardActions.tsx'
 
 interface Props {
   pr: PullRequest
@@ -248,7 +248,13 @@ export function PRCard({ pr, isAuthored = false }: Props) {
         </div>
 
         {/* Right: actions */}
-        <PRCardActions toggleHide={handleHide} isHidden={isHidden} togglePriority={handleTogglePriority} isPriority={isPriority} prUrl={pr.url} />
+        <PRCardActions
+          toggleHide={handleHide}
+          isHidden={isHidden}
+          togglePriority={handleTogglePriority}
+          isPriority={isPriority}
+          prUrl={pr.url}
+        />
       </div>
     </div>
   )

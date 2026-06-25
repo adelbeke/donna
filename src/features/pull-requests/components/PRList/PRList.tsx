@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { usePullRequests } from '../../queries/useGitHubPRs'
 import { usePRStore } from '../../stores/prStore'
 import { PRCard } from '../PRCard/PRCard'
-import {PRListHeader} from "@/features/pull-requests/components/PRList/PRListHeader/PRListHeader.tsx";
+import { PRListHeader } from '@/features/pull-requests/components/PRList/PRListHeader/PRListHeader.tsx'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -48,7 +48,15 @@ export function PRList() {
   return (
     <div className="flex-1 min-w-0">
       {/* Header */}
-      <PRListHeader title={sectionLabels[section]} displayCounter={!isLoading} counter={prs.length + priorityPRs.length} totalCount={totalCount} displayTotalCount={totalCount > prs.length + priorityPRs.length} refetch={handleRefetch} isFetching={isFetching} />
+      <PRListHeader
+        title={sectionLabels[section]}
+        displayCounter={!isLoading}
+        counter={prs.length + priorityPRs.length}
+        totalCount={totalCount}
+        displayTotalCount={totalCount > prs.length + priorityPRs.length}
+        refetch={handleRefetch}
+        isFetching={isFetching}
+      />
 
       {/* States */}
       {isLoading && (

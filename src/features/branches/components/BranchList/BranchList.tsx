@@ -5,7 +5,7 @@ import { usePRStore, usePullRequests } from '@/features/pull-requests/exports'
 import { useBranchStore } from '../../stores/branchStore'
 import type { Worktree } from '../../types'
 import type { PullRequest } from '@/types/github'
-import {BranchCard} from "@/features/branches/components/BranchList/BranchCard/BranchCard.tsx";
+import { BranchCard } from '@/features/branches/components/BranchList/BranchCard/BranchCard.tsx'
 
 const REPO_HUES = [210, 140, 30, 280, 180, 60, 320, 260]
 
