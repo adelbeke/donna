@@ -53,31 +53,35 @@ src/
   index.css          Tailwind v4 @theme tokens + [data-theme="light"] overrides
   containers/        AppContainer.tsx (Electron: gh CLI auth probe, error screen, mounts DashboardPage)
                      WebContainer.tsx (Web: PAT gate, mounts AuthPage or DashboardPage)
-  pages/             DashboardPage (navbar + view switch)
+                     DashboardPage.tsx (navbar + view switch)
   features/          Feature slices — each has components/, queries/, stores/ + exports.ts barrel
     auth/            Web-only auth (PAT gate)
       components/AuthPage/   AuthPage.tsx (web PAT entry form)
-      stores/                authStore.ts (Zustand, persisted: token + user)
+      stores/                authStore.ts (Zustand, persisted: token + user) + authStore.test.ts
       exports.ts             public surface: { useAuthStore, AuthPage }
     branches/        Electron-only Branches tab
       components/BranchList/   BranchList.tsx + BranchList.test.tsx
       queries/                 useBranches.ts (dormant GraphQL hook) + useBranches.test.tsx
       stores/                  branchStore.ts (Zustand, persisted)
+      types.ts                 branch-specific TypeScript types
       exports.ts               public surface: { BranchList }
     pull-requests/   PR inbox feature
-      components/    Filters/, PRCard/ (PRCard, ReviewerAvatars, ChecksPanel), PRList/
-      queries/       useGitHubPRs.ts, useCheckContexts.ts, useViewer.ts
-      stores/        prStore.ts (Zustand, persisted)
+      components/    Filters/ (+ Filters.test.tsx), PRCard/ (PRCard, PRCard.test.tsx,
+                     ReviewerAvatars, ChecksPanel), PRList/ (PRList, PRList.test.tsx, VisibilityToggles)
+      lib/           prUtils.ts & prUtils.test.ts, prFilters.ts & prFilters.test.ts, timeAgo.ts & timeAgo.test.ts
+      queries/       useGitHubPRs.ts + useGitHubPRs.test.ts, useCheckContexts.ts, useViewer.ts
+      stores/        prStore.ts + prStore.test.ts (Zustand, persisted)
       exports.ts     public surface: { Filters, PRList, usePRStore, … }
     updates/         OTA self-update (Electron-only)
       components/UpdateBanner/   UpdateBanner.tsx
       queries/                   useUpdateCheck.ts + useUpdateCheck.test.tsx
       exports.ts                 public surface: { useUpdateCheck, isNewer, UpdateBanner }
+  providers/         Transport layer: github.ts (createClient/restFetch + GraphQL queries),
+                     github.test.ts, electron.ts (IS_NATIVE)
   shared/            Cross-feature shared code
     components/      CopyWithFeedback/, Footer/, ui/ButtonWithTooltip
+    features.ts      FeaturesContext (useFeatures, Feature union type)
     hooks/           useTheme.ts
-  lib/               github.ts (clients + GraphQL queries), prUtils.ts & prFilters.ts (pure,
-                     well-tested), timeAgo.ts, electron.ts (IS_NATIVE), features.ts (FeaturesContext)
   types/             github.ts (API shapes), worktree.ts, electron.d.ts (window global)
 ```
 
@@ -93,9 +97,9 @@ The renderer never branches on platform ad hoc. It goes through three seams:
 
 1. **`AppContainer` / `WebContainer`** — the top-level split. `App.tsx` uses `IS_NATIVE` exactly once to choose which container to render. All platform-specific bootstrap logic (auth flow, error screens) lives in these two files and nowhere else.
 
-2. **`FeaturesContext`** (`src/lib/features.ts`) — a static React context (never updated after mount) that carries the set of gated `Feature` values. `AppContainer` provides `new Set(['branches'])`; `WebContainer` leaves the default empty Set. Components read it via `useFeatures()` — **never import `IS_NATIVE` inside a component**, use `features.has('branches')` instead. To add a new gated feature: add it to the `Feature` union type and set it in `AppContainer`.
+2. **`FeaturesContext`** (`src/shared/features.ts`) — a static React context (never updated after mount) that carries the set of gated `Feature` values. `AppContainer` provides `new Set(['branches'])`; `WebContainer` leaves the default empty Set. Components read it via `useFeatures()` — **never import `IS_NATIVE` inside a component**, use `features.has('branches')` instead. To add a new gated feature: add it to the `Feature` union type and set it in `AppContainer`.
 
-3. **`createClient(token)` / `restFetch(url, token)`** (`src/lib/github.ts`) — the transport seam. In Electron they call `window.electronAPI.gh.graphql/.rest`, which IPCs to `electron/main.ts` and shells out to `gh api`. In the browser they hit `api.github.com` directly with the PAT. **Data hooks stay platform-agnostic by always going through these functions** — never call `fetch` to GitHub or read `window.electronAPI` directly from a hook/component.
+3. **`createClient(token)` / `restFetch(url, token)`** (`src/providers/github.ts`) — the transport seam. In Electron they call `window.electronAPI.gh.graphql/.rest`, which IPCs to `electron/main.ts` and shells out to `gh api`. In the browser they hit `api.github.com` directly with the PAT. **Data hooks stay platform-agnostic by always going through these functions** — never call `fetch` to GitHub or read `window.electronAPI` directly from a hook/component.
 
 Anything that touches the local filesystem (list branches, list worktrees, directory picker) is Electron-only and lives as an `ipcMain.handle` in `electron/main.ts`, exposed through `preload.ts`, typed in `src/types/electron.d.ts`. These shell out to local `git`. `main.ts` augments `PATH` with Homebrew dirs so the bundled `.app` can find `gh`/`git`.
 
@@ -122,7 +126,7 @@ Two layers, deliberately separated:
 4. `applyFilters` (`src/lib/prFilters.ts`) drops drafts/hidden/repo/author/search misses.
 5. `sortAndPartition` (`src/lib/prUtils.ts`) sorts by `updatedAt` and splits priority PRs (pinned on top) from the rest.
 
-All GraphQL queries live as exported template strings in `src/lib/github.ts`. The pure derivation helpers in `prUtils.ts` (review summaries, check rollup state) are the most heavily unit-tested part of the app — keep them pure and add cases there rather than testing through components.
+All GraphQL queries live as exported template strings in `src/providers/github.ts`. The pure derivation helpers in `prUtils.ts` (review summaries, check rollup state) are the most heavily unit-tested part of the app — keep them pure and add cases there rather than testing through components.
 
 ## Code standards
 
@@ -132,7 +136,7 @@ These are conventions the existing code follows consistently — match them:
 - **Components**: one component per folder as `Name/Name.tsx` with a colocated `Name.test.tsx`; default-exported. Small sub-components (e.g. `CheckIcon`) can be local to the file. Lookup tables keyed by a union type (`Record<ReviewState, …>`) are the idiom for badge/icon config rather than `if/else` chains.
 - **Styling**: Tailwind v4 utility classes only — no CSS modules, no inline styles. **All colors go through `var(--color-*)`** in arbitrary-value classes (`bg-[var(--color-surface)]`), never raw palette classes like `bg-gray-900`, so both themes work. Recurring patterns: `cursor-pointer` on every interactive element, `focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]` for keyboard a11y, and the `group` + `opacity-0 group-hover:opacity-100` reveal for card hover actions. Icons come from `lucide-react`.
 - **External links** always use `target="_blank" rel="noopener noreferrer"`; in Electron these are forced to the system browser by `setWindowOpenHandler` in `main.ts`.
-- **Data layer**: GraphQL query strings are constants in `lib/github.ts`; hooks are thin react-query wrappers keyed on `[resource, …deps, login]` with explicit `staleTime` and `enabled: !!token`. Server pagination is always bounded (10-page caps) with an explicit truncation signal rather than unbounded fetching. Keep business logic in pure `lib/*` functions (testable) and out of components.
+- **Data layer**: GraphQL query strings are constants in `providers/github.ts`; hooks are thin react-query wrappers keyed on `[resource, …deps, login]` with explicit `staleTime` and `enabled: !!token`. Server pagination is always bounded (10-page caps) with an explicit truncation signal rather than unbounded fetching. Keep business logic in pure `features/*/lib/` functions (testable) and out of components.
 - **Zustand**: subscribe with narrow selectors (`usePRStore((s) => s.priorityIds)`) to avoid needless re-renders; persisted stores declare explicit `partialize`/`merge` to keep `localStorage` migration-safe.
 - **Magic numbers** are pulled into named `const`s (see `CopyWithFeedback`, `MAX_PAGES`).
 - Comments prefixed `// ponytail:` mark intentional non-obvious decisions; preserve them and add your own when a choice would otherwise look like a mistake.
