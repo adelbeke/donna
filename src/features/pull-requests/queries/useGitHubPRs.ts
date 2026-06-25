@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createClient, PULL_REQUESTS_QUERY } from '@/lib/github'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/stores/authStore'
 import { usePRStore } from '@/features/pull-requests/stores/prStore'
 import { buildSearchQuery, deriveMyReviewState, sortAndPartition } from '@/lib/prUtils'
 import { applyFilters } from '@/lib/prFilters'

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { GitHubUser } from '../types/github'
+import type { GitHubUser } from '@/types/github'
 
 interface AuthState {
   token: string | null

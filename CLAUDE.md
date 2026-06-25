@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Donna is a GitHub PR dashboard that ships as **two products from one React codebase**:
+Donna is an open source GitHub companion — filter, prioritise, and track review status across all your repositories — that ships as **two products from one React codebase**:
 
 - **Electron app** (macOS, the primary target): full features including the Branches tab. Auth and all GitHub calls are delegated to the local `gh` CLI — no token is ever stored.
 - **Web app** (GitHub Pages at `adelbeke.github.io/donna`): browser-only, authenticates with a classic PAT kept in `localStorage`, and **omits the Branches tab**.
@@ -49,29 +49,39 @@ electron/            Electron main + preload (Node side; the only place that she
   preload.ts         contextBridge → window.electronAPI (typed in src/types/electron.d.ts)
 src/
   App.tsx            QueryClient setup + container switch (IS_NATIVE → AppContainer or WebContainer)
-  AppContainer.tsx   Electron entry: gh CLI auth probe, error screen, mounts DashboardPage
-  WebContainer.tsx   Web entry: PAT gate, mounts AuthPage or DashboardPage
   main.tsx           React entry
   index.css          Tailwind v4 @theme tokens + [data-theme="light"] overrides
-  pages/             AuthPage (web PAT entry), DashboardPage (navbar + view switch)
+  containers/        AppContainer.tsx (Electron: gh CLI auth probe, error screen, mounts DashboardPage)
+                     WebContainer.tsx (Web: PAT gate, mounts AuthPage or DashboardPage)
+  pages/             DashboardPage (navbar + view switch)
   features/          Feature slices — each has components/, queries/, stores/ + exports.ts barrel
+    auth/            Web-only auth (PAT gate)
+      components/AuthPage/   AuthPage.tsx (web PAT entry form)
+      stores/                authStore.ts (Zustand, persisted: token + user)
+      exports.ts             public surface: { useAuthStore, AuthPage }
     branches/        Electron-only Branches tab
       components/BranchList/   BranchList.tsx + BranchList.test.tsx
       queries/                 useBranches.ts (dormant GraphQL hook) + useBranches.test.tsx
       stores/                  branchStore.ts (Zustand, persisted)
       exports.ts               public surface: { BranchList }
-  components/        One folder per component: ComponentName/ComponentName.tsx (+ .test.tsx)
-                     PRCard/ (PRCard, ReviewerAvatars, ChecksPanel), PRList/, Filters/,
-                     Footer/, shared/ (CopyWithFeedback)
-  hooks/             react-query wrappers: useGitHubPRs (core), useCheckContexts, useViewer,
-                     useTheme, useUpdateCheck
-  store/             Zustand stores: authStore, prStore
+    pull-requests/   PR inbox feature
+      components/    Filters/, PRCard/ (PRCard, ReviewerAvatars, ChecksPanel), PRList/
+      queries/       useGitHubPRs.ts, useCheckContexts.ts, useViewer.ts
+      stores/        prStore.ts (Zustand, persisted)
+      exports.ts     public surface: { Filters, PRList, usePRStore, … }
+    updates/         OTA self-update (Electron-only)
+      components/UpdateBanner/   UpdateBanner.tsx
+      queries/                   useUpdateCheck.ts + useUpdateCheck.test.tsx
+      exports.ts                 public surface: { useUpdateCheck, isNewer, UpdateBanner }
+  shared/            Cross-feature shared code
+    components/      CopyWithFeedback/, Footer/, ui/ButtonWithTooltip
+    hooks/           useTheme.ts
   lib/               github.ts (clients + GraphQL queries), prUtils.ts & prFilters.ts (pure,
                      well-tested), timeAgo.ts, electron.ts (IS_NATIVE), features.ts (FeaturesContext)
   types/             github.ts (API shapes), worktree.ts, electron.d.ts (window global)
 ```
 
-`src/config.ts` is empty. `src/features/branches/queries/useBranches.ts`, `src/hooks/useRepos.ts`, `useRecentRepos.ts` exist but are **not wired into any view** (the live Branches tab uses local git via IPC, not these GraphQL/REST hooks) — treat them as dormant, not load-bearing.
+`src/features/branches/queries/useBranches.ts` is **not wired into any view** (the live Branches tab uses local git via IPC, not this GraphQL hook) — treat it as dormant, not load-bearing.
 
 ### Path alias
 
@@ -104,7 +114,7 @@ Two layers, deliberately separated:
 
 ## PR data pipeline
 
-`usePullRequests` (`src/hooks/useGitHubPRs.ts`) is the core read path:
+`usePullRequests` (`src/features/pull-requests/queries/useGitHubPRs.ts`) is the core read path:
 
 1. `buildSearchQuery(section, login)` turns the active section (`review-requested` / `authored` / `mentioned`) into a GitHub search string.
 2. `useInfiniteQuery` pages the GraphQL `search` (20/page, capped at `MAX_PAGES = 10`; `truncated` flags when the cap hides more).

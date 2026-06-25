@@ -1,51 +1,12 @@
-import { useState, useEffect } from 'react'
 import { LogOut, Moon, Search, Sun, X } from 'lucide-react'
-import { useAuthStore } from '../store/authStore'
+import { useAuthStore } from '@/features/auth/stores/authStore'
 import { usePRStore } from '@/features/pull-requests/stores/prStore'
-import { useTheme } from '../hooks/useTheme'
+import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures } from '../lib/features'
 import { Filters, PRList } from '@/features/pull-requests/exports'
 import { BranchList } from '@/features/branches/exports'
-import Footer from '../components/Footer/Footer'
-import { useUpdateCheck, isNewer } from '../hooks/useUpdateCheck'
-
-function UpdateBanner({ version }: { version: string }) {
-  const [dismissed, setDismissed] = useState(false)
-  const [downloaded, setDownloaded] = useState(false)
-
-  useEffect(() => {
-    // Check if update was already downloaded before this banner mounted (race condition)
-    window.electronAPI?.updater?.isUpdateDownloaded().then(setDownloaded)
-    window.electronAPI?.updater?.onUpdateDownloaded(() => setDownloaded(true))
-  }, [])
-
-  if (dismissed) return null
-  return (
-    <div className="flex items-center justify-between px-4 py-2 text-xs bg-[var(--color-accent)] text-white">
-      <span>Version {version} is available.</span>
-      <span className="flex items-center gap-3">
-        {downloaded ? (
-          <button
-            className="underline cursor-pointer"
-            onClick={() => window.electronAPI?.updater?.installUpdate()}
-          >
-            Restart to install
-          </button>
-        ) : (
-          <a
-            href="https://github.com/adelbeke/donna/releases/latest"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline"
-          >
-            Download
-          </a>
-        )}
-        <button onClick={() => setDismissed(true)}>✕</button>
-      </span>
-    </div>
-  )
-}
+import Footer from '@/shared/components/Footer/Footer'
+import { useUpdateCheck, isNewer, UpdateBanner } from '@/features/updates/exports'
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore()

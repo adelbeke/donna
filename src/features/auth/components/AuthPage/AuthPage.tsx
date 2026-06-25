@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Lock } from 'lucide-react'
-import { createGitHubClient, VIEWER_QUERY } from '../lib/github'
-import { useAuthStore } from '../store/authStore'
-import type { GitHubUser } from '../types/github'
-import Footer from '../components/Footer/Footer'
+import { createGitHubClient, VIEWER_QUERY } from '@/lib/github'
+import { useAuthStore } from '@/features/auth/stores/authStore'
+import type { GitHubUser } from '@/types/github'
+import Footer from '@/shared/components/Footer/Footer'
 
 interface ViewerResult {
   viewer: GitHubUser

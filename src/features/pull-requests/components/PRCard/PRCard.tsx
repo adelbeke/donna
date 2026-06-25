@@ -14,10 +14,10 @@ import {
   XCircle,
   Clock,
 } from 'lucide-react'
-import { CopyWithFeedback } from '@/components/shared/CopyWithFeedback'
+import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
 import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/stores/authStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
 import { ChecksPanel } from './ChecksPanel'
 import { deriveCheckState } from '@/lib/prUtils'

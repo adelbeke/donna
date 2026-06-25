@@ -3,8 +3,8 @@ import { Copy, ExternalLink, FolderPlus, MoreVertical, RefreshCw, Trash2, X } fr
 import { useMemo, useState } from 'react'
 import { usePRStore, usePullRequests } from '@/features/pull-requests/exports'
 import { useBranchStore } from '../../stores/branchStore'
-import { CopyWithFeedback } from '@/components/shared/CopyWithFeedback'
-import type { Worktree } from '@/types/worktree'
+import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
+import type { Worktree } from '../../types'
 import type { PullRequest } from '@/types/github'
 
 const REPO_HUES = [210, 140, 30, 280, 180, 60, 320, 260]

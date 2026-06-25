@@ -4,14 +4,14 @@ import { vi, describe, it, expect, beforeEach } from 'vitest'
 import React from 'react'
 import { useBranches, mapBranchNodes } from './useBranches'
 import { createClient } from '@/lib/github'
-import { useAuthStore } from '@/store/authStore'
+import { useAuthStore } from '@/features/auth/stores/authStore'
 
 vi.mock('@/lib/github', () => ({
   createClient: vi.fn(),
   BRANCHES_QUERY: 'BRANCHES_QUERY',
 }))
 
-vi.mock('@/store/authStore', () => ({
+vi.mock('@/features/auth/stores/authStore', () => ({
   useAuthStore: vi.fn(),
 }))
 

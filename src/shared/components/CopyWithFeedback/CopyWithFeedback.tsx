@@ -1,7 +1,7 @@
 import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { ButtonWithTooltip } from '../ui/ButtonWithTooltip.tsx'
+import { ButtonWithTooltip } from '@/shared/components/ui/ButtonWithTooltip.tsx'
 
 const FEEDBACK_DURATION_DEFAULT_DELAY = 3000
 // Matches Tailwind's default transition-opacity duration

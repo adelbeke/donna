@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-query'
-import { useAuthStore } from './store/authStore'
+import { useAuthStore } from '@/features/auth/stores/authStore'
 import { isAuthError } from './lib/github'
 import { IS_NATIVE } from './lib/electron'
 import { AppContainer } from './containers/AppContainer.tsx'

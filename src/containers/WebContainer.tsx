@@ -1,5 +1,5 @@
-import { useAuthStore } from '../store/authStore.ts'
-import AuthPage from '../pages/AuthPage.tsx'
+import { useAuthStore } from '@/features/auth/stores/authStore'
+import { AuthPage } from '@/features/auth/exports'
 import DashboardPage from '../pages/DashboardPage.tsx'
 
 export function WebContainer() {
