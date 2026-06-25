@@ -98,6 +98,36 @@ ipcMain.handle('branches:list', async (_e, repoPath: string) => {
   }
 })
 
+ipcMain.handle('branches:switchToDefault', async (_e, repoPath: string) => {
+  try {
+    await execFileAsync('git', ['-C', repoPath, 'switch', 'main'])
+  } catch {
+    try {
+      await execFileAsync('git', ['-C', repoPath, 'switch', 'master'])
+    } catch (e) {
+      throw gitError(e)
+    }
+  }
+})
+
+ipcMain.handle('branches:delete', async (_e, repoPath: string, branch: string) => {
+  try {
+    await execFileAsync('git', ['-C', repoPath, 'branch', '-d', branch])
+  } catch (e) {
+    throw gitError(e)
+  }
+})
+
+ipcMain.handle('worktrees:remove', async (_e, repoPath: string, worktreePath: string, force: boolean) => {
+  try {
+    const args = ['-C', repoPath, 'worktree', 'remove', worktreePath]
+    if (force) args.splice(4, 0, '--force')
+    await execFileAsync('git', args)
+  } catch (e) {
+    throw gitError(e)
+  }
+})
+
 ipcMain.handle('dialog:open', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
   return canceled ? null : filePaths[0]

@@ -9,9 +9,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   branches: {
     list: (repoPath: string): Promise<string[]> => ipcRenderer.invoke('branches:list', repoPath),
+    delete: (repoPath: string, branch: string): Promise<void> =>
+      ipcRenderer.invoke('branches:delete', repoPath, branch),
+    switchToDefault: (repoPath: string): Promise<void> =>
+      ipcRenderer.invoke('branches:switchToDefault', repoPath),
   },
   worktrees: {
     list: (repoPath: string): Promise<unknown[]> => ipcRenderer.invoke('worktrees:list', repoPath),
+    remove: (repoPath: string, worktreePath: string, force: boolean): Promise<void> =>
+      ipcRenderer.invoke('worktrees:remove', repoPath, worktreePath, force),
   },
   dialog: {
     openDirectory: (): Promise<string | null> => ipcRenderer.invoke('dialog:open'),
