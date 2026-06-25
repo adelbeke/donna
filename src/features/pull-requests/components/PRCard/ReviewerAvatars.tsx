@@ -1,7 +1,7 @@
 import { Check, AlertCircle, MessageSquare, Clock } from 'lucide-react'
-import type { PullRequest } from '../../types/github'
-import { deriveReviewerSummary } from '../../lib/prUtils'
-import type { Reviewer } from '../../lib/prUtils'
+import type { PullRequest } from '@/types/github'
+import { deriveReviewerSummary } from '@/lib/prUtils'
+import type { Reviewer } from '@/lib/prUtils'
 
 interface Props {
   pr: PullRequest
@@ -19,7 +19,7 @@ const groupConfig: Record<Kind, { icon: React.ReactElement; color: string }> = {
 
 const ORDER: Kind[] = ['approved', 'changesRequested', 'commented', 'pending']
 
-export default function ReviewerAvatars({ pr, authorLogin }: Props) {
+export function ReviewerAvatars({ pr, authorLogin }: Props) {
   const summary = deriveReviewerSummary(pr, authorLogin)
 
   const groups: { kind: Kind; reviewers: Reviewer[] }[] = ORDER.map((kind) => ({

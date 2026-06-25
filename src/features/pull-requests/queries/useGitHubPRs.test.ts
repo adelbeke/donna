@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { sortAndPartition, deriveMyReviewState } from '../lib/prUtils'
-import type { PullRequest } from '../types/github'
+import { sortAndPartition, deriveMyReviewState } from '@/lib/prUtils'
+import type { PullRequest } from '@/types/github'
 
 function makePR(id: string, createdAt: string): PullRequest {
   return {

@@ -1,17 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import PRList from './PRList'
-import type { PullRequest } from '../../types/github'
+import { PRList } from './PRList'
+import type { PullRequest } from '@/types/github'
 
-vi.mock('../../hooks/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
-vi.mock('../../store/prStore', () => ({ usePRStore: vi.fn() }))
-vi.mock('./VisibilityToggles', () => ({ default: () => null }))
-vi.mock('../../hooks/useCheckContexts', () => ({
+vi.mock('@/features/pull-requests/queries/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
+vi.mock('@/features/pull-requests/stores/prStore', () => ({ usePRStore: vi.fn() }))
+vi.mock('./VisibilityToggles', () => ({ VisibilityToggles: () => null }))
+vi.mock('@/features/pull-requests/queries/useCheckContexts', () => ({
   useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false })),
 }))
 
-import { usePullRequests } from '../../hooks/useGitHubPRs'
-import { usePRStore, type PRFilters } from '../../store/prStore'
+import { usePullRequests } from '@/features/pull-requests/queries/useGitHubPRs'
+import { usePRStore, type PRFilters } from '@/features/pull-requests/stores/prStore'
 const mockUsePullRequests = vi.mocked(usePullRequests)
 const mockUsePRStore = vi.mocked(usePRStore)
 

@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { createClient, PULL_REQUESTS_QUERY } from '../lib/github'
-import { useAuthStore } from '../store/authStore'
-import { usePRStore } from '../store/prStore'
-import { buildSearchQuery, deriveMyReviewState, sortAndPartition } from '../lib/prUtils'
-import { applyFilters } from '../lib/prFilters'
-import type { PullRequest } from '../types/github'
+import { createClient, PULL_REQUESTS_QUERY } from '@/lib/github'
+import { useAuthStore } from '@/store/authStore'
+import { usePRStore } from '@/features/pull-requests/stores/prStore'
+import { buildSearchQuery, deriveMyReviewState, sortAndPartition } from '@/lib/prUtils'
+import { applyFilters } from '@/lib/prFilters'
+import type { PullRequest } from '@/types/github'
 
-export { deriveMyReviewState, sortAndPartition } from '../lib/prUtils'
+export { deriveMyReviewState, sortAndPartition } from '@/lib/prUtils'
 export { useViewer } from './useViewer'
 
 const MAX_PAGES = 10

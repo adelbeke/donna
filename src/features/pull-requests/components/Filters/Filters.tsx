@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Lock, X } from 'lucide-react'
-import { usePRStore, type PRSection } from '../../store/prStore'
-import { usePullRequests } from '../../hooks/useGitHubPRs'
-import { useFeatures } from '../../lib/features'
+import { usePRStore, type PRSection } from '../../stores/prStore'
+import { usePullRequests } from '../../queries/useGitHubPRs'
+import { useFeatures } from '@/lib/features'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'review-requested', label: 'Review requested' },
@@ -10,7 +10,7 @@ const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'mentioned', label: 'Mentioned' },
 ]
 
-export default function Filters() {
+export function Filters() {
   const { filters, setFilters } = usePRStore()
   const addHiddenAuthor = usePRStore((s) => s.addHiddenAuthor)
   const removeHiddenAuthor = usePRStore((s) => s.removeHiddenAuthor)

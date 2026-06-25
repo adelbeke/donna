@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { createClient, VIEWER_QUERY } from '../lib/github'
-import { useAuthStore } from '../store/authStore'
-import type { GitHubUser } from '../types/github'
+import { createClient, VIEWER_QUERY } from '@/lib/github'
+import { useAuthStore } from '@/store/authStore'
+import type { GitHubUser } from '@/types/github'
 
 interface ViewerResult {
   viewer: GitHubUser

@@ -14,15 +14,15 @@ import {
   XCircle,
   Clock,
 } from 'lucide-react'
-import { CopyWithFeedback } from '../shared/CopyWithFeedback'
-import type { PullRequest, ReviewState, CheckRollupState } from '../../types/github'
-import { usePRStore } from '../../store/prStore'
-import { useAuthStore } from '../../store/authStore'
-import ReviewerAvatars from './ReviewerAvatars'
-import ChecksPanel from './ChecksPanel'
-import { deriveCheckState } from '../../lib/prUtils'
-import { useCheckContexts } from '../../hooks/useCheckContexts'
-import { timeAgo } from '../../lib/timeAgo'
+import { CopyWithFeedback } from '@/components/shared/CopyWithFeedback'
+import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
+import { usePRStore } from '../../stores/prStore'
+import { useAuthStore } from '@/store/authStore'
+import { ReviewerAvatars } from './ReviewerAvatars'
+import { ChecksPanel } from './ChecksPanel'
+import { deriveCheckState } from '@/lib/prUtils'
+import { useCheckContexts } from '../../queries/useCheckContexts'
+import { timeAgo } from '@/lib/timeAgo'
 
 interface Props {
   pr: PullRequest
@@ -101,7 +101,7 @@ const reviewBadge: Record<
   },
 }
 
-function PRCard({ pr, isAuthored = false }: Props) {
+export function PRCard({ pr, isAuthored = false }: Props) {
   const [checksOpen, setChecksOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
@@ -292,5 +292,3 @@ function PRCard({ pr, isAuthored = false }: Props) {
     </div>
   )
 }
-
-export default PRCard

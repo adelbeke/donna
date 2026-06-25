@@ -1,6 +1,6 @@
-import { usePRStore } from '../../store/prStore'
+import { usePRStore } from '@/features/pull-requests/stores/prStore'
 
-export default function VisibilityToggles() {
+export function VisibilityToggles() {
   const { filters, setFilters } = usePRStore()
   const hiddenIds = usePRStore((s) => s.hiddenIds)
 

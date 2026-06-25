@@ -1,12 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import Filters from './Filters'
+import { Filters } from './Filters'
+import { usePullRequests } from '../../queries/useGitHubPRs'
+import { usePRStore, type PRFilters } from '../../stores/prStore'
 
-vi.mock('../../hooks/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
-vi.mock('../../store/prStore', () => ({ usePRStore: vi.fn() }))
-
-import { usePullRequests } from '../../hooks/useGitHubPRs'
-import { usePRStore, type PRFilters } from '../../store/prStore'
+vi.mock('../../queries/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
+vi.mock('../../stores/prStore', () => ({ usePRStore: vi.fn() }))
 const mockUsePullRequests = vi.mocked(usePullRequests)
 const mockUsePRStore = vi.mocked(usePRStore)
 

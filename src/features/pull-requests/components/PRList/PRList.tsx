@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { usePullRequests } from '../../hooks/useGitHubPRs'
-import { usePRStore } from '../../store/prStore'
-import PRCard from '../PRCard/PRCard'
-import VisibilityToggles from './VisibilityToggles'
+import { usePullRequests } from '../../queries/useGitHubPRs'
+import { usePRStore } from '../../stores/prStore'
+import { PRCard } from '../PRCard/PRCard'
+import { VisibilityToggles } from './VisibilityToggles'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -11,7 +11,7 @@ const sectionLabels: Record<string, string> = {
   mentioned: 'Mentioned',
 }
 
-export default function PRList() {
+export function PRList() {
   const {
     data: prs = [],
     priorityPRs = [],
