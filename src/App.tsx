@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-qu
 import { useAuthStore } from './store/authStore'
 import { isAuthError } from './lib/github'
 import { IS_NATIVE } from './lib/electron'
-import { AppContainer } from './AppContainer'
-import { WebContainer } from './WebContainer'
+import { AppContainer } from './containers/AppContainer.tsx'
+import { WebContainer } from './containers/WebContainer.tsx'
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
