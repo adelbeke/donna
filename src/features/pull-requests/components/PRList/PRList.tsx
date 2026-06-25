@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react'
-import { RefreshCw } from 'lucide-react'
 import { usePullRequests } from '../../queries/useGitHubPRs'
 import { usePRStore } from '../../stores/prStore'
 import { PRCard } from '../PRCard/PRCard'
-import { VisibilityToggles } from './VisibilityToggles'
+import {PRListHeader} from "@/features/pull-requests/components/PRList/PRListHeader/PRListHeader.tsx";
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -49,33 +48,7 @@ export function PRList() {
   return (
     <div className="flex-1 min-w-0">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-            {sectionLabels[section]}
-          </h2>
-          {!isLoading && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-overlay)] text-[var(--color-text-secondary)]">
-              {prs.length + priorityPRs.length}
-              {totalCount > prs.length + priorityPRs.length && (
-                <span className="text-[var(--color-text-muted)]"> of {totalCount}</span>
-              )}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          <VisibilityToggles />
-          <button
-            onClick={handleRefetch}
-            disabled={isFetching}
-            title="Refresh"
-            className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-          >
-            <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
-          </button>
-        </div>
-      </div>
+      <PRListHeader title={sectionLabels[section]} displayCounter={!isLoading} counter={prs.length + priorityPRs.length} totalCount={totalCount} displayTotalCount={totalCount > prs.length + priorityPRs.length} refetch={handleRefetch} isFetching={isFetching} />
 
       {/* States */}
       {isLoading && (

@@ -1,4 +1,4 @@
-import { usePRStore } from '@/features/pull-requests/stores/prStore'
+import { usePRStore } from '@/features/pull-requests/stores/prStore.ts'
 
 export function VisibilityToggles() {
   const { filters, setFilters } = usePRStore()
