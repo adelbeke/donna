@@ -235,7 +235,7 @@ function PRCard({ pr, isAuthored = false }: Props) {
               setTimeout(() => setCopied(false), 1500)
             }}
             title="Copy PR link"
-            className="p-1.5 rounded text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+            className="p-1.5 rounded text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
           >
             {copied ? <Check size={14} /> : <Link2 size={14} />}
           </button>
