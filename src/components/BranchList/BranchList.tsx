@@ -103,44 +103,44 @@ export function BranchCard({
               <ExternalLink size={10} />
             </a>
           )}
-          {!isProtected && <div className="relative">
-            <button
-              onClick={() => setIsMenuOpen((v) => !v)}
-              title="More actions"
-              className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
-            >
-              <MoreVertical size={14} />
-            </button>
-            {isMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setIsMenuOpen(false)} />
-                <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-lg py-1">
-                  {worktree ? (
-                    <button
-                      onClick={removeWorktree}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
-                    >
-                      <Trash2 size={12} />
-                      Remove worktree
-                    </button>
-                  ) : (
-                    <button
-                      onClick={deleteBranch}
-                      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
-                    >
-                      <Trash2 size={12} />
-                      Delete branch
-                    </button>
-                  )}
-                </div>
-              </>
-            )}
-          </div>}
+          {!isProtected && (
+            <div className="relative">
+              <button
+                onClick={() => setIsMenuOpen((v) => !v)}
+                title="More actions"
+                className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
+              >
+                <MoreVertical size={14} />
+              </button>
+              {isMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setIsMenuOpen(false)} />
+                  <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-lg py-1">
+                    {worktree ? (
+                      <button
+                        onClick={removeWorktree}
+                        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={12} />
+                        Remove worktree
+                      </button>
+                    ) : (
+                      <button
+                        onClick={deleteBranch}
+                        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={12} />
+                        Delete branch
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
-      {deleteError && (
-        <p className="text-xs text-[var(--color-danger)]">{deleteError}</p>
-      )}
+      {deleteError && <p className="text-xs text-[var(--color-danger)]">{deleteError}</p>}
       <div className="flex gap-2 items-center">
         {worktree && (
           <CopyWithFeedback

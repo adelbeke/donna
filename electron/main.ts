@@ -118,15 +118,18 @@ ipcMain.handle('branches:delete', async (_e, repoPath: string, branch: string) =
   }
 })
 
-ipcMain.handle('worktrees:remove', async (_e, repoPath: string, worktreePath: string, force: boolean) => {
-  try {
-    const args = ['-C', repoPath, 'worktree', 'remove', worktreePath]
-    if (force) args.splice(4, 0, '--force')
-    await execFileAsync('git', args)
-  } catch (e) {
-    throw gitError(e)
+ipcMain.handle(
+  'worktrees:remove',
+  async (_e, repoPath: string, worktreePath: string, force: boolean) => {
+    try {
+      const args = ['-C', repoPath, 'worktree', 'remove', worktreePath]
+      if (force) args.splice(4, 0, '--force')
+      await execFileAsync('git', args)
+    } catch (e) {
+      throw gitError(e)
+    }
   }
-})
+)
 
 ipcMain.handle('dialog:open', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })

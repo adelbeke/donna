@@ -111,7 +111,13 @@ describe('BranchCard — current branch', () => {
 })
 
 describe('BranchCard — worktree branch', () => {
-  const worktree = { path: '/repos/my-repo-wt', branch: 'feat/my-feature', commit: 'abc123', isMain: false, isDirty: false }
+  const worktree = {
+    path: '/repos/my-repo-wt',
+    branch: 'feat/my-feature',
+    commit: 'abc123',
+    isMain: false,
+    isDirty: false,
+  }
 
   it('WHEN more-actions clicked THEN shows Remove worktree, not Delete branch', async () => {
     const user = userEvent.setup()
