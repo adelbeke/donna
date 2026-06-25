@@ -7,14 +7,18 @@ import { usePullRequests } from '../../hooks/useGitHubPRs'
 import type { Worktree } from '../../types/worktree'
 import type { PullRequest } from '../../types/github'
 
+const REPO_HUES = [210, 140, 30, 280, 180, 60, 320, 260]
+
 function BranchCard({
   branch,
   repo,
+  hue,
   worktree,
   pr,
 }: {
   branch: string
   repo: string
+  hue: number
   worktree?: Worktree
   pr?: PullRequest
 }) {
@@ -23,7 +27,10 @@ function BranchCard({
   return (
     <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 space-y-2">
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-surface-overlay)] text-[var(--color-text-muted)]">
+        <span
+          style={{ backgroundColor: `hsla(${hue}, 65%, 50%, 0.18)`, color: `hsl(${hue}, 70%, 65%)` }}
+          className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+        >
           {repo}
         </span>
         <span className="text-sm font-medium text-[var(--color-text-primary)] font-mono">{branch}</span>
@@ -131,7 +138,7 @@ export default function BranchList() {
   type FlatItem =
     | { key: string; loading: true; repoLabel: string }
     | { key: string; error: string; repoLabel: string }
-    | { key: string; branch: string; repoLabel: string; worktree?: Worktree; pr?: PullRequest }
+    | { key: string; branch: string; repoLabel: string; hue: number; worktree?: Worktree; pr?: PullRequest }
 
   const flatBranches: FlatItem[] = []
   for (let i = 0; i < localPaths.length; i++) {
@@ -159,6 +166,7 @@ export default function BranchList() {
         key: `${localPath}/${branch}`,
         branch,
         repoLabel,
+        hue: REPO_HUES[i % REPO_HUES.length],
         worktree: wtByBranch.get(branch),
         pr: prMap.get(`${repoLabel}/${branch}`),
       })
@@ -183,17 +191,24 @@ export default function BranchList() {
         >
           <RefreshCw size={14} className={isFetching ? 'animate-spin' : ''} />
         </button>
-        {localPaths.map((p) => (
-          <button
-            key={p}
-            onClick={() => removeLocalPath(p)}
-            title={`Remove ${p.split('/').pop()}`}
-            className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-          >
-            <X size={12} />
-            {p.split('/').pop()}
-          </button>
-        ))}
+        {localPaths.map((p, i) => {
+          const label = p.split('/').pop() ?? p
+          const color = `hsl(${REPO_HUES[i % REPO_HUES.length]}, 70%, 65%)`
+          return (
+            <button
+              key={p}
+              onClick={() => removeLocalPath(p)}
+              title={`Remove ${label}`}
+              style={{ color }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-danger)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = color }}
+              className="flex items-center gap-1 text-xs transition-colors cursor-pointer"
+            >
+              <X size={12} />
+              {label}
+            </button>
+          )
+        })}
       </div>
 
       <div className="space-y-2">
@@ -209,6 +224,7 @@ export default function BranchList() {
               key={item.key}
               branch={item.branch}
               repo={item.repoLabel}
+              hue={item.hue}
               worktree={item.worktree}
               pr={item.pr}
             />
