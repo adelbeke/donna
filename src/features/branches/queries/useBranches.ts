@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { useAuthStore } from '../store/authStore'
-import { createClient, BRANCHES_QUERY } from '../lib/github'
-import type { Branch } from '../types/github'
+import { useAuthStore } from '@/store/authStore'
+import { createClient, BRANCHES_QUERY } from '@/lib/github'
+import type { Branch } from '@/types/github'
 
 const DEFAULT_BRANCHES = new Set([
   'main',

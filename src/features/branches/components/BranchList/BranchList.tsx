@@ -1,12 +1,12 @@
 import { useQueries } from '@tanstack/react-query'
 import { Copy, ExternalLink, FolderPlus, MoreVertical, RefreshCw, Trash2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { usePRStore } from '../../store/prStore'
-import { useBranchStore } from '../../store/branchStore'
-import { usePullRequests } from '../../hooks/useGitHubPRs'
-import { CopyWithFeedback } from '../shared/CopyWithFeedback'
-import type { Worktree } from '../../types/worktree'
-import type { PullRequest } from '../../types/github'
+import { usePRStore } from '@/store/prStore'
+import { useBranchStore } from '../../stores/branchStore'
+import { usePullRequests } from '@/hooks/useGitHubPRs'
+import { CopyWithFeedback } from '@/components/shared/CopyWithFeedback'
+import type { Worktree } from '@/types/worktree'
+import type { PullRequest } from '@/types/github'
 
 const REPO_HUES = [210, 140, 30, 280, 180, 60, 320, 260]
 
@@ -165,7 +165,7 @@ export function BranchCard({
   )
 }
 
-export default function BranchList() {
+export function BranchList() {
   const { localPaths, addLocalPath, removeLocalPath } = useBranchStore()
   const { filters } = usePRStore()
   const { allPRs } = usePullRequests()

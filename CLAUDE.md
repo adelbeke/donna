@@ -54,18 +54,28 @@ src/
   main.tsx           React entry
   index.css          Tailwind v4 @theme tokens + [data-theme="light"] overrides
   pages/             AuthPage (web PAT entry), DashboardPage (navbar + view switch)
+  features/          Feature slices — each has components/, queries/, stores/ + exports.ts barrel
+    branches/        Electron-only Branches tab
+      components/BranchList/   BranchList.tsx + BranchList.test.tsx
+      queries/                 useBranches.ts (dormant GraphQL hook) + useBranches.test.tsx
+      stores/                  branchStore.ts (Zustand, persisted)
+      exports.ts               public surface: { BranchList }
   components/        One folder per component: ComponentName/ComponentName.tsx (+ .test.tsx)
                      PRCard/ (PRCard, ReviewerAvatars, ChecksPanel), PRList/, Filters/,
-                     BranchList/, Footer/, shared/ (CopyWithFeedback)
+                     Footer/, shared/ (CopyWithFeedback)
   hooks/             react-query wrappers: useGitHubPRs (core), useCheckContexts, useViewer,
                      useTheme, useUpdateCheck
-  store/             Zustand stores: authStore, prStore, branchStore
+  store/             Zustand stores: authStore, prStore
   lib/               github.ts (clients + GraphQL queries), prUtils.ts & prFilters.ts (pure,
                      well-tested), timeAgo.ts, electron.ts (IS_NATIVE), features.ts (FeaturesContext)
   types/             github.ts (API shapes), worktree.ts, electron.d.ts (window global)
 ```
 
-`src/config.ts` is empty. `src/hooks/useBranches.ts`, `useRepos.ts`, `useRecentRepos.ts` exist but are **not wired into any view** (the live Branches tab uses local git via IPC, not these GraphQL/REST hooks) — treat them as dormant, not load-bearing.
+`src/config.ts` is empty. `src/features/branches/queries/useBranches.ts`, `src/hooks/useRepos.ts`, `useRecentRepos.ts` exist but are **not wired into any view** (the live Branches tab uses local git via IPC, not these GraphQL/REST hooks) — treat them as dormant, not load-bearing.
+
+### Path alias
+
+`@/` resolves to `src/` in both Vite configs and `tsconfig.app.json`. Use it for any cross-feature import instead of deep relative paths (`../../..`).
 
 ## The native-vs-web abstraction
 

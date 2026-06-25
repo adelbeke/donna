@@ -6,7 +6,7 @@ import { useTheme } from '../hooks/useTheme'
 import { useFeatures } from '../lib/features'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
-import BranchList from '../components/BranchList/BranchList'
+import { BranchList } from '@/features/branches/exports'
 import Footer from '../components/Footer/Footer'
 import { useUpdateCheck, isNewer } from '../hooks/useUpdateCheck'
 
