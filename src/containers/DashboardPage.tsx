@@ -1,16 +1,16 @@
-import { LogOut, Moon, Search, Sun, X } from 'lucide-react'
-import { useAuthStore } from '@/features/auth/stores/authStore'
-import { usePRStore } from '@/features/pull-requests/stores/prStore'
+import { LogOut, Moon, Sun } from 'lucide-react'
+import { useAuthStore } from '@/features/auth/exports'
+import { usePRStore, PRDashboard } from '@/features/pull-requests/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures } from '@/shared/features'
-import { Filters, PRList } from '@/features/pull-requests/exports'
-import { BranchList } from '@/features/branches/exports'
+import { BranchDashboard } from '@/features/branches/exports'
 import Footer from '@/shared/components/Footer/Footer'
 import { useUpdateCheck, isNewer, UpdateBanner } from '@/features/updates/exports'
 
 export default function DashboardPage() {
   const { user, logout } = useAuthStore()
-  const { filters, setFilters, view, setView } = usePRStore()
+  // TODO: the view shouldn't be drove by the PR store feature
+  const { view, setView } = usePRStore()
   const { data: latestVersion } = useUpdateCheck()
   const showBanner = latestVersion && isNewer(latestVersion, __APP_VERSION__)
   const { theme, toggle } = useTheme()
@@ -21,51 +21,29 @@ export default function DashboardPage() {
       {/* Top navbar */}
       <header className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/90 backdrop-blur-sm px-6 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-3">
             <h1 className="text-sm font-semibold text-[var(--color-text-primary)] tracking-tight">
               Donna
             </h1>
-          </div>
 
-          <div className="flex items-center gap-1 shrink-0">
-            {(['prs', ...(features.has('branches') ? ['branches' as const] : [])] as const).map(
-              (v) => (
-                <button
-                  key={v}
-                  onClick={() => setView(v)}
-                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+            <div className="flex items-center gap-1 shrink-0">
+              {(['prs', ...(features.has('branches') ? ['branches' as const] : [])] as const).map(
+                (v) => (
+                  <button
+                    key={v}
+                    onClick={() => setView(v)}
+                    className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${
                       view === v
                         ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
                         : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
                     }`}
-                >
-                  {v === 'prs' ? 'Pull Requests' : 'Branches'}
-                </button>
-              )
-            )}
-          </div>
-
-          <div className="relative flex-1 max-w-sm mx-auto">
-            <Search
-              size={13}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
-            />
-            <input
-              type="text"
-              value={filters.search}
-              onChange={(e) => setFilters({ search: e.target.value })}
-              placeholder={view === 'branches' ? 'Filter by branch…' : 'Filter by title…'}
-              className="w-full bg-[var(--color-surface)] border border-[var(--color-border)] rounded-md pl-7 pr-7 py-1.5 text-xs text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-accent)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] transition-colors"
-            />
-            {filters.search && (
-              <button
-                onClick={() => setFilters({ search: '' })}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
-              >
-                <X size={12} />
-              </button>
-            )}
+                  >
+                    {v === 'prs' ? 'Pull Requests' : 'Branches'}
+                  </button>
+                )
+              )}
+            </div>
           </div>
 
           {user && (
@@ -97,14 +75,7 @@ export default function DashboardPage() {
 
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
-        {view === 'branches' ? (
-          <BranchList />
-        ) : (
-          <div className="flex gap-8">
-            <Filters />
-            <PRList />
-          </div>
-        )}
+        {view === 'branches' ? <BranchDashboard /> : <PRDashboard />}
       </main>
       <Footer />
     </div>

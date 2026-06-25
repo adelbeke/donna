@@ -1,6 +1,4 @@
-export { Filters } from './components/Filters/Filters'
-export { PRList } from './components/PRList/PRList'
 export { usePRStore } from './stores/prStore'
-export type { PRFilters, PRSection } from './stores/prStore'
 export { usePullRequests } from './queries/useGitHubPRs'
 export { useCheckContexts } from './queries/useCheckContexts'
+export { PRDashboard } from './components/PRDashboard/PRDashboard'
