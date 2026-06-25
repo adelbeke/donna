@@ -11,7 +11,7 @@ interface Window {
       rest: (path: string) => Promise<unknown>
     }
     branches: {
-      list: (repoPath: string) => Promise<string[]>
+      list: (repoPath: string) => Promise<import('../features/branches/types').Branch[]>
       delete: (repoPath: string, branch: string) => Promise<void>
       switchToDefault: (repoPath: string) => Promise<void>
     }

@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     rest: (path: string): Promise<unknown> => ipcRenderer.invoke('gh:rest', path),
   },
   branches: {
-    list: (repoPath: string): Promise<string[]> => ipcRenderer.invoke('branches:list', repoPath),
+    list: (repoPath: string): Promise<unknown[]> => ipcRenderer.invoke('branches:list', repoPath),
     delete: (repoPath: string, branch: string): Promise<void> =>
       ipcRenderer.invoke('branches:delete', repoPath, branch),
     switchToDefault: (repoPath: string): Promise<void> =>

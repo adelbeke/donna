@@ -87,16 +87,14 @@ ipcMain.handle('worktrees:list', async (_e, repoPath: string) => {
 
 ipcMain.handle('branches:list', async (_e, repoPath: string) => {
   try {
-    const { stdout } = await execFileAsync('git', [
-      '-C',
-      repoPath,
-      'branch',
-      '--format=%(refname:short)',
-    ])
-    return stdout.trim().split('\n').filter(Boolean)
-  } catch (e) {
-    throw gitError(e)
-  }
+    // %(HEAD) emits '*' for the branch checked out in this (main) worktree, ' ' otherwise.
+    const { stdout } = await execFileAsync('git', ['-C', repoPath, 'branch', '--format=%(HEAD)\t%(refname:short)'])
+    return stdout.trim().split('\n').filter(Boolean).map((line) => {
+      const tabIdx = line.indexOf('\t')
+      return { name: line.slice(tabIdx + 1), isCurrent: line.slice(0, tabIdx) === '*' }
+    // ponytail: drop the detached-HEAD pseudo-entry ("(HEAD detached at …)") — not a real, switchable branch.
+    }).filter((b) => !b.name.startsWith('('))
+  } catch (e) { throw gitError(e) }
 })
 
 ipcMain.handle('branches:switchToDefault', async (_e, repoPath: string) => {
