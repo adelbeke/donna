@@ -135,12 +135,16 @@ function createWindow() {
 }
 
 ipcMain.handle('update:install', () => autoUpdater.quitAndInstall())
+// ponytail: flag so the banner can catch updates downloaded before it mounts
+let updateDownloaded = false
+ipcMain.handle('update:is-downloaded', () => updateDownloaded)
 
 app.whenReady().then(() => {
   createWindow()
   if (app.isPackaged) {
     autoUpdater.checkForUpdates()
     autoUpdater.on('update-downloaded', () => {
+      updateDownloaded = true
       BrowserWindow.getAllWindows().forEach(w => w.webContents.send('update:downloaded'))
     })
   }

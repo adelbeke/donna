@@ -19,5 +19,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updater: {
     onUpdateDownloaded: (cb: () => void) => ipcRenderer.on('update:downloaded', cb),
     installUpdate: (): Promise<void> => ipcRenderer.invoke('update:install'),
+    isUpdateDownloaded: (): Promise<boolean> => ipcRenderer.invoke('update:is-downloaded'),
   },
 })

@@ -19,6 +19,7 @@ interface Window {
     updater: {
       onUpdateDownloaded: (cb: () => void) => void
       installUpdate: () => Promise<void>
+      isUpdateDownloaded: () => Promise<boolean>
     }
   }
 }
