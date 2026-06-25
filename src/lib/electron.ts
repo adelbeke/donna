@@ -1,1 +1,1 @@
-export const IS_ELECTRON = !!window.electronAPI
+export const IS_NATIVE = !!window.electronAPI
