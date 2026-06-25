@@ -66,23 +66,23 @@ function BranchCard({
       </div>
       <div className="flex gap-2 items-center">
         {worktree && (
-          <button
-            onClick={() => navigator.clipboard.writeText(`cd ${worktree.path}`)}
-            title={`Copy: cd ${worktree.path}`}
-            className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)] transition-colors cursor-pointer font-mono"
+          <CopyWithFeedback
+            text={`cd ${worktree.path}`}
+            label="Copy cd command"
+            buttonClassName="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)] transition-colors cursor-pointer font-mono"
           >
             <Copy size={11} />
             cd {shortPath}
-          </button>
+          </CopyWithFeedback>
         )}
-        <button
-          onClick={() => navigator.clipboard.writeText(`git switch ${branch}`)}
-          title={`Copy: git switch ${branch}`}
-          className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)] transition-colors cursor-pointer font-mono"
+        <CopyWithFeedback
+          text={`git switch ${branch}`}
+          label="Copy git switch command"
+          buttonClassName="flex items-center gap-1 text-xs px-2 py-1 rounded border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:border-[var(--color-border)] transition-colors cursor-pointer font-mono"
         >
           <Copy size={11} />
           git switch {branch}
-        </button>
+        </CopyWithFeedback>
       </div>
     </div>
   )
