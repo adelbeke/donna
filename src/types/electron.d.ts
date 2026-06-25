@@ -16,7 +16,7 @@ interface Window {
       switchToDefault: (repoPath: string) => Promise<void>
     }
     worktrees: {
-      list: (repoPath: string) => Promise<import('./worktree').Worktree[]>
+      list: (repoPath: string) => Promise<import('../features/branches/types').Worktree[]>
       remove: (repoPath: string, worktreePath: string, force: boolean) => Promise<void>
     }
     dialog: {
