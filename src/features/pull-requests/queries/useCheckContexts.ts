@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { createClient, PR_CHECK_CONTEXTS_QUERY } from '@/lib/github'
+import { createClient, PR_CHECK_CONTEXTS_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import type { CheckRunContext, StatusContextItem } from '@/types/github'
 

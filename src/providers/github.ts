@@ -1,4 +1,5 @@
 import { GraphQLClient, ClientError } from 'graphql-request'
+import { IS_NATIVE, ghGraphql, ghRest } from './electron'
 
 const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
 const GH_BASE = 'https://api.github.com'
@@ -28,10 +29,7 @@ type GQLClient = { request: <T>(query: string, variables?: Record<string, unknow
 function createElectronClient(): GQLClient {
   return {
     request: async <T>(query: string, variables?: Record<string, unknown>): Promise<T> => {
-      const result = (await window.electronAPI!.gh.graphql(query, variables ?? {})) as {
-        data: T
-        errors?: { message: string }[]
-      }
+      const result = await ghGraphql<T>(query, variables ?? {})
       if (result.errors?.length) throw new Error(result.errors[0].message)
       return result.data
     },
@@ -39,14 +37,14 @@ function createElectronClient(): GQLClient {
 }
 
 export function createClient(token?: string | null): GQLClient {
-  if (typeof window !== 'undefined' && window.electronAPI) return createElectronClient()
+  if (IS_NATIVE) return createElectronClient()
   return createGitHubClient(token!) as unknown as GQLClient
 }
 
 export async function restFetch<T>(url: string, token?: string): Promise<T> {
-  if (typeof window !== 'undefined' && window.electronAPI) {
+  if (IS_NATIVE) {
     const path = url.startsWith(GH_BASE) ? url.slice(GH_BASE.length) : url
-    return window.electronAPI.gh.rest(path) as Promise<T>
+    return ghRest<T>(path)
   }
   const r = await fetch(url, {
     headers: {

@@ -3,10 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 import React from 'react'
 import { useBranches, mapBranchNodes } from './useBranches'
-import { createClient } from '@/lib/github'
+import { createClient } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 
-vi.mock('@/lib/github', () => ({
+vi.mock('@/providers/github', () => ({
   createClient: vi.fn(),
   BRANCHES_QUERY: 'BRANCHES_QUERY',
 }))

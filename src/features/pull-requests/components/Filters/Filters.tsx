@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Lock, X } from 'lucide-react'
 import { usePRStore, type PRSection } from '../../stores/prStore'
 import { usePullRequests } from '../../queries/useGitHubPRs'
-import { useFeatures } from '@/lib/features'
+import { useFeatures } from '@/shared/features'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'review-requested', label: 'Review requested' },

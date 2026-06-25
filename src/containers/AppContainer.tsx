@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Terminal } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/stores/authStore'
-import { VIEWER_QUERY } from '../lib/github.ts'
-import DashboardPage from '../pages/DashboardPage.tsx'
-import { FeaturesContext, type Feature } from '../lib/features.ts'
+import { ghIsInstalled, ghGraphql } from '@/providers/electron'
+import { VIEWER_QUERY } from '@/providers/github'
+import DashboardPage from './DashboardPage.tsx'
+import { FeaturesContext, type Feature } from '@/shared/features'
 import type { GitHubUser } from '../types/github.ts'
 
 const APP_FEATURES = new Set<Feature>(['branches'])
@@ -12,11 +13,11 @@ async function tryNativeAuth(
   setToken: (t: string) => void,
   setUser: (u: GitHubUser) => void
 ): Promise<string | null> {
-  const installed = await window.electronAPI!.gh.isInstalled()
+  const installed = await ghIsInstalled()
   if (!installed) return 'gh CLI not found. Install it at cli.github.com then relaunch.'
   try {
-    const res = await window.electronAPI!.gh.graphql(VIEWER_QUERY, {})
-    const viewer = (res.data as { viewer: GitHubUser }).viewer
+    const res = await ghGraphql<{ viewer: GitHubUser }>(VIEWER_QUERY, {})
+    const viewer = res.data.viewer
     setToken('gh-cli')
     setUser(viewer)
     return null

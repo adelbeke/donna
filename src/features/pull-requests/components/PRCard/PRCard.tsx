@@ -20,9 +20,9 @@ import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
 import { ChecksPanel } from './ChecksPanel'
-import { deriveCheckState } from '@/lib/prUtils'
+import { deriveCheckState } from '../../lib/prUtils'
 import { useCheckContexts } from '../../queries/useCheckContexts'
-import { timeAgo } from '@/lib/timeAgo'
+import { timeAgo } from '../../lib/timeAgo'
 
 interface Props {
   pr: PullRequest

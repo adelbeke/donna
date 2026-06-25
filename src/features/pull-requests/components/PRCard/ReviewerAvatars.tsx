@@ -1,7 +1,7 @@
 import { Check, AlertCircle, MessageSquare, Clock } from 'lucide-react'
 import type { PullRequest } from '@/types/github'
-import { deriveReviewerSummary } from '@/lib/prUtils'
-import type { Reviewer } from '@/lib/prUtils'
+import { deriveReviewerSummary } from '../../lib/prUtils'
+import type { Reviewer } from '../../lib/prUtils'
 
 interface Props {
   pr: PullRequest

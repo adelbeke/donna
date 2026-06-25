@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { createClient, VIEWER_QUERY } from '@/lib/github'
+import { createClient, VIEWER_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import type { GitHubUser } from '@/types/github'
 

@@ -1,4 +1,4 @@
-import type { PullRequest, ReviewState, CheckRollupState } from '../types/github'
+import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
 
 export interface Reviewer {
   login: string

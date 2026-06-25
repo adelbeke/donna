@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { Lock } from 'lucide-react'
-import { createGitHubClient, VIEWER_QUERY } from '@/lib/github'
+import { createGitHubClient, VIEWER_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import type { GitHubUser } from '@/types/github'
 import Footer from '@/shared/components/Footer/Footer'

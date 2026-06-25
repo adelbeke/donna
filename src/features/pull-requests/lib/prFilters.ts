@@ -1,5 +1,5 @@
-import type { PullRequest } from '../types/github'
-import type { PRFilters } from '../features/pull-requests/stores/prStore'
+import type { PullRequest } from '@/types/github'
+import type { PRFilters } from '../stores/prStore'
 
 export function applyFilters(nodes: PullRequest[], filters: PRFilters): PullRequest[] {
   return nodes.filter((pr) => {
