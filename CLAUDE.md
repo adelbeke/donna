@@ -48,7 +48,9 @@ electron/            Electron main + preload (Node side; the only place that she
   main.ts            ipcMain handlers: gh:graphql/rest/installed, branches/worktrees list, dialog, updater
   preload.ts         contextBridge → window.electronAPI (typed in src/types/electron.d.ts)
 src/
-  App.tsx            QueryClient setup, Electron-vs-web auth gating, top-level routing
+  App.tsx            QueryClient setup + container switch (IS_NATIVE → AppContainer or WebContainer)
+  AppContainer.tsx   Electron entry: gh CLI auth probe, error screen, mounts DashboardPage
+  WebContainer.tsx   Web entry: PAT gate, mounts AuthPage or DashboardPage
   main.tsx           React entry
   index.css          Tailwind v4 @theme tokens + [data-theme="light"] overrides
   pages/             AuthPage (web PAT entry), DashboardPage (navbar + view switch)
@@ -59,23 +61,25 @@ src/
                      useTheme, useUpdateCheck
   store/             Zustand stores: authStore, prStore, branchStore
   lib/               github.ts (clients + GraphQL queries), prUtils.ts & prFilters.ts (pure,
-                     well-tested), timeAgo.ts, electron.ts (IS_ELECTRON)
+                     well-tested), timeAgo.ts, electron.ts (IS_NATIVE), features.ts (FeaturesContext)
   types/             github.ts (API shapes), worktree.ts, electron.d.ts (window global)
 ```
 
 `src/config.ts` is empty. `src/hooks/useBranches.ts`, `useRepos.ts`, `useRecentRepos.ts` exist but are **not wired into any view** (the live Branches tab uses local git via IPC, not these GraphQL/REST hooks) — treat them as dormant, not load-bearing.
 
-## The Electron-vs-web abstraction
+## The native-vs-web abstraction
 
-The renderer never branches on platform ad hoc. It goes through two seams:
+The renderer never branches on platform ad hoc. It goes through three seams:
 
-1. **`IS_ELECTRON`** (`src/lib/electron.ts`) — just `!!window.electronAPI`. The `electronAPI` object is injected by `electron/preload.ts` via `contextBridge` and is absent in the browser. Use this to gate Electron-only UI (the Branches tab, the OTA banner, hiding the PAT privacy note / logout button).
+1. **`AppContainer` / `WebContainer`** — the top-level split. `App.tsx` uses `IS_NATIVE` exactly once to choose which container to render. All platform-specific bootstrap logic (auth flow, error screens) lives in these two files and nowhere else.
 
-2. **`createClient(token)` / `restFetch(url, token)`** (`src/lib/github.ts`) — the transport seam. In Electron they call `window.electronAPI.gh.graphql/.rest`, which IPCs to `electron/main.ts` and shells out to `gh api`. In the browser they hit `api.github.com` directly with the PAT. **Data hooks stay platform-agnostic by always going through these functions** — never call `fetch` to GitHub or read `window.electronAPI` directly from a hook/component.
+2. **`FeaturesContext`** (`src/lib/features.ts`) — a static React context (never updated after mount) that carries the set of gated `Feature` values. `AppContainer` provides `new Set(['branches'])`; `WebContainer` leaves the default empty Set. Components read it via `useFeatures()` — **never import `IS_NATIVE` inside a component**, use `features.has('branches')` instead. To add a new gated feature: add it to the `Feature` union type and set it in `AppContainer`.
+
+3. **`createClient(token)` / `restFetch(url, token)`** (`src/lib/github.ts`) — the transport seam. In Electron they call `window.electronAPI.gh.graphql/.rest`, which IPCs to `electron/main.ts` and shells out to `gh api`. In the browser they hit `api.github.com` directly with the PAT. **Data hooks stay platform-agnostic by always going through these functions** — never call `fetch` to GitHub or read `window.electronAPI` directly from a hook/component.
 
 Anything that touches the local filesystem (list branches, list worktrees, directory picker) is Electron-only and lives as an `ipcMain.handle` in `electron/main.ts`, exposed through `preload.ts`, typed in `src/types/electron.d.ts`. These shell out to local `git`. `main.ts` augments `PATH` with Homebrew dirs so the bundled `.app` can find `gh`/`git`.
 
-Auth flow differs by mode (`src/App.tsx`): web shows `AuthPage` until a PAT is set; Electron auto-probes `gh` on launch, sets a sentinel token `'gh-cli'`, and shows an error screen with a Retry button if `gh` is missing or not logged in.
+Auth flow differs by container: `WebContainer` shows `AuthPage` until a PAT is set; `AppContainer` auto-probes `gh` on launch, sets a sentinel token `'gh-cli'`, and shows an error screen with a Retry button if `gh` is missing or not logged in.
 
 ## State management
 

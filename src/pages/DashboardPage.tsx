@@ -3,7 +3,7 @@ import { LogOut, Moon, Search, Sun, X } from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import { usePRStore } from '../store/prStore'
 import { useTheme } from '../hooks/useTheme'
-import { IS_ELECTRON } from '../lib/electron'
+import { useFeatures } from '../lib/features'
 import Filters from '../components/Filters/Filters'
 import PRList from '../components/PRList/PRList'
 import BranchList from '../components/BranchList/BranchList'
@@ -54,6 +54,7 @@ export default function DashboardPage() {
   const { data: latestVersion } = useUpdateCheck()
   const showBanner = latestVersion && isNewer(latestVersion, __APP_VERSION__)
   const { theme, toggle } = useTheme()
+  const features = useFeatures()
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">
@@ -67,20 +68,22 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {(['prs', ...(IS_ELECTRON ? ['branches' as const] : [])] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+            {(['prs', ...(features.has('branches') ? ['branches' as const] : [])] as const).map(
+              (v) => (
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${
                       view === v
                         ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
                         : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
                     }`}
-              >
-                {v === 'prs' ? 'Pull Requests' : 'Branches'}
-              </button>
-            ))}
+                >
+                  {v === 'prs' ? 'Pull Requests' : 'Branches'}
+                </button>
+              )
+            )}
           </div>
 
           <div className="relative flex-1 max-w-sm mx-auto">
@@ -116,7 +119,7 @@ export default function DashboardPage() {
               >
                 {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
               </button>
-              {!IS_ELECTRON && (
+              {!features.has('branches') && (
                 <button
                   onClick={logout}
                   title="Disconnect"
