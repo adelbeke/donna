@@ -6,14 +6,15 @@ import {
   AlertCircle,
   Star,
   ExternalLink,
+  Link2,
   FileCode,
   EyeOff,
   Eye,
   CheckCircle,
   XCircle,
   Clock,
-  Link2,
 } from 'lucide-react'
+import { CopyWithFeedback } from '../shared/CopyWithFeedback'
 import type { PullRequest, ReviewState, CheckRollupState } from '../../types/github'
 import { usePRStore } from '../../store/prStore'
 import { useAuthStore } from '../../store/authStore'
@@ -102,8 +103,7 @@ const reviewBadge: Record<
 
 function PRCard({ pr, isAuthored = false }: Props) {
   const [checksOpen, setChecksOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const togglePriority = usePRStore((s) => s.togglePriority)
+    const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
@@ -272,17 +272,12 @@ function PRCard({ pr, isAuthored = false }: Props) {
             <Star size={14} fill={isPriority ? 'currentColor' : 'none'} />
           </button>
 
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(pr.url)
-              setCopied(true)
-              setTimeout(() => setCopied(false), 1500)
-            }}
-            title="Copy PR link"
-            className="p-1.5 rounded text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-          >
-            {copied ? <Check size={14} /> : <Link2 size={14} />}
-          </button>
+          <CopyWithFeedback
+            text={pr.url}
+            label="Copy PR link"
+            icon={<Link2 size={14} />}
+            buttonClassName="p-1.5 rounded text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+          />
 
           <a
             href={pr.url}
