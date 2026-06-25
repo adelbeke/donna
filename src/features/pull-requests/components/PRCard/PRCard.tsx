@@ -4,17 +4,11 @@ import {
   MessageSquare,
   Check,
   AlertCircle,
-  Star,
-  ExternalLink,
-  Link2,
   FileCode,
-  EyeOff,
-  Eye,
   CheckCircle,
   XCircle,
   Clock,
 } from 'lucide-react'
-import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
 import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
@@ -23,6 +17,7 @@ import { ChecksPanel } from './ChecksPanel'
 import { deriveCheckState } from '../../lib/prUtils'
 import { useCheckContexts } from '../../queries/useCheckContexts'
 import { timeAgo } from '../../lib/timeAgo'
+import {PRCardActions} from "@/features/pull-requests/components/PRCard/PRCardActions/PRCardActions.tsx";
 
 interface Props {
   pr: PullRequest
@@ -114,6 +109,14 @@ export function PRCard({ pr, isAuthored = false }: Props) {
   const ciBadge = checkState ? ciStateBadge[checkState] : null
   const showConflict = pr.mergeable === 'CONFLICTING'
   const { checks, isLoading: checksLoading } = useCheckContexts(pr.id, checksOpen)
+
+  const handleHide = () => {
+    toggleHide(pr.id)
+  }
+
+  const handleTogglePriority = () => {
+    togglePriority(pr.id)
+  }
 
   return (
     <div
@@ -245,49 +248,7 @@ export function PRCard({ pr, isAuthored = false }: Props) {
         </div>
 
         {/* Right: actions */}
-        <div className="flex items-center gap-1 shrink-0">
-          <button
-            onClick={() => toggleHide(pr.id)}
-            title={isHidden ? 'Unhide PR' : 'Hide PR'}
-            className={`p-1.5 rounded transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none
-              ${
-                isHidden
-                  ? 'text-[var(--color-warning)]'
-                  : 'text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-warning)]'
-              }`}
-          >
-            {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
-          </button>
-
-          <button
-            onClick={() => togglePriority(pr.id)}
-            title={isPriority ? 'Remove priority' : 'Mark as top priority'}
-            className={`p-1.5 rounded transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none
-              ${
-                isPriority
-                  ? 'text-[var(--color-priority)]'
-                  : 'text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-priority)]'
-              }`}
-          >
-            <Star size={14} fill={isPriority ? 'currentColor' : 'none'} />
-          </button>
-
-          <CopyWithFeedback
-            text={pr.url}
-            label="Copy PR link"
-            icon={<Link2 size={14} />}
-            buttonClassName="p-1.5 rounded text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-          />
-
-          <a
-            href={pr.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 rounded text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 hover:text-[var(--color-accent)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-          >
-            <ExternalLink size={14} />
-          </a>
-        </div>
+        <PRCardActions toggleHide={handleHide} isHidden={isHidden} togglePriority={handleTogglePriority} isPriority={isPriority} prUrl={pr.url} />
       </div>
     </div>
   )
