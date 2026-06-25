@@ -8,7 +8,7 @@ interface Window {
       rest: (path: string) => Promise<unknown>
     }
     branches: {
-      list: (repoPath: string) => Promise<string[]>
+      list: (repoPath: string) => Promise<import('./worktree').Branch[]>
     }
     worktrees: {
       list: (repoPath: string) => Promise<import('./worktree').Worktree[]>

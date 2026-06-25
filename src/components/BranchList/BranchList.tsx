@@ -13,21 +13,34 @@ function BranchCard({
   repo,
   worktree,
   pr,
+  isCurrent,
 }: {
   branch: string
   repo: string
   worktree?: Worktree
   pr?: PullRequest
+  isCurrent: boolean
 }) {
   const shortPath = worktree?.path.replace(/^\/Users\/[^/]+/, '~')
 
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 space-y-2">
+    <div
+      className={`rounded-lg border bg-[var(--color-surface-raised)] px-4 py-3 space-y-2 ${
+        isCurrent
+          ? 'border-l-2 border-l-[var(--color-accent)] border-y-[var(--color-border)] border-r-[var(--color-border)]'
+          : 'border-[var(--color-border)]'
+      }`}
+    >
       <div className="flex items-center gap-2 flex-wrap">
         <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-surface-overlay)] text-[var(--color-text-muted)]">
           {repo}
         </span>
         <span className="text-sm font-medium text-[var(--color-text-primary)] font-mono">{branch}</span>
+        {isCurrent && (
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
+            current
+          </span>
+        )}
         <CopyWithFeedback text={branch} label="Copy branch name" />
         {worktree && (
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
@@ -133,7 +146,7 @@ export default function BranchList() {
   type FlatItem =
     | { key: string; loading: true; repoLabel: string }
     | { key: string; error: string; repoLabel: string }
-    | { key: string; branch: string; repoLabel: string; worktree?: Worktree; pr?: PullRequest }
+    | { key: string; branch: string; repoLabel: string; worktree?: Worktree; pr?: PullRequest; isCurrent: boolean }
 
   const flatBranches: FlatItem[] = []
   for (let i = 0; i < localPaths.length; i++) {
@@ -150,21 +163,27 @@ export default function BranchList() {
     }
 
     const wtByBranch = new Map<string, Worktree>()
+    // ponytail: branches checked out in *any* worktree (incl. main) are "current".
+    const currentBranches = new Set<string>()
     for (const wt of worktrees ?? []) {
+      if (wt.branch) currentBranches.add(wt.branch)
       if (wt.branch && !wt.isMain) wtByBranch.set(wt.branch, wt)
     }
 
-    for (const branch of (branches ?? []).filter(
-      (b) => !filters.search || b.toLowerCase().includes(filters.search.toLowerCase())
-    )) {
-      flatBranches.push({
-        key: `${localPath}/${branch}`,
-        branch,
+    const repoItems = (branches ?? [])
+      .filter((b) => !filters.search || b.name.toLowerCase().includes(filters.search.toLowerCase()))
+      .map((branch) => ({
+        key: `${localPath}/${branch.name}`,
+        branch: branch.name,
         repoLabel,
-        worktree: wtByBranch.get(branch),
-        pr: prMap.get(`${repoLabel}/${branch}`),
-      })
-    }
+        worktree: wtByBranch.get(branch.name),
+        pr: prMap.get(`${repoLabel}/${branch.name}`),
+        // `*` from git branch (main worktree) OR checked out in a linked worktree
+        isCurrent: branch.isCurrent || currentBranches.has(branch.name),
+      }))
+    // ponytail: float current branch(es) to the top of their repo; stable otherwise.
+    repoItems.sort((a, b) => Number(b.isCurrent) - Number(a.isCurrent))
+    flatBranches.push(...repoItems)
   }
 
   return (
@@ -213,6 +232,7 @@ export default function BranchList() {
               repo={item.repoLabel}
               worktree={item.worktree}
               pr={item.pr}
+              isCurrent={item.isCurrent}
             />
           )
         })}
