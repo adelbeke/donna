@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { usePRStore } from '../../store/prStore'
 import { useBranchStore } from '../../store/branchStore'
 import { usePullRequests } from '../../hooks/useGitHubPRs'
+import { CopyWithFeedback } from '../shared/CopyWithFeedback'
 import type { Worktree } from '../../types/worktree'
 import type { PullRequest } from '../../types/github'
 
@@ -27,6 +28,7 @@ function BranchCard({
           {repo}
         </span>
         <span className="text-sm font-medium text-[var(--color-text-primary)] font-mono">{branch}</span>
+        <CopyWithFeedback text={branch} label="Copy branch name" />
         {worktree && (
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
             worktree
