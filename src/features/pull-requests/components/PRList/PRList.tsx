@@ -24,17 +24,19 @@ export function PRList() {
     totalCount,
     truncated,
   } = usePullRequests()
-  const filters = usePRStore((s) => s.filters)
-  const section = filters.section
+  const section = usePRStore((s) => s.section)
+  const viewFilters = usePRStore((s) => s.viewFilters)
+  const globalFilters = usePRStore((s) => s.globalFilters)
+  const currentView = viewFilters[section]
   const loadAllRef = useRef(false)
 
   const handleRefetch = () => void refetch()
 
   const hasActiveFilters =
-    filters.repos.length > 0 ||
-    (filters.hiddenAuthors?.length ?? 0) > 0 ||
-    filters.showDrafts ||
-    filters.search.length > 0
+    currentView.repos.length > 0 ||
+    globalFilters.hiddenAuthors.length > 0 ||
+    currentView.showDrafts ||
+    currentView.search.length > 0
 
   useEffect(() => {
     if (loadAllRef.current && hasNextPage && !isFetchingNextPage) {

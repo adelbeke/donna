@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { applyFilters } from './prFilters'
 import type { PullRequest } from '@/types/github'
-import type { PRFilters } from '../stores/prStore'
+import type { GlobalFilters, ViewFilters } from '../stores/prStore'
 
 const makePR = (login: string): PullRequest =>
   ({
@@ -16,58 +16,96 @@ const makePR = (login: string): PullRequest =>
     updatedAt: '2024-01-01T00:00:00Z',
   }) as unknown as PullRequest
 
-const baseFilters: PRFilters = {
-  section: 'review-requested',
-  showHidden: false,
-  showDrafts: true,
-  repos: [],
-  search: '',
+const baseGlobal: GlobalFilters = {
   hiddenAuthors: [],
+  hiddenRepos: [],
+  showHidden: false,
+}
+
+const baseView: ViewFilters = {
+  repos: [],
+  showDrafts: true,
+  search: '',
 }
 
 describe('applyFilters — hiddenAuthors exact match', () => {
   it('hides a PR whose author exactly matches a muted entry', () => {
     // GIVEN renovate is muted
-    const filters = { ...baseFilters, hiddenAuthors: ['renovate'] }
+    const global = { ...baseGlobal, hiddenAuthors: ['renovate'] }
     // WHEN filtering a PR by renovate
-    const actual = applyFilters([makePR('renovate')], filters)
+    const actual = applyFilters([makePR('renovate')], global, baseView)
     // THEN the PR is hidden
     expect(actual).toHaveLength(0)
   })
 
   it('does NOT hide a PR whose author only partially matches', () => {
     // GIVEN renovate is muted
-    const filters = { ...baseFilters, hiddenAuthors: ['renovate'] }
+    const global = { ...baseGlobal, hiddenAuthors: ['renovate'] }
     // WHEN filtering a PR by doctolib-renovate
-    const actual = applyFilters([makePR('doctolib-renovate')], filters)
+    const actual = applyFilters([makePR('doctolib-renovate')], global, baseView)
     // THEN the PR is visible
     expect(actual).toHaveLength(1)
   })
 
   it('is case-insensitive', () => {
     // GIVEN Renovate (capitalised) is muted
-    const filters = { ...baseFilters, hiddenAuthors: ['Renovate'] }
+    const global = { ...baseGlobal, hiddenAuthors: ['Renovate'] }
     // WHEN filtering a PR by renovate (lowercase)
-    const actual = applyFilters([makePR('renovate')], filters)
+    const actual = applyFilters([makePR('renovate')], global, baseView)
     // THEN the PR is hidden
     expect(actual).toHaveLength(0)
   })
 
   it('does not hide unrelated authors', () => {
     // GIVEN renovate is muted
-    const filters = { ...baseFilters, hiddenAuthors: ['renovate'] }
+    const global = { ...baseGlobal, hiddenAuthors: ['renovate'] }
     // WHEN filtering a PR by dependabot
-    const actual = applyFilters([makePR('dependabot')], filters)
+    const actual = applyFilters([makePR('dependabot')], global, baseView)
     // THEN the PR is visible
     expect(actual).toHaveLength(1)
   })
 
   it('shows muted-author PRs when showHidden is true', () => {
     // GIVEN renovate is muted but showHidden is on
-    const filters = { ...baseFilters, hiddenAuthors: ['renovate'], showHidden: true }
+    const global = { ...baseGlobal, hiddenAuthors: ['renovate'], showHidden: true }
     // WHEN filtering a PR by renovate
-    const actual = applyFilters([makePR('renovate')], filters)
+    const actual = applyFilters([makePR('renovate')], global, baseView)
     // THEN the PR is visible because showHidden overrides the mute
+    expect(actual).toHaveLength(1)
+  })
+})
+
+describe('applyFilters — hiddenRepos deny-list', () => {
+  const orgPR = {
+    ...makePR('author'),
+    repository: { nameWithOwner: 'myorg/awesome-repo' },
+  } as PullRequest
+
+  it('hides a PR by exact owner/repo match', () => {
+    // GIVEN myorg/awesome-repo is denied
+    const global = { ...baseGlobal, hiddenRepos: ['myorg/awesome-repo'] }
+    const actual = applyFilters([orgPR], global, baseView)
+    expect(actual).toHaveLength(0)
+  })
+
+  it('hides a PR by org-level match', () => {
+    // GIVEN myorg (all repos) is denied
+    const global = { ...baseGlobal, hiddenRepos: ['myorg'] }
+    const actual = applyFilters([orgPR], global, baseView)
+    expect(actual).toHaveLength(0)
+  })
+
+  it('does NOT hide a PR from a different org', () => {
+    // GIVEN otherapg is denied but PR is from myorg
+    const global = { ...baseGlobal, hiddenRepos: ['otherorg'] }
+    const actual = applyFilters([orgPR], global, baseView)
+    expect(actual).toHaveLength(1)
+  })
+
+  it('shows denied-repo PRs when showHidden is true', () => {
+    // GIVEN myorg is denied but showHidden is on
+    const global = { ...baseGlobal, hiddenRepos: ['myorg'], showHidden: true }
+    const actual = applyFilters([orgPR], global, baseView)
     expect(actual).toHaveLength(1)
   })
 })
@@ -77,48 +115,40 @@ describe('applyFilters — showDrafts', () => {
 
   it('hides draft PRs when showDrafts is false', () => {
     // GIVEN showDrafts is off
-    const filters = { ...baseFilters, showDrafts: false }
+    const view = { ...baseView, showDrafts: false }
     // WHEN filtering a draft PR
-    const actual = applyFilters([draftPR], filters)
+    const actual = applyFilters([draftPR], baseGlobal, view)
     // THEN the draft is hidden
     expect(actual).toHaveLength(0)
   })
 
   it('shows draft PRs when showDrafts is true', () => {
     // GIVEN showDrafts is on
-    const filters = { ...baseFilters, showDrafts: true }
-    // WHEN filtering a draft PR
-    const actual = applyFilters([draftPR], filters)
+    const actual = applyFilters([draftPR], baseGlobal, baseView)
     // THEN the draft is visible
     expect(actual).toHaveLength(1)
   })
 })
 
-describe('applyFilters — repos', () => {
+describe('applyFilters — repos allow-list', () => {
   const repoPR = { ...makePR('author'), repository: { nameWithOwner: 'org/repo-a' } } as PullRequest
 
   it('keeps PRs from selected repos', () => {
     // GIVEN org/repo-a is selected
-    const filters = { ...baseFilters, repos: ['org/repo-a'] }
-    // WHEN filtering
-    const actual = applyFilters([repoPR], filters)
-    // THEN the PR is included
+    const view = { ...baseView, repos: ['org/repo-a'] }
+    const actual = applyFilters([repoPR], baseGlobal, view)
     expect(actual).toHaveLength(1)
   })
 
   it('hides PRs from repos not in the selection', () => {
     // GIVEN org/repo-b is selected
-    const filters = { ...baseFilters, repos: ['org/repo-b'] }
-    // WHEN filtering a PR from org/repo-a
-    const actual = applyFilters([repoPR], filters)
-    // THEN the PR is excluded
+    const view = { ...baseView, repos: ['org/repo-b'] }
+    const actual = applyFilters([repoPR], baseGlobal, view)
     expect(actual).toHaveLength(0)
   })
 
   it('shows all repos when repos list is empty', () => {
-    // GIVEN no repo filter
-    const filters = { ...baseFilters, repos: [] }
-    const actual = applyFilters([repoPR], filters)
+    const actual = applyFilters([repoPR], baseGlobal, baseView)
     expect(actual).toHaveLength(1)
   })
 })
@@ -127,23 +157,20 @@ describe('applyFilters — search', () => {
   const pr = { ...makePR('author'), title: 'fix: update login flow' } as PullRequest
 
   it('matches PRs whose title contains the search string', () => {
-    // GIVEN search is "login"
-    const filters = { ...baseFilters, search: 'login' }
-    const actual = applyFilters([pr], filters)
+    const view = { ...baseView, search: 'login' }
+    const actual = applyFilters([pr], baseGlobal, view)
     expect(actual).toHaveLength(1)
   })
 
   it('is case-insensitive', () => {
-    // GIVEN search is "LOGIN"
-    const filters = { ...baseFilters, search: 'LOGIN' }
-    const actual = applyFilters([pr], filters)
+    const view = { ...baseView, search: 'LOGIN' }
+    const actual = applyFilters([pr], baseGlobal, view)
     expect(actual).toHaveLength(1)
   })
 
   it('excludes PRs that do not match', () => {
-    // GIVEN search is "payment"
-    const filters = { ...baseFilters, search: 'payment' }
-    const actual = applyFilters([pr], filters)
+    const view = { ...baseView, search: 'payment' }
+    const actual = applyFilters([pr], baseGlobal, view)
     expect(actual).toHaveLength(0)
   })
 })

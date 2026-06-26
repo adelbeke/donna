@@ -11,7 +11,7 @@ vi.mock('@/features/pull-requests/queries/useCheckContexts', () => ({
 }))
 
 import { usePullRequests } from '@/features/pull-requests/queries/useGitHubPRs'
-import { usePRStore, type PRFilters } from '@/features/pull-requests/stores/prStore'
+import { usePRStore } from '@/features/pull-requests/stores/prStore'
 const mockUsePullRequests = vi.mocked(usePullRequests)
 const mockUsePRStore = vi.mocked(usePRStore)
 
@@ -37,26 +37,28 @@ function makePR(id: string, title: string): PullRequest {
   }
 }
 
-function mockStoreFilters(filterOverrides: Record<string, unknown> = {}) {
+function mockStoreFilters(viewOverrides: Record<string, unknown> = {}) {
   mockUsePRStore.mockImplementation((selector) =>
     selector({
-      filters: {
-        section: 'review-requested',
-        repos: [],
-        hiddenAuthors: [],
-        showDrafts: false,
-        showHidden: false,
-        search: '',
-        ...filterOverrides,
-      } as PRFilters,
+      section: 'review-requested',
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+      viewFilters: {
+        'review-requested': { repos: [], showDrafts: false, search: '', ...viewOverrides },
+        authored: { repos: [], showDrafts: false, search: '' },
+        mentioned: { repos: [], showDrafts: false, search: '' },
+      },
       priorityIds: [],
       hiddenIds: [],
-      setFilters: vi.fn(),
+      setSection: vi.fn(),
+      setGlobalFilters: vi.fn(),
+      setViewFilters: vi.fn(),
       resetFilters: vi.fn(),
       toggleHide: vi.fn(),
       togglePriority: vi.fn(),
       addHiddenAuthor: vi.fn(),
       removeHiddenAuthor: vi.fn(),
+      addHiddenRepo: vi.fn(),
+      removeHiddenRepo: vi.fn(),
       setView: vi.fn(),
       view: 'prs' as const,
     })
@@ -190,7 +192,7 @@ describe('PRList', () => {
     })
 
     it('GIVEN hasNextPage and active filter THEN shows "Load all" button', () => {
-      mockStoreFilters({ repos: ['org/repo'] })
+      mockStoreFilters({ repos: ['org/repo'] }) // viewOverrides for review-requested
       const prs = [makePR('1', 'PR')]
       mockUsePullRequests.mockReturnValue({
         ...defaultQuery,

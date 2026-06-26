@@ -26,7 +26,7 @@ export function ButtonWithTooltip({
         {children}
       </button>
       <span
-        className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-xs rounded bg-[var(--color-surface-overlay)] text-[var(--color-text-primary)] whitespace-nowrap pointer-events-none transition-opacity ${tooltipClassName}`}
+        className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 text-xs rounded bg-[var(--color-surface-overlay)] text-[var(--color-text-primary)] whitespace-nowrap pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity ${tooltipClassName}`}
       >
         {label}
       </span>

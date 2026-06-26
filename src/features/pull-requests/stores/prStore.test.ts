@@ -3,13 +3,12 @@ import { usePRStore } from './prStore'
 
 beforeEach(() => {
   usePRStore.setState({
-    filters: {
-      section: 'review-requested',
-      repos: [],
-      hiddenAuthors: [],
-      showDrafts: false,
-      showHidden: false,
-      search: '',
+    section: 'review-requested',
+    globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+    viewFilters: {
+      'review-requested': { repos: [], showDrafts: false, search: '' },
+      authored: { repos: [], showDrafts: false, search: '' },
+      mentioned: { repos: [], showDrafts: false, search: '' },
     },
     priorityIds: [],
     hiddenIds: [],
@@ -17,11 +16,16 @@ beforeEach(() => {
 })
 
 describe('prStore', () => {
-  it('setFilters merges partial update', () => {
-    usePRStore.getState().setFilters({ search: 'foo' })
-    const { filters } = usePRStore.getState()
-    expect(filters.search).toBe('foo')
-    expect(filters.section).toBe('review-requested')
+  it('setViewFilters merges partial update', () => {
+    usePRStore.getState().setViewFilters('review-requested', { search: 'foo' })
+    const { viewFilters, section } = usePRStore.getState()
+    expect(viewFilters[section].search).toBe('foo')
+    expect(section).toBe('review-requested')
+  })
+
+  it('setSection changes the active section', () => {
+    usePRStore.getState().setSection('authored')
+    expect(usePRStore.getState().section).toBe('authored')
   })
 
   it('togglePriority adds an id', () => {
@@ -43,31 +47,53 @@ describe('prStore', () => {
 
   it('addHiddenAuthor adds a pattern', () => {
     usePRStore.getState().addHiddenAuthor('renovate')
-    expect(usePRStore.getState().filters.hiddenAuthors).toContain('renovate')
+    expect(usePRStore.getState().globalFilters.hiddenAuthors).toContain('renovate')
   })
 
   it('addHiddenAuthor normalizes to lowercase', () => {
     usePRStore.getState().addHiddenAuthor('Renovate')
-    expect(usePRStore.getState().filters.hiddenAuthors).toContain('renovate')
-    expect(usePRStore.getState().filters.hiddenAuthors).not.toContain('Renovate')
+    expect(usePRStore.getState().globalFilters.hiddenAuthors).toContain('renovate')
+    expect(usePRStore.getState().globalFilters.hiddenAuthors).not.toContain('Renovate')
   })
 
   it('addHiddenAuthor does not duplicate case-insensitively', () => {
     usePRStore.getState().addHiddenAuthor('Renovate')
     usePRStore.getState().addHiddenAuthor('renovate')
-    expect(usePRStore.getState().filters.hiddenAuthors).toHaveLength(1)
+    expect(usePRStore.getState().globalFilters.hiddenAuthors).toHaveLength(1)
   })
 
   it('removeHiddenAuthor removes an existing pattern', () => {
     usePRStore.getState().addHiddenAuthor('dependabot')
     usePRStore.getState().removeHiddenAuthor('dependabot')
-    expect(usePRStore.getState().filters.hiddenAuthors).not.toContain('dependabot')
+    expect(usePRStore.getState().globalFilters.hiddenAuthors).not.toContain('dependabot')
   })
 
   it('removeHiddenAuthor is a no-op for unknown pattern', () => {
     usePRStore.getState().addHiddenAuthor('renovate')
     usePRStore.getState().removeHiddenAuthor('unknown')
-    expect(usePRStore.getState().filters.hiddenAuthors).toHaveLength(1)
+    expect(usePRStore.getState().globalFilters.hiddenAuthors).toHaveLength(1)
+  })
+
+  it('addHiddenRepo adds a repo', () => {
+    usePRStore.getState().addHiddenRepo('myorg/repo')
+    expect(usePRStore.getState().globalFilters.hiddenRepos).toContain('myorg/repo')
+  })
+
+  it('addHiddenRepo normalizes to lowercase', () => {
+    usePRStore.getState().addHiddenRepo('MyOrg/Repo')
+    expect(usePRStore.getState().globalFilters.hiddenRepos).toContain('myorg/repo')
+  })
+
+  it('addHiddenRepo does not duplicate', () => {
+    usePRStore.getState().addHiddenRepo('myorg/repo')
+    usePRStore.getState().addHiddenRepo('myorg/repo')
+    expect(usePRStore.getState().globalFilters.hiddenRepos).toHaveLength(1)
+  })
+
+  it('removeHiddenRepo removes an existing repo', () => {
+    usePRStore.getState().addHiddenRepo('myorg/repo')
+    usePRStore.getState().removeHiddenRepo('myorg/repo')
+    expect(usePRStore.getState().globalFilters.hiddenRepos).not.toContain('myorg/repo')
   })
 
   it('toggleHide adds id when not hidden', () => {
@@ -81,15 +107,15 @@ describe('prStore', () => {
     expect(usePRStore.getState().hiddenIds).not.toContain('pr-1')
   })
 
-  it('resetFilters resets all filters to defaults', () => {
-    usePRStore.getState().setFilters({ search: 'foo', section: 'authored', showDrafts: true })
+  it('resetFilters resets only the current section view filters', () => {
+    usePRStore.getState().setViewFilters('review-requested', { search: 'foo', showDrafts: true, repos: ['org/repo'] })
+    usePRStore.getState().addHiddenAuthor('renovate')
     usePRStore.getState().resetFilters()
-    const { filters } = usePRStore.getState()
-    expect(filters.search).toBe('')
-    expect(filters.section).toBe('review-requested')
-    expect(filters.showDrafts).toBe(false)
-    expect(filters.repos).toEqual([])
-    expect(filters.hiddenAuthors).toEqual([])
-    expect(filters.showHidden).toBe(false)
+    const { viewFilters, globalFilters } = usePRStore.getState()
+    expect(viewFilters['review-requested'].search).toBe('')
+    expect(viewFilters['review-requested'].showDrafts).toBe(false)
+    expect(viewFilters['review-requested'].repos).toEqual([])
+    // global filters are preserved
+    expect(globalFilters.hiddenAuthors).toContain('renovate')
   })
 })

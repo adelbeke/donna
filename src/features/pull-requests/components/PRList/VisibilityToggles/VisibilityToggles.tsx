@@ -1,17 +1,23 @@
 import { usePRStore } from '@/features/pull-requests/stores/prStore.ts'
 
 export function VisibilityToggles() {
-  const { filters, setFilters } = usePRStore()
+  const section = usePRStore((s) => s.section)
+  const globalFilters = usePRStore((s) => s.globalFilters)
+  const setGlobalFilters = usePRStore((s) => s.setGlobalFilters)
+  const viewFilters = usePRStore((s) => s.viewFilters)
+  const setViewFilters = usePRStore((s) => s.setViewFilters)
   const hiddenIds = usePRStore((s) => s.hiddenIds)
+
+  const showDrafts = viewFilters[section].showDrafts
 
   return (
     <div className="flex items-center gap-1">
       <button
-        onClick={() => setFilters({ showDrafts: !filters.showDrafts })}
-        title={filters.showDrafts ? 'Hide drafts' : 'Show drafts'}
+        onClick={() => setViewFilters(section, { showDrafts: !showDrafts })}
+        title={showDrafts ? 'Hide drafts' : 'Show drafts'}
         className={`text-xs px-2 py-0.5 rounded transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none
           ${
-            filters.showDrafts
+            showDrafts
               ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-overlay)]'
           }`}
@@ -19,11 +25,11 @@ export function VisibilityToggles() {
         Drafts
       </button>
       <button
-        onClick={() => setFilters({ showHidden: !filters.showHidden })}
-        title={filters.showHidden ? 'Hide hidden PRs' : 'Show hidden PRs'}
+        onClick={() => setGlobalFilters({ showHidden: !globalFilters.showHidden })}
+        title={globalFilters.showHidden ? 'Hide hidden PRs' : 'Show hidden PRs'}
         className={`text-xs px-2 py-0.5 rounded transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none
           ${
-            filters.showHidden
+            globalFilters.showHidden
               ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-overlay)]'
           }`}
