@@ -66,8 +66,8 @@ export function usePullRequests() {
 
   const currentView = viewFilters[section]
   const filtered = useMemo(
-    () => applyFilters(allNodes, globalFilters, currentView),
-    [allNodes, globalFilters, currentView]
+    () => applyFilters(allNodes, globalFilters, currentView, section),
+    [allNodes, globalFilters, currentView, section]
   )
   const { priorityPRs, regular } = useMemo(
     () => sortAndPartition(filtered, priorityIds),

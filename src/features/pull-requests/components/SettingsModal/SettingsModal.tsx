@@ -29,7 +29,10 @@ export function SettingsModal() {
   }, [open])
 
   const activeCount =
-    currentView.repos.length + globalFilters.hiddenAuthors.length + globalFilters.hiddenRepos.length
+    currentView.repos.length +
+    (section !== 'authored'
+      ? globalFilters.hiddenAuthors.length + globalFilters.hiddenRepos.length
+      : 0)
 
   function toggleRepo(repo: string) {
     setViewFilters(section, {
