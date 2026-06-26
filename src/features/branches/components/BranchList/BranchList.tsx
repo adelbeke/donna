@@ -1,7 +1,7 @@
 import { useQueries } from '@tanstack/react-query'
 import { FolderPlus, RefreshCw, X } from 'lucide-react'
 import { useMemo } from 'react'
-import { usePRStore, usePullRequests } from '@/features/pull-requests/exports'
+import { usePullRequests } from '@/features/pull-requests/exports'
 import { useBranchStore } from '../../stores/branchStore'
 import type { Worktree } from '../../types'
 import type { PullRequest } from '@/types/github'
@@ -11,7 +11,7 @@ const REPO_HUES = [210, 140, 30, 280, 180, 60, 320, 260]
 
 export function BranchList() {
   const { localPaths, addLocalPath, removeLocalPath } = useBranchStore()
-  const { filters } = usePRStore()
+  const { branchSearch } = useBranchStore()
   const { allPRs } = usePullRequests()
 
   const branchQueries = useQueries({
@@ -115,7 +115,7 @@ export function BranchList() {
     const mainBranch = (worktrees ?? []).find((wt) => wt.isMain)?.branch ?? ''
 
     for (const branch of (branches ?? []).filter(
-      (b) => !filters.search || b.toLowerCase().includes(filters.search.toLowerCase())
+      (b) => !branchSearch || b.toLowerCase().includes(branchSearch.toLowerCase())
     )) {
       flatBranches.push({
         key: `${localPath}/${branch}`,

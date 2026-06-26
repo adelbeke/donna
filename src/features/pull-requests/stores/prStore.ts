@@ -15,7 +15,7 @@ export interface ViewFilters {
   search: string
 }
 
-interface PRStore {
+export interface PRStore {
   view: 'prs' | 'branches'
   section: PRSection
   globalFilters: GlobalFilters
@@ -144,6 +144,8 @@ export const usePRStore = create<PRStore>()(
           ...(p.section ? { section: p.section } : {}),
           globalFilters: { ...current.globalFilters, ...(p.globalFilters ?? {}) },
           viewFilters: { ...current.viewFilters, ...(p.viewFilters ?? {}) },
+          priorityIds: p.priorityIds ?? current.priorityIds,
+          hiddenIds: p.hiddenIds ?? current.hiddenIds,
         }
       },
     }
