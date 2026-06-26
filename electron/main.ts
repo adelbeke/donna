@@ -7,12 +7,9 @@ import path from 'node:path'
 const execFileAsync = promisify(execFile)
 
 // ponytail: augment PATH so macOS .app bundles find gh via Homebrew/nix paths
-const GH_PATH = [
-  '/opt/homebrew/bin',
-  '/usr/local/bin',
-  '/usr/bin',
-  process.env.PATH,
-].filter(Boolean).join(':')
+const GH_PATH = ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', process.env.PATH]
+  .filter(Boolean)
+  .join(':')
 
 function runGh(args: string[], stdinData?: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -59,30 +56,80 @@ function gitError(e: unknown): Error {
 
 ipcMain.handle('worktrees:list', async (_e, repoPath: string) => {
   try {
-    const { stdout } = await execFileAsync('git', ['-C', repoPath, 'worktree', 'list', '--porcelain'])
+    const { stdout } = await execFileAsync('git', [
+      '-C',
+      repoPath,
+      'worktree',
+      'list',
+      '--porcelain',
+    ])
     const worktrees = parseWorktrees(stdout)
-    return await Promise.all(worktrees.map(async (wt) => {
-      try {
-        const { stdout: status } = await execFileAsync('git', ['-C', wt.path, 'status', '--porcelain'])
-        return { ...wt, isDirty: status.trim().length > 0 }
-      } catch {
-        return { ...wt, isDirty: false }
-      }
-    }))
-  } catch (e) { throw gitError(e) }
+    return await Promise.all(
+      worktrees.map(async (wt) => {
+        try {
+          const { stdout: status } = await execFileAsync('git', [
+            '-C',
+            wt.path,
+            'status',
+            '--porcelain',
+          ])
+          return { ...wt, isDirty: status.trim().length > 0 }
+        } catch {
+          return { ...wt, isDirty: false }
+        }
+      })
+    )
+  } catch (e) {
+    throw gitError(e)
+  }
 })
 
 ipcMain.handle('branches:list', async (_e, repoPath: string) => {
   try {
-    // %(HEAD) emits '*' for the branch checked out in this (main) worktree, ' ' otherwise.
-    const { stdout } = await execFileAsync('git', ['-C', repoPath, 'branch', '--format=%(HEAD)\t%(refname:short)'])
-    return stdout.trim().split('\n').filter(Boolean).map((line) => {
-      const tabIdx = line.indexOf('\t')
-      return { name: line.slice(tabIdx + 1), isCurrent: line.slice(0, tabIdx) === '*' }
-    // ponytail: drop the detached-HEAD pseudo-entry ("(HEAD detached at …)") — not a real, switchable branch.
-    }).filter((b) => !b.name.startsWith('('))
-  } catch (e) { throw gitError(e) }
+    const { stdout } = await execFileAsync('git', [
+      '-C',
+      repoPath,
+      'branch',
+      '--format=%(refname:short)',
+    ])
+    return stdout.trim().split('\n').filter(Boolean)
+  } catch (e) {
+    throw gitError(e)
+  }
 })
+
+ipcMain.handle('branches:switchToDefault', async (_e, repoPath: string) => {
+  try {
+    await execFileAsync('git', ['-C', repoPath, 'switch', 'main'])
+  } catch {
+    try {
+      await execFileAsync('git', ['-C', repoPath, 'switch', 'master'])
+    } catch (e) {
+      throw gitError(e)
+    }
+  }
+})
+
+ipcMain.handle('branches:delete', async (_e, repoPath: string, branch: string) => {
+  try {
+    await execFileAsync('git', ['-C', repoPath, 'branch', '-d', branch])
+  } catch (e) {
+    throw gitError(e)
+  }
+})
+
+ipcMain.handle(
+  'worktrees:remove',
+  async (_e, repoPath: string, worktreePath: string, force: boolean) => {
+    try {
+      const args = ['-C', repoPath, 'worktree', 'remove', worktreePath]
+      if (force) args.splice(4, 0, '--force')
+      await execFileAsync('git', args)
+    } catch (e) {
+      throw gitError(e)
+    }
+  }
+)
 
 ipcMain.handle('dialog:open', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
@@ -140,13 +187,17 @@ function createWindow() {
 }
 
 ipcMain.handle('update:install', () => autoUpdater.quitAndInstall())
+// ponytail: flag so the banner can catch updates downloaded before it mounts
+let updateDownloaded = false
+ipcMain.handle('update:is-downloaded', () => updateDownloaded)
 
 app.whenReady().then(() => {
   createWindow()
   if (app.isPackaged) {
     autoUpdater.checkForUpdates()
     autoUpdater.on('update-downloaded', () => {
-      BrowserWindow.getAllWindows().forEach(w => w.webContents.send('update:downloaded'))
+      updateDownloaded = true
+      BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('update:downloaded'))
     })
   }
 })

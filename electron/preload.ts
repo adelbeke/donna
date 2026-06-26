@@ -8,10 +8,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
     rest: (path: string): Promise<unknown> => ipcRenderer.invoke('gh:rest', path),
   },
   branches: {
-    list: (repoPath: string): Promise<unknown[]> => ipcRenderer.invoke('branches:list', repoPath),
+    list: (repoPath: string): Promise<string[]> => ipcRenderer.invoke('branches:list', repoPath),
+    delete: (repoPath: string, branch: string): Promise<void> =>
+      ipcRenderer.invoke('branches:delete', repoPath, branch),
+    switchToDefault: (repoPath: string): Promise<void> =>
+      ipcRenderer.invoke('branches:switchToDefault', repoPath),
   },
   worktrees: {
     list: (repoPath: string): Promise<unknown[]> => ipcRenderer.invoke('worktrees:list', repoPath),
+    remove: (repoPath: string, worktreePath: string, force: boolean): Promise<void> =>
+      ipcRenderer.invoke('worktrees:remove', repoPath, worktreePath, force),
   },
   dialog: {
     openDirectory: (): Promise<string | null> => ipcRenderer.invoke('dialog:open'),
@@ -19,5 +25,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updater: {
     onUpdateDownloaded: (cb: () => void) => ipcRenderer.on('update:downloaded', cb),
     installUpdate: (): Promise<void> => ipcRenderer.invoke('update:install'),
+    isUpdateDownloaded: (): Promise<boolean> => ipcRenderer.invoke('update:is-downloaded'),
   },
 })

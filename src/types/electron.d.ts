@@ -4,14 +4,20 @@ interface Window {
   electronAPI?: {
     gh: {
       isInstalled: () => Promise<boolean>
-      graphql: (query: string, variables: Record<string, unknown>) => Promise<{ data: unknown; errors?: { message: string }[] }>
+      graphql: (
+        query: string,
+        variables: Record<string, unknown>
+      ) => Promise<{ data: unknown; errors?: { message: string }[] }>
       rest: (path: string) => Promise<unknown>
     }
     branches: {
-      list: (repoPath: string) => Promise<import('./worktree').Branch[]>
+      list: (repoPath: string) => Promise<string[]>
+      delete: (repoPath: string, branch: string) => Promise<void>
+      switchToDefault: (repoPath: string) => Promise<void>
     }
     worktrees: {
-      list: (repoPath: string) => Promise<import('./worktree').Worktree[]>
+      list: (repoPath: string) => Promise<import('../features/branches/types').Worktree[]>
+      remove: (repoPath: string, worktreePath: string, force: boolean) => Promise<void>
     }
     dialog: {
       openDirectory: () => Promise<string | null>
@@ -19,6 +25,7 @@ interface Window {
     updater: {
       onUpdateDownloaded: (cb: () => void) => void
       installUpdate: () => Promise<void>
+      isUpdateDownloaded: () => Promise<boolean>
     }
   }
 }
