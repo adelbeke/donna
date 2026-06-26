@@ -194,11 +194,13 @@ ipcMain.handle('update:is-downloaded', () => updateDownloaded)
 app.whenReady().then(() => {
   createWindow()
   if (app.isPackaged) {
-    autoUpdater.checkForUpdates()
+    // ponytail: error listener required — Node throws on unhandled 'error' events
+    autoUpdater.on('error', (err) => console.error('[updater]', err.message))
     autoUpdater.on('update-downloaded', () => {
       updateDownloaded = true
       BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('update:downloaded'))
     })
+    autoUpdater.checkForUpdates()?.catch((err) => console.error('[updater]', err.message))
   }
 })
 app.on('window-all-closed', () => {
