@@ -1,7 +1,7 @@
 import { SearchInput } from '@/shared/components/SearchInput/SearchInput.tsx'
 import { usePRStore } from '@/features/pull-requests/stores/prStore.ts'
 import type { ChangeEvent } from 'react'
-import { Filters } from '@/features/pull-requests/components/Filters/Filters.tsx'
+import { PRSectionsTabs } from '@/features/pull-requests/components/PRSectionsTabs/PRSectionsTabs.tsx'
 import { PRList } from '@/features/pull-requests/components/PRList/PRList.tsx'
 import { SettingsModal } from '@/features/pull-requests/components/SettingsModal/SettingsModal.tsx'
 
@@ -33,7 +33,7 @@ export function PRDashboard() {
         <SettingsModal />
       </div>
       <div className="flex gap-8">
-        <Filters />
+        <PRSectionsTabs />
         <PRList />
       </div>
     </div>

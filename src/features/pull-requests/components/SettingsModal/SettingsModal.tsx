@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Settings, X } from 'lucide-react'
 import { usePRStore } from '../../stores/prStore'
 import { usePullRequests } from '../../queries/useGitHubPRs'
+import { isRepoMatchedBy } from '../../lib/prFilters'
 import { ButtonWithTooltip } from '@/shared/components/ui/ButtonWithTooltip'
 
 export function SettingsModal() {
@@ -115,14 +116,7 @@ export function SettingsModal() {
                   </div>
                   <div className="space-y-0.5 max-h-48 overflow-y-auto">
                     {repos
-                      .filter(
-                        (r) =>
-                          !globalFilters.hiddenRepos.some((h) =>
-                            h.includes('/')
-                              ? r.toLowerCase() === h
-                              : r.toLowerCase().split('/')[0] === h
-                          )
-                      )
+                      .filter((r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h)))
                       .map((repo) => {
                         const selected = currentView.repos.includes(repo)
                         return (

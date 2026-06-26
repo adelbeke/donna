@@ -1,6 +1,12 @@
 import type { PullRequest } from '@/types/github'
 import type { GlobalFilters, PRSection, ViewFilters } from '../stores/prStore'
 
+// supports "owner/repo" (exact) or "owner" (org-wide)
+export function isRepoMatchedBy(repoNameWithOwner: string, pattern: string): boolean {
+  const repo = repoNameWithOwner.toLowerCase()
+  return pattern.includes('/') ? repo === pattern : repo.split('/')[0] === pattern
+}
+
 export function applyFilters(
   nodes: PullRequest[],
   global: GlobalFilters,
@@ -18,11 +24,7 @@ export function applyFilters(
         return false
       if (
         !global.showHidden &&
-        global.hiddenRepos.some((r) => {
-          const repo = pr.repository.nameWithOwner.toLowerCase()
-          // supports "owner/repo" (exact) or "owner" (org-wide)
-          return r.includes('/') ? repo === r : repo.split('/')[0] === r
-        })
+        global.hiddenRepos.some((r) => isRepoMatchedBy(pr.repository.nameWithOwner, r))
       )
         return false
     }

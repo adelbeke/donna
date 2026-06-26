@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { applyFilters } from './prFilters'
+import { applyFilters, isRepoMatchedBy } from './prFilters'
 import type { PullRequest } from '@/types/github'
 import type { GlobalFilters, ViewFilters } from '../stores/prStore'
 
@@ -81,6 +81,21 @@ describe('applyFilters — hiddenAuthors exact match', () => {
     const actual = applyFilters([makePR('renovate')], global, baseView, 'authored')
     // THEN PR still shows (you authored it, you should see it)
     expect(actual).toHaveLength(1)
+  })
+})
+
+describe('isRepoMatchedBy', () => {
+  it('matches exact owner/repo', () => {
+    expect(isRepoMatchedBy('myorg/repo', 'myorg/repo')).toBe(true)
+  })
+  it('matches org-wide pattern', () => {
+    expect(isRepoMatchedBy('myorg/repo', 'myorg')).toBe(true)
+  })
+  it('does not match a different org', () => {
+    expect(isRepoMatchedBy('myorg/repo', 'otherorg')).toBe(false)
+  })
+  it('does not match a partial repo name without slash', () => {
+    expect(isRepoMatchedBy('myorg/repo', 'myorg/rep')).toBe(false)
   })
 })
 
