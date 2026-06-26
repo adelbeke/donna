@@ -59,7 +59,11 @@ export const BranchCard = ({
   }
 
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-3 space-y-2">
+    <div
+      className={`rounded-lg border bg-[var(--color-surface-raised)] px-4 py-3 space-y-2 ${
+        isCurrentBranch ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'
+      }`}
+    >
       <div className="flex items-center gap-2 flex-wrap">
         <span
           style={{
