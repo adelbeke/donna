@@ -61,9 +61,7 @@ export function BranchCard({
   return (
     <div
       className={`rounded-lg border bg-[var(--color-surface-raised)] px-4 py-3 space-y-2 ${
-        isCurrentBranch
-          ? 'border-l-2 border-l-[var(--color-accent)] border-y-[var(--color-border)] border-r-[var(--color-border)]'
-          : 'border-[var(--color-border)]'
+        isCurrentBranch ? 'border-[var(--color-accent)]' : 'border-[var(--color-border)]'
       }`}
     >
       <div className="flex items-center gap-2 flex-wrap">
