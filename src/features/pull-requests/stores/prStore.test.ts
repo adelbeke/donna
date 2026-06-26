@@ -108,7 +108,9 @@ describe('prStore', () => {
   })
 
   it('resetFilters resets only the current section view filters', () => {
-    usePRStore.getState().setViewFilters('review-requested', { search: 'foo', showDrafts: true, repos: ['org/repo'] })
+    usePRStore
+      .getState()
+      .setViewFilters('review-requested', { search: 'foo', showDrafts: true, repos: ['org/repo'] })
     usePRStore.getState().addHiddenAuthor('renovate')
     usePRStore.getState().resetFilters()
     const { viewFilters, globalFilters } = usePRStore.getState()
