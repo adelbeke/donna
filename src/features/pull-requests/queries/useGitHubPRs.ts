@@ -23,14 +23,16 @@ interface SearchResult {
 export function usePullRequests() {
   const token = useAuthStore((s) => s.token)
   const user = useAuthStore((s) => s.user)
-  const filters = usePRStore((s) => s.filters)
+  const section = usePRStore((s) => s.section)
+  const globalFilters = usePRStore((s) => s.globalFilters)
+  const viewFilters = usePRStore((s) => s.viewFilters)
   const priorityIds = usePRStore((s) => s.priorityIds)
   const hiddenIds = usePRStore((s) => s.hiddenIds)
 
-  const searchQuery = buildSearchQuery(filters.section, user?.login ?? '')
+  const searchQuery = buildSearchQuery(section, user?.login ?? '')
 
   const query = useInfiniteQuery<SearchResult>({
-    queryKey: ['prs', filters.section, user?.login],
+    queryKey: ['prs', section, user?.login],
     enabled: !!token && !!user,
     staleTime: 60_000,
     initialPageParam: null,
@@ -62,7 +64,11 @@ export function usePullRequests() {
     [query.data, user, priorityIds, hiddenIds]
   )
 
-  const filtered = useMemo(() => applyFilters(allNodes, filters), [allNodes, filters])
+  const currentView = viewFilters[section]
+  const filtered = useMemo(
+    () => applyFilters(allNodes, globalFilters, currentView, section),
+    [allNodes, globalFilters, currentView, section]
+  )
   const { priorityPRs, regular } = useMemo(
     () => sortAndPartition(filtered, priorityIds),
     [filtered, priorityIds]

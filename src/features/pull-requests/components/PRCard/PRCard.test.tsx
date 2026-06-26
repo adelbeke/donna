@@ -30,18 +30,7 @@ const pr: PullRequest = {
 }
 
 beforeEach(() => {
-  usePRStore.setState({
-    priorityIds: [],
-    hiddenIds: [],
-    filters: {
-      section: 'review-requested',
-      repos: [],
-      hiddenAuthors: [],
-      showDrafts: false,
-      showHidden: false,
-      search: '',
-    },
-  })
+  usePRStore.setState({ priorityIds: [], hiddenIds: [] })
 })
 
 describe('PRCard', () => {

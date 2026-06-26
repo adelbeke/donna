@@ -1,19 +1,36 @@
 import type { PullRequest } from '@/types/github'
-import type { PRFilters } from '../stores/prStore'
+import type { GlobalFilters, PRSection, ViewFilters } from '../stores/prStore'
 
-export function applyFilters(nodes: PullRequest[], filters: PRFilters): PullRequest[] {
+// supports "owner/repo" (exact) or "owner" (org-wide)
+export function isRepoMatchedBy(repoNameWithOwner: string, pattern: string): boolean {
+  const repo = repoNameWithOwner.toLowerCase()
+  return pattern.includes('/') ? repo === pattern : repo.split('/')[0] === pattern
+}
+
+export function applyFilters(
+  nodes: PullRequest[],
+  global: GlobalFilters,
+  view: ViewFilters,
+  section: PRSection
+): PullRequest[] {
   return nodes.filter((pr) => {
-    if (!filters.showHidden && pr.isHidden) return false
-    if (
-      !filters.showHidden &&
-      pr.author &&
-      filters.hiddenAuthors.some((p) => pr.author!.login.toLowerCase() === p.toLowerCase())
-    )
-      return false
-    if (!filters.showDrafts && pr.isDraft) return false
-    if (filters.repos.length && !filters.repos.includes(pr.repository.nameWithOwner)) return false
-    if (filters.search && !pr.title.toLowerCase().includes(filters.search.toLowerCase()))
-      return false
+    if (!global.showHidden && pr.isHidden) return false
+    if (section !== 'authored') {
+      if (
+        !global.showHidden &&
+        pr.author &&
+        global.hiddenAuthors.some((p) => pr.author!.login.toLowerCase() === p.toLowerCase())
+      )
+        return false
+      if (
+        !global.showHidden &&
+        global.hiddenRepos.some((r) => isRepoMatchedBy(pr.repository.nameWithOwner, r))
+      )
+        return false
+    }
+    if (!view.showDrafts && pr.isDraft) return false
+    if (view.repos.length && !view.repos.includes(pr.repository.nameWithOwner)) return false
+    if (view.search && !pr.title.toLowerCase().includes(view.search.toLowerCase())) return false
     return true
   })
 }
