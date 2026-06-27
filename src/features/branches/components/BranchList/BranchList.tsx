@@ -15,8 +15,8 @@ export function BranchList() {
   const { allPRs } = usePullRequests()
 
   useEffect(() => {
-    window.electronAPI!.dirs
-      .filterExisting(localPaths)
+    window
+      .electronAPI!.dirs.filterExisting(localPaths)
       .then((existing) => {
         localPaths.filter((p) => !existing.includes(p)).forEach(removeLocalPath)
       })

@@ -190,7 +190,12 @@ function createWindow() {
 ipcMain.handle('dirs:filter-existing', async (_e, paths: string[]) => {
   if (!Array.isArray(paths)) return []
   const results = await Promise.all(
-    paths.map((p) => fs.promises.access(p).then(() => p).catch(() => null))
+    paths.map((p) =>
+      fs.promises
+        .access(p)
+        .then(() => p)
+        .catch(() => null)
+    )
   )
   return results.filter((p): p is string => p !== null)
 })
