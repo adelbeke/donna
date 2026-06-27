@@ -19,6 +19,7 @@
   --color-danger-subtle: #3d1010;
   --color-priority: #bf91f3;
   --color-priority-subtle: #2d1f4e;
+  --color-overlay: rgba(0, 0, 0, 0.4);
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
   --shadow-card-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
 }
@@ -47,6 +48,7 @@ body {
   --color-danger-subtle: #ffebe9;
   --color-priority: #8250df;
   --color-priority-subtle: #fbefff;
+  --color-overlay: rgba(0, 0, 0, 0.25);
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   --shadow-card-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
 }

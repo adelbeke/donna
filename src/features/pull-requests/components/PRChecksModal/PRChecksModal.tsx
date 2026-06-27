@@ -46,7 +46,7 @@ export function PRChecksModal({ isOpen, prTitle, checks, rollupState, onClose, i
           )
         })
       )}
-      {(rollupState === 'PENDING' || rollupState === 'EXPECTED') && (
+      {!isLoading && (rollupState === 'PENDING' || rollupState === 'EXPECTED') && (
         <div className="flex items-center gap-2 px-3 py-1.5 border-t border-[var(--color-border)]">
           <Clock size={12} className="text-[var(--color-warning)] shrink-0" />
           <span className="text-xs text-[var(--color-text-muted)]">
