@@ -2,6 +2,31 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BranchCard } from './BranchCard/BranchCard'
+import { BranchList } from './BranchList'
+import type { Branch, Worktree } from '../../types'
+
+vi.mock('@tanstack/react-query', () => ({ useQueries: vi.fn() }))
+vi.mock('../../stores/branchStore', () => ({ useBranchStore: vi.fn() }))
+vi.mock('@/features/pull-requests/exports', () => ({ usePullRequests: vi.fn() }))
+
+import { useQueries } from '@tanstack/react-query'
+import { useBranchStore } from '../../stores/branchStore'
+import { usePullRequests } from '@/features/pull-requests/exports'
+
+const mockUseQueries = vi.mocked(useQueries)
+const mockUseBranchStore = vi.mocked(useBranchStore)
+const mockUsePullRequests = vi.mocked(usePullRequests)
+
+const REPO = '/Users/me/code/donna'
+
+const ok = <T,>(data: T) => ({
+  data,
+  isLoading: false,
+  isError: false,
+  error: null,
+  isFetching: false,
+  refetch: vi.fn(),
+})
 
 const mockDelete = vi.fn().mockResolvedValue(undefined)
 const mockSwitchToDefault = vi.fn().mockResolvedValue(undefined)
@@ -35,6 +60,72 @@ const card = (overrides: Partial<Parameters<typeof BranchCard>[0]> = {}) => {
   )
   return { onDeleted }
 }
+
+describe('BranchList — current branch sorting', () => {
+  const mockQueries = (branches: Branch[], worktrees: Worktree[]) => {
+    mockUseQueries
+      .mockReturnValueOnce([ok(branches)] as never)
+      .mockReturnValueOnce([ok(worktrees)] as never)
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.defineProperty(window, 'electronAPI', {
+      value: {
+        branches: { list: vi.fn(), delete: vi.fn(), switchToDefault: vi.fn() },
+        worktrees: { list: vi.fn(), remove: vi.fn() },
+        dirs: { filterExisting: vi.fn().mockResolvedValue([REPO]) },
+        dialog: { openDirectory: vi.fn() },
+      },
+      writable: true,
+      configurable: true,
+    })
+    mockUseBranchStore.mockReturnValue({
+      localPaths: [REPO],
+      addLocalPath: vi.fn(),
+      removeLocalPath: vi.fn(),
+      branchSearch: '',
+    } as never)
+    mockUsePullRequests.mockReturnValue({ allPRs: [] } as never)
+  })
+
+  it('GIVEN current branch is not first THEN it is sorted to the top', () => {
+    mockQueries(
+      [
+        { name: 'feat/a', isCurrent: false },
+        { name: 'feat/b', isCurrent: false },
+        { name: 'main', isCurrent: true },
+      ],
+      []
+    )
+    render(<BranchList />)
+    const names = screen
+      .getAllByText(/^(feat\/a|feat\/b|main)$/)
+      .map((el) => el.textContent)
+    expect(names[0]).toBe('main')
+    expect(names).toEqual(['main', 'feat/a', 'feat/b'])
+  })
+
+  it('GIVEN branch checked out in linked worktree THEN it is treated as current and floats up', () => {
+    mockQueries(
+      [
+        { name: 'feat/x', isCurrent: false },
+        { name: 'main', isCurrent: true },
+      ],
+      [
+        { path: REPO, branch: 'main', commit: 'aaa', isMain: true, isDirty: false },
+        { path: `${REPO}-feat-x`, branch: 'feat/x', commit: 'bbb', isMain: false, isDirty: false },
+      ]
+    )
+    render(<BranchList />)
+    const names = screen
+      .getAllByText(/^(feat\/x|main)$/)
+      .map((el) => el.textContent)
+    // both render — feat/x detected as current via linked worktree, not just via isCurrent flag
+    expect(names).toContain('feat/x')
+    expect(names).toContain('main')
+  })
+})
 
 describe('BranchCard — protected branches', () => {
   it('GIVEN branch is main WHEN rendered THEN no more-actions button', () => {

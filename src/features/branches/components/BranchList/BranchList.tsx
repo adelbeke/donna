@@ -3,7 +3,7 @@ import { FolderPlus, RefreshCw, X } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { usePullRequests } from '@/features/pull-requests/exports'
 import { useBranchStore } from '../../stores/branchStore'
-import type { Branch, Worktree } from '../../types'
+import type { Worktree } from '../../types'
 import type { PullRequest } from '@/types/github'
 import { BranchCard } from '@/features/branches/components/BranchList/BranchCard/BranchCard.tsx'
 
@@ -126,7 +126,7 @@ export const BranchList = () => {
       if (wt.branch && !wt.isMain) wtByBranch.set(wt.branch, wt)
     }
 
-    const repoItems = (branches as Branch[] ?? [])
+    const repoItems = (branches ?? [])
       .filter((b) => !branchSearch || b.name.toLowerCase().includes(branchSearch.toLowerCase()))
       .map((branch) => ({
         key: `${localPath}/${branch.name}`,
