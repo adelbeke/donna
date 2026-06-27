@@ -218,14 +218,14 @@ export function PRCard({ pr, isAuthored = false }: Props) {
                     {ciBadge.icon}
                     {ciBadge.label}
                   </button>
-                  {checksOpen && (
-                    <PRChecksModal
-                      checks={checks}
-                      isLoading={checksLoading}
-                      rollupState={checkState}
-                      onClose={() => setChecksOpen(false)}
-                    />
-                  )}
+                  <PRChecksModal
+                    isOpen={checksOpen}
+                    prTitle={pr.title}
+                    checks={checks}
+                    isLoading={checksLoading}
+                    rollupState={checkState}
+                    onClose={() => setChecksOpen(false)}
+                  />
                 </div>
               )}
 

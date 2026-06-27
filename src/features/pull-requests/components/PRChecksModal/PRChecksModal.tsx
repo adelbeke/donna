@@ -1,33 +1,20 @@
-import { useRef, useEffect } from 'react'
 import { Clock, ExternalLink } from 'lucide-react'
 import type { CheckRunContext, StatusContextItem, CheckRollupState } from '@/types/github.ts'
 import {PRCheckIcon} from "@/features/pull-requests/components/PRChecksModal/PRCheckIcon.tsx";
+import {Modal} from "@/shared/components/ui/Modal.tsx";
 
 interface Props {
+  isOpen: boolean
+  prTitle: string
   checks: (CheckRunContext | StatusContextItem)[]
   rollupState?: CheckRollupState | null
   onClose: () => void
   isLoading?: boolean
 }
 
-export function PRChecksModal({ checks, rollupState, onClose, isLoading }: Props) {
-  const panelRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        onClose()
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [onClose])
-
+export function PRChecksModal({ isOpen, prTitle, checks, rollupState, onClose, isLoading }: Props) {
   return (
-    <div
-      ref={panelRef}
-      className="absolute left-0 top-full mt-1 z-50 min-w-60 max-w-80 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-[var(--shadow-card-hover)] py-1"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={`${prTitle}'s checks`}>
       {isLoading ? (
         <p className="px-3 py-2 text-xs text-[var(--color-text-muted)]">Loading…</p>
       ) : checks.length === 0 ? (
@@ -67,6 +54,6 @@ export function PRChecksModal({ checks, rollupState, onClose, isLoading }: Props
           </span>
         </div>
       )}
-    </div>
+    </Modal>
   )
 }
