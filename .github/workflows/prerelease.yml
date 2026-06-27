@@ -3,6 +3,12 @@ name: Pre-release
 on:
   workflow_dispatch:
     inputs:
+      bump:
+        description: 'Version bump type'
+        required: false
+        default: 'patch'
+        type: choice
+        options: [patch, minor, major]
       label:
         description: 'Pre-release label'
         required: false
@@ -24,7 +30,8 @@ jobs:
         id: tag
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          TAG="v${VERSION}-${{ inputs.label }}.${{ github.run_number }}"
+          NEXT=$(node -p "const [M,m,p]=require('./package.json').version.split('.').map(Number);({'patch':M+'.'+(m)+'.'+(p+1),'minor':M+'.'+(m+1)+'.0','major':(M+1)+'.0.0'})['${{ inputs.bump }}']")
+          TAG="v${NEXT}-${{ inputs.label }}.${{ github.run_number }}"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
       - run: npm install
       - run: npx electron-vite build
