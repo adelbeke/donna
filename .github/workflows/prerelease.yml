@@ -1,0 +1,76 @@
+name: Pre-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      label:
+        description: 'Pre-release label'
+        required: false
+        default: 'beta'
+
+jobs:
+  build:
+    if: github.actor == 'adelbeke'
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - name: Compute tag
+        id: tag
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}-${{ inputs.label }}.${{ github.run_number }}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+      - run: npm install
+      - run: npx electron-vite build
+      - run: npx electron-builder --mac --publish never
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: prerelease-mac
+          path: |
+            release/*.dmg
+            release/*.blockmap
+            release/*.zip
+          # ponytail: latest-mac.yml excluded intentionally — OTA updater skips pre-releases
+          retention-days: 7
+
+  release:
+    needs: build
+    if: github.actor == 'adelbeke'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Create tag
+        run: |
+          git config user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config user.name "${{ secrets.GIT_USER_NAME }}"
+          git tag "${{ needs.build.outputs.tag }}"
+          git push origin "${{ needs.build.outputs.tag }}"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: prerelease-mac
+          merge-multiple: true
+          path: artifacts
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.build.outputs.tag }}
+          name: ${{ needs.build.outputs.tag }}
+          prerelease: true
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
