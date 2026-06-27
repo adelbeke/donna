@@ -24,7 +24,9 @@ const buildRepoItems = (opts: {
   }
 
   const items = opts.branches
-    .filter((b) => !opts.branchSearch || b.name.toLowerCase().includes(opts.branchSearch.toLowerCase()))
+    .filter(
+      (b) => !opts.branchSearch || b.name.toLowerCase().includes(opts.branchSearch.toLowerCase())
+    )
     .map((branch) => ({
       key: `${opts.localPath}/${branch.name}`,
       branch: branch.name,

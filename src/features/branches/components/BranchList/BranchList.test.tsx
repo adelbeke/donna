@@ -116,9 +116,7 @@ describe('BranchList — current branch sorting', () => {
       ]
     )
     render(<BranchList />)
-    const names = screen
-      .getAllByText(/^(feat\/x|main)$/)
-      .map((el) => el.textContent)
+    const names = screen.getAllByText(/^(feat\/x|main)$/).map((el) => el.textContent)
     // main floats to top; feat/x has a worktree badge but is not treated as current
     expect(names[0]).toBe('main')
     expect(names).toEqual(['main', 'feat/x'])
