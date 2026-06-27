@@ -1,7 +1,7 @@
 import { Clock } from 'lucide-react'
 import type { CheckRunContext, StatusContextItem, CheckRollupState } from '@/types/github.ts'
 import { Modal } from '@/shared/components/ui/Modal.tsx'
-import {PRCheckRow} from "@/features/pull-requests/components/PRCheckRow/PRCheckRow.tsx";
+import { PRCheckRow } from '@/features/pull-requests/components/PRCheckRow/PRCheckRow.tsx'
 
 interface Props {
   isOpen: boolean
