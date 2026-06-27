@@ -13,7 +13,13 @@ type Props = {
   prUrl: string
 }
 
-export const PRCardActions = ({ isHidden, isPriority, prUrl, toggleHide, togglePriority }: Props) => {
+export const PRCardActions = ({
+  isHidden,
+  isPriority,
+  prUrl,
+  toggleHide,
+  togglePriority,
+}: Props) => {
   return (
     <div className="flex items-center gap-1 shrink-0 flex-col lg:flex-row">
       <PRCardAction

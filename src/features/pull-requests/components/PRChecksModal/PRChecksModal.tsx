@@ -12,7 +12,14 @@ type Props = {
   isLoading?: boolean
 }
 
-export const PRChecksModal = ({ isOpen, prTitle, checks, rollupState, onClose, isLoading }: Props) => {
+export const PRChecksModal = ({
+  isOpen,
+  prTitle,
+  checks,
+  rollupState,
+  onClose,
+  isLoading,
+}: Props) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`${prTitle}'s checks`}>
       {isLoading ? (
