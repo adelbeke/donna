@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react'
 
-type Props = PropsWithChildren & {
+interface Props extends PropsWithChildren {
   label: string
   onClick: () => void
   tooltipClassName?: string

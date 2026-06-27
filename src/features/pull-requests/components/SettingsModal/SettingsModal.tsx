@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Settings, X } from 'lucide-react'
 import { usePRStore } from '../../stores/prStore'
 import { usePullRequests } from '../../queries/useGitHubPRs'
 import { isRepoMatchedBy } from '../../lib/prFilters'
 import { ButtonWithTooltip } from '@/shared/components/ui/ButtonWithTooltip'
+import { Modal } from '@/shared/components/ui/Modal.tsx'
 
 export function SettingsModal() {
   const [open, setOpen] = useState(false)
@@ -21,13 +22,6 @@ export function SettingsModal() {
   const { repos = [], hasNextPage, truncated, loadedCount, totalCount } = usePullRequests()
 
   const currentView = viewFilters[section]
-
-  useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [open])
 
   const activeCount =
     currentView.repos.length +
@@ -66,7 +60,7 @@ export function SettingsModal() {
   }
 
   const showWarning =
-    (currentView.repos.length > 0 || globalFilters.showHidden) && !!hasNextPage && !truncated
+    (currentView.repos.length > 0 || globalFilters.showHidden) && hasNextPage && !truncated
 
   return (
     <>
@@ -84,148 +78,130 @@ export function SettingsModal() {
         )}
       </ButtonWithTooltip>
 
-      {open && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div className="pointer-events-auto w-96 max-h-[80vh] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-lg p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-[var(--color-text-primary)]">Settings</p>
+      <Modal isOpen={open} title={'Settings'} onClose={() => setOpen(false)}>
+        {repos.length > 1 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
+                Repository{currentView.repos.length > 0 && ` (${currentView.repos.length})`}
+              </p>
+              {currentView.repos.length > 0 && (
                 <button
-                  onClick={() => setOpen(false)}
-                  className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none rounded"
-                  aria-label="Close settings"
+                  onClick={() => setViewFilters(section, { repos: [] })}
+                  className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
                 >
-                  <X size={16} />
+                  Clear
                 </button>
-              </div>
-              {repos.length > 1 && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider">
-                      Repository{currentView.repos.length > 0 && ` (${currentView.repos.length})`}
-                    </p>
-                    {currentView.repos.length > 0 && (
-                      <button
-                        onClick={() => setViewFilters(section, { repos: [] })}
-                        className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                    {repos
-                      .filter((r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h)))
-                      .map((repo) => {
-                        const selected = currentView.repos.includes(repo)
-                        return (
-                          <label
-                            key={repo}
-                            className={`flex items-center gap-2 px-1 py-1 rounded cursor-pointer group
-                            ${selected ? 'bg-[var(--color-accent-subtle)]' : 'hover:bg-[var(--color-surface-overlay)]'}`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selected}
-                              onChange={() => toggleRepo(repo)}
-                              className="accent-[var(--color-accent)] cursor-pointer"
-                            />
-                            <span
-                              className={`text-xs truncate ${selected ? 'text-[var(--color-text-primary)] font-medium' : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'}`}
-                            >
-                              {repo.split('/')[1]}
-                            </span>
-                          </label>
-                        )
-                      })}
-                  </div>
-                </div>
-              )}
-
-              {section !== 'authored' && (
-                <>
-                  <div>
-                    <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-                      Muted authors
-                      {globalFilters.hiddenAuthors.length > 0 &&
-                        ` (${globalFilters.hiddenAuthors.length})`}
-                    </p>
-                    <input
-                      type="text"
-                      value={mutedInput}
-                      onChange={(e) => setMutedInput(e.target.value)}
-                      onKeyDown={handleMutedKeyDown}
-                      placeholder="e.g. renovate, dependabot"
-                      className="w-full text-xs px-2 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
-                    />
-                    {globalFilters.hiddenAuthors.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {globalFilters.hiddenAuthors.map((pattern) => (
-                          <span
-                            key={pattern}
-                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-overlay)] text-[var(--color-text-secondary)]"
-                          >
-                            {pattern}
-                            <button
-                              onClick={() => removeHiddenAuthor(pattern)}
-                              className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-                              aria-label={`Remove ${pattern}`}
-                            >
-                              <X size={10} />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
-                      Hidden repos
-                      {globalFilters.hiddenRepos.length > 0 &&
-                        ` (${globalFilters.hiddenRepos.length})`}
-                    </p>
-                    <input
-                      type="text"
-                      value={hiddenRepoInput}
-                      onChange={(e) => setHiddenRepoInput(e.target.value)}
-                      onKeyDown={handleHiddenRepoKeyDown}
-                      placeholder="e.g. owner/repo or owner"
-                      className="w-full text-xs px-2 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
-                    />
-                    {globalFilters.hiddenRepos.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {globalFilters.hiddenRepos.map((repo) => (
-                          <span
-                            key={repo}
-                            className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-overlay)] text-[var(--color-text-secondary)]"
-                          >
-                            {repo}
-                            <button
-                              onClick={() => removeHiddenRepo(repo)}
-                              className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
-                              aria-label={`Remove ${repo}`}
-                            >
-                              <X size={10} />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {showWarning && (
-                <p className="text-xs text-[var(--color-warning)]">
-                  ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
-                </p>
               )}
             </div>
+            <div className="space-y-0.5 max-h-48 overflow-y-auto">
+              {repos
+                .filter((r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h)))
+                .map((repo) => {
+                  const selected = currentView.repos.includes(repo)
+                  return (
+                    <label
+                      key={repo}
+                      className={`flex items-center gap-2 px-1 py-1 rounded cursor-pointer group
+                            ${selected ? 'bg-[var(--color-accent-subtle)]' : 'hover:bg-[var(--color-surface-overlay)]'}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => toggleRepo(repo)}
+                        className="accent-[var(--color-accent)] cursor-pointer"
+                      />
+                      <span
+                        className={`text-xs truncate ${selected ? 'text-[var(--color-text-primary)] font-medium' : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'}`}
+                      >
+                        {repo.split('/')[1]}
+                      </span>
+                    </label>
+                  )
+                })}
+            </div>
           </div>
-        </>
-      )}
+        )}
+
+        {section !== 'authored' && (
+          <>
+            <div>
+              <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+                Muted authors
+                {globalFilters.hiddenAuthors.length > 0 &&
+                  ` (${globalFilters.hiddenAuthors.length})`}
+              </p>
+              <input
+                type="text"
+                value={mutedInput}
+                onChange={(e) => setMutedInput(e.target.value)}
+                onKeyDown={handleMutedKeyDown}
+                placeholder="e.g. renovate, dependabot"
+                className="w-full text-xs px-2 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+              />
+              {globalFilters.hiddenAuthors.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {globalFilters.hiddenAuthors.map((pattern) => (
+                    <span
+                      key={pattern}
+                      className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-overlay)] text-[var(--color-text-secondary)]"
+                    >
+                      {pattern}
+                      <button
+                        onClick={() => removeHiddenAuthor(pattern)}
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
+                        aria-label={`Remove ${pattern}`}
+                      >
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+                Hidden repos
+                {globalFilters.hiddenRepos.length > 0 && ` (${globalFilters.hiddenRepos.length})`}
+              </p>
+              <input
+                type="text"
+                value={hiddenRepoInput}
+                onChange={(e) => setHiddenRepoInput(e.target.value)}
+                onKeyDown={handleHiddenRepoKeyDown}
+                placeholder="e.g. owner/repo or owner"
+                className="w-full text-xs px-2 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+              />
+              {globalFilters.hiddenRepos.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {globalFilters.hiddenRepos.map((repo) => (
+                    <span
+                      key={repo}
+                      className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-[var(--color-surface-overlay)] text-[var(--color-text-secondary)]"
+                    >
+                      {repo}
+                      <button
+                        onClick={() => removeHiddenRepo(repo)}
+                        className="text-[var(--color-text-muted)] hover:text-[var(--color-danger)] transition-colors cursor-pointer"
+                        aria-label={`Remove ${repo}`}
+                      >
+                        <X size={10} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {showWarning && (
+          <p className="text-xs text-[var(--color-warning)]">
+            ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
+          </p>
+        )}
+      </Modal>
     </>
   )
 }

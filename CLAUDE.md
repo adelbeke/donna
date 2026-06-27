@@ -32,7 +32,7 @@ CI (`.github/workflows/ci.yml`) runs `lint`, `test:run`, then `build` on every P
 - Per-PR actions on each `PRCard`: **star** (top-priority, pinned above the list and persisted), **hide** (dims + filtered out unless "Hidden" toggle is on), **copy PR link**, open externally.
 - **Mute authors**: free-form patterns (e.g. `dependabot`) that filter out their PRs.
 - Filters: by repository (checkboxes, shown only when >1 repo loaded), title search (navbar), show/hide **drafts**, show/hide **hidden**.
-- Each card shows repo, author, `#number`, opened/updated ages, diff size (`+/-`), draft/hidden badges, **my review-state** badge, a **CI checks** badge that opens a `ChecksPanel` popover (lazy-loads per-check contexts), and a **conflict** badge when `mergeable === 'CONFLICTING'`. In the authored section, cards also show grouped **reviewer avatars** (approved / changes-requested / commented / pending).
+- Each card shows repo, author, `#number`, opened/updated ages, diff size (`+/-`), draft/hidden badges, **my review-state** badge, a **CI checks** badge that opens a `PRChecksModal` popover (lazy-loads per-check contexts), and a **conflict** badge when `mergeable === 'CONFLICTING'`. In the authored section, cards also show grouped **reviewer avatars** (approved / changes-requested / commented / pending).
 - Paging: "Load more" / "Load all" (capped — see pipeline below), with a truncation notice past the cap.
 
 **Branches view** (`branches`, **Electron-only**) — `BranchList` reads *local* git repos the user adds via a native directory picker:
@@ -67,7 +67,7 @@ src/
       exports.ts               public surface: { BranchList }
     pull-requests/   PR inbox feature
       components/    Filters/ (+ Filters.test.tsx), PRCard/ (PRCard, PRCard.test.tsx,
-                     ReviewerAvatars, ChecksPanel), PRList/ (PRList, PRList.test.tsx, VisibilityToggles)
+                     ReviewerAvatars, PRChecksModal), PRList/ (PRList, PRList.test.tsx, VisibilityToggles)
       lib/           prUtils.ts & prUtils.test.ts, prFilters.ts & prFilters.test.ts, timeAgo.ts & timeAgo.test.ts
       queries/       useGitHubPRs.ts + useGitHubPRs.test.ts, useCheckContexts.ts, useViewer.ts
       stores/        prStore.ts + prStore.test.ts (Zustand, persisted)

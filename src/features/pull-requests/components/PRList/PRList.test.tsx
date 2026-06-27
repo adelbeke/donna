@@ -5,7 +5,9 @@ import type { PullRequest } from '@/types/github'
 
 vi.mock('@/features/pull-requests/queries/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
 vi.mock('@/features/pull-requests/stores/prStore', () => ({ usePRStore: vi.fn() }))
-vi.mock('./VisibilityToggles/VisibilityToggles', () => ({ VisibilityToggles: () => null }))
+vi.mock('@/features/pull-requests/components/VisibilityToggles/VisibilityToggles', () => ({
+  VisibilityToggles: () => null,
+}))
 vi.mock('@/features/pull-requests/queries/useCheckContexts', () => ({
   useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false })),
 }))
