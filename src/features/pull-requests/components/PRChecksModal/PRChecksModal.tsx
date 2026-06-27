@@ -1,7 +1,7 @@
-import { Clock, ExternalLink } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import type { CheckRunContext, StatusContextItem, CheckRollupState } from '@/types/github.ts'
-import { PRCheckIcon } from '@/features/pull-requests/components/PRChecksModal/PRCheckIcon.tsx'
 import { Modal } from '@/shared/components/ui/Modal.tsx'
+import { PRCheckRow } from '@/features/pull-requests/components/PRCheckRow/PRCheckRow.tsx'
 
 interface Props {
   isOpen: boolean
@@ -21,29 +21,7 @@ export function PRChecksModal({ isOpen, prTitle, checks, rollupState, onClose, i
         <p className="px-3 py-2 text-xs text-[var(--color-text-muted)]">No checks found</p>
       ) : (
         checks.map((check, i) => {
-          const name = check.__typename === 'CheckRun' ? check.name : check.context
-          const url = check.__typename === 'CheckRun' ? check.detailsUrl : check.targetUrl
-          return (
-            <div
-              key={i}
-              className="flex items-center gap-2 px-3 py-1.5 hover:bg-[var(--color-surface-overlay)]"
-            >
-              <PRCheckIcon check={check} />
-              <span className="text-xs text-[var(--color-text-secondary)] flex-1 truncate">
-                {name}
-              </span>
-              {url && (
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="shrink-0 text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
-                >
-                  <ExternalLink size={11} />
-                </a>
-              )}
-            </div>
-          )
+          return <PRCheckRow check={check} key={i} />
         })
       )}
       {!isLoading && (rollupState === 'PENDING' || rollupState === 'EXPECTED') && (
