@@ -3,11 +3,45 @@ import { FolderPlus, RefreshCw, X } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { usePullRequests } from '@/features/pull-requests/exports'
 import { useBranchStore } from '../../stores/branchStore'
-import type { Worktree } from '../../types'
+import type { Branch, Worktree } from '../../types'
 import type { PullRequest } from '@/types/github'
 import { BranchCard } from '@/features/branches/components/BranchList/BranchCard/BranchCard.tsx'
 
 const REPO_HUES = [210, 140, 30, 280, 180, 60, 320, 260]
+
+const buildRepoItems = (opts: {
+  localPath: string
+  repoLabel: string
+  hue: number
+  branches: Branch[]
+  worktrees: Worktree[]
+  branchSearch: string
+  prMap: Map<string, PullRequest>
+}) => {
+  const wtByBranch = new Map<string, Worktree>()
+  for (const wt of opts.worktrees) {
+    if (wt.branch && !wt.isMain) wtByBranch.set(wt.branch, wt)
+  }
+
+  const items = opts.branches
+    .filter(
+      (b) => !opts.branchSearch || b.name.toLowerCase().includes(opts.branchSearch.toLowerCase())
+    )
+    .map((branch) => ({
+      key: `${opts.localPath}/${branch.name}`,
+      branch: branch.name,
+      repoLabel: opts.repoLabel,
+      repoPath: opts.localPath,
+      hue: opts.hue,
+      isCurrentBranch: branch.isCurrent,
+      worktree: wtByBranch.get(branch.name),
+      pr: opts.prMap.get(`${opts.repoLabel}/${branch.name}`),
+    }))
+
+  // ponytail: float current branch(es) to the top of their repo; stable otherwise.
+  items.sort((a, b) => Number(b.isCurrentBranch) - Number(a.isCurrentBranch))
+  return items
+}
 
 export const BranchList = () => {
   const { localPaths, addLocalPath, removeLocalPath } = useBranchStore()
@@ -118,26 +152,17 @@ export const BranchList = () => {
       continue
     }
 
-    const wtByBranch = new Map<string, Worktree>()
-    for (const wt of worktrees ?? []) {
-      if (wt.branch && !wt.isMain) wtByBranch.set(wt.branch, wt)
-    }
-    const mainBranch = (worktrees ?? []).find((wt) => wt.isMain)?.branch ?? ''
-
-    for (const branch of (branches ?? []).filter(
-      (b) => !branchSearch || b.toLowerCase().includes(branchSearch.toLowerCase())
-    )) {
-      flatBranches.push({
-        key: `${localPath}/${branch}`,
-        branch,
+    flatBranches.push(
+      ...buildRepoItems({
+        localPath,
         repoLabel,
-        repoPath: localPath,
         hue: REPO_HUES[i % REPO_HUES.length],
-        isCurrentBranch: branch === mainBranch,
-        worktree: wtByBranch.get(branch),
-        pr: prMap.get(`${repoLabel}/${branch}`),
+        branches: branches ?? [],
+        worktrees: worktrees ?? [],
+        branchSearch,
+        prMap,
       })
-    }
+    )
   }
 
   return (
