@@ -104,7 +104,7 @@ describe('BranchList — current branch sorting', () => {
     expect(names).toEqual(['main', 'feat/a', 'feat/b'])
   })
 
-  it('GIVEN branch checked out in linked worktree THEN it is treated as current and floats up', () => {
+  it('GIVEN branch checked out in linked worktree THEN it is NOT highlighted and does not float up', () => {
     mockQueries(
       [
         { name: 'feat/x', isCurrent: false },
@@ -116,10 +116,12 @@ describe('BranchList — current branch sorting', () => {
       ]
     )
     render(<BranchList />)
-    const names = screen.getAllByText(/^(feat\/x|main)$/).map((el) => el.textContent)
-    // both render — feat/x detected as current via linked worktree, not just via isCurrent flag
-    expect(names).toContain('feat/x')
-    expect(names).toContain('main')
+    const names = screen
+      .getAllByText(/^(feat\/x|main)$/)
+      .map((el) => el.textContent)
+    // main floats to top; feat/x has a worktree badge but is not treated as current
+    expect(names[0]).toBe('main')
+    expect(names).toEqual(['main', 'feat/x'])
   })
 })
 
