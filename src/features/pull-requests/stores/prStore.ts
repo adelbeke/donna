@@ -131,19 +131,53 @@ export const usePRStore = create<PRStore>()(
       merge: (persisted, current) => {
         const p = persisted as Partial<PRStore>
         const validViews = new Set<string>(['prs', 'branches'])
-        // ponytail: drop old 'filters' key — muted authors lost once on first upgrade
+        // migrate from pre-1.6.0 format: flat `filters` key → globalFilters + viewFilters + section
         if (!p.globalFilters) {
+          const old = (
+            persisted as {
+              filters?: {
+                section?: PRSection
+                hiddenAuthors?: string[]
+                showHidden?: boolean
+                repos?: string[]
+                showDrafts?: boolean
+              }
+            }
+          ).filters
+          const section: PRSection = old?.section ?? current.section
           return {
             ...current,
             ...(p.view && validViews.has(p.view) ? { view: p.view } : {}),
+            section,
+            globalFilters: {
+              ...current.globalFilters,
+              hiddenAuthors: old?.hiddenAuthors ?? [],
+              showHidden: old?.showHidden ?? false,
+            },
+            viewFilters: {
+              ...current.viewFilters,
+              [section]: {
+                ...current.viewFilters[section],
+                repos: old?.repos ?? [],
+                showDrafts: old?.showDrafts ?? false,
+              },
+            },
+            priorityIds: p.priorityIds ?? current.priorityIds,
+            hiddenIds: p.hiddenIds ?? current.hiddenIds,
           }
         }
+        const validSections = new Set<string>(['review-requested', 'authored', 'mentioned'])
         return {
           ...current,
           ...(p.view && validViews.has(p.view) ? { view: p.view } : {}),
-          ...(p.section ? { section: p.section } : {}),
+          ...(p.section && validSections.has(p.section) ? { section: p.section } : {}),
           globalFilters: { ...current.globalFilters, ...(p.globalFilters ?? {}) },
-          viewFilters: { ...current.viewFilters, ...(p.viewFilters ?? {}) },
+          viewFilters: Object.fromEntries(
+            (Object.keys(current.viewFilters) as PRSection[]).map((s) => [
+              s,
+              { ...current.viewFilters[s], ...(p.viewFilters?.[s] ?? {}) },
+            ])
+          ) as Record<PRSection, ViewFilters>,
           priorityIds: p.priorityIds ?? current.priorityIds,
           hiddenIds: p.hiddenIds ?? current.hiddenIds,
         }

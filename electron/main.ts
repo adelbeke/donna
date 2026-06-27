@@ -3,6 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import { spawn, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import path from 'node:path'
+import fs from 'node:fs'
 
 const execFileAsync = promisify(execFile)
 
@@ -185,6 +186,19 @@ function createWindow() {
     win.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
 }
+
+ipcMain.handle('dirs:filter-existing', async (_e, paths: string[]) => {
+  if (!Array.isArray(paths)) return []
+  const results = await Promise.all(
+    paths.map((p) =>
+      fs.promises
+        .access(p)
+        .then(() => p)
+        .catch(() => null)
+    )
+  )
+  return results.filter((p): p is string => p !== null)
+})
 
 ipcMain.handle('update:install', () => autoUpdater.quitAndInstall())
 // ponytail: flag so the banner can catch updates downloaded before it mounts

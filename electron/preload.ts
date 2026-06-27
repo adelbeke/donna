@@ -19,6 +19,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     remove: (repoPath: string, worktreePath: string, force: boolean): Promise<void> =>
       ipcRenderer.invoke('worktrees:remove', repoPath, worktreePath, force),
   },
+  dirs: {
+    filterExisting: (paths: string[]): Promise<string[]> =>
+      ipcRenderer.invoke('dirs:filter-existing', paths),
+  },
   dialog: {
     openDirectory: (): Promise<string | null> => ipcRenderer.invoke('dialog:open'),
   },
