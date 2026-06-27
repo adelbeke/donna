@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-export function UpdateBanner({ version }: { version: string }) {
+export const UpdateBanner = ({ version }: { version: string }) => {
   const [dismissed, setDismissed] = useState(false)
   const [downloaded, setDownloaded] = useState(false)
 

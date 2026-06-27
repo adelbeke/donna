@@ -12,7 +12,7 @@ const GH_PATH = ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', process.env.
   .filter(Boolean)
   .join(':')
 
-function runGh(args: string[], stdinData?: string): Promise<string> {
+const runGh = (args: string[], stdinData?: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const proc = spawn('gh', args, { env: { ...process.env, PATH: GH_PATH } })
     let stdout = ''
@@ -49,7 +49,7 @@ ipcMain.handle('gh:rest', async (_e, endpoint: string) => {
   return JSON.parse(out)
 })
 
-function gitError(e: unknown): Error {
+const gitError = (e: unknown): Error => {
   const stderr = (e as { stderr?: string }).stderr?.trim()
   const msg = stderr || (e as Error).message || String(e)
   return new Error(msg.split('\n')[0])
@@ -139,7 +139,7 @@ ipcMain.handle('dialog:open', async () => {
 
 type WorktreeRecord = { worktree?: string; HEAD?: string; branch?: string; detached?: string }
 
-function parseWorktrees(output: string) {
+const parseWorktrees = (output: string) => {
   const results: WorktreeRecord[] = []
   let current: WorktreeRecord = {}
   for (const line of output.split('\n')) {
@@ -163,7 +163,7 @@ function parseWorktrees(output: string) {
   }))
 }
 
-function createWindow() {
+const createWindow = () => {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,

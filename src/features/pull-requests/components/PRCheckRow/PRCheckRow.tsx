@@ -4,7 +4,7 @@ import { ExternalLink } from 'lucide-react'
 import type { PropsWithChildren } from 'react'
 import { twMerge } from 'tailwind-merge'
 
-interface Props {
+type Props = {
   check: CheckRunContext | StatusContextItem
 }
 
@@ -32,7 +32,7 @@ const Wrapper = ({
   )
 }
 
-export function PRCheckRow({ check }: Props) {
+export const PRCheckRow = ({ check }: Props) => {
   const name = check.__typename === 'CheckRun' ? check.name : check.context
   const url = check.__typename === 'CheckRun' ? check.detailsUrl : check.targetUrl
 

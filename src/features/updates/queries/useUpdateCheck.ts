@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-export function isNewer(latest: string, current: string) {
+export const isNewer = (latest: string, current: string) => {
   const a = latest.replace(/^v/, '').split('.').map(Number)
   const b = current.replace(/^v/, '').split('.').map(Number)
   for (let i = 0; i < 3; i++) {
@@ -10,7 +10,7 @@ export function isNewer(latest: string, current: string) {
   return false
 }
 
-export function useUpdateCheck() {
+export const useUpdateCheck = () => {
   return useQuery({
     queryKey: ['update-check'],
     queryFn: async () => {

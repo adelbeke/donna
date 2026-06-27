@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
 import { Copy, ExternalLink, MoreVertical, Trash2 } from 'lucide-react'
 
-export function BranchCard({
+export const BranchCard = ({
   branch,
   repo,
   repoPath,
@@ -22,13 +22,13 @@ export function BranchCard({
   worktree?: Worktree
   pr?: PullRequest
   onDeleted: () => void
-}) {
+}) => {
   const shortPath = worktree?.path.replace(/^\/Users\/[^/]+/, '~')
   const isProtected = branch === 'main' || branch === 'master'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  async function deleteBranch() {
+  const deleteBranch = async () => {
     const message = isCurrentBranch
       ? `Delete branch "${branch}"?\n\nYou're currently on this branch — git will switch to main first.`
       : `Delete branch "${branch}"?\nThe branch must be fully merged.`
@@ -43,7 +43,7 @@ export function BranchCard({
     }
   }
 
-  async function removeWorktree() {
+  const removeWorktree = async () => {
     const wt = worktree!
     const message = wt.isDirty
       ? `⚠️ "${branch}" has uncommitted changes.\n\nRemoving this worktree will permanently delete those changes.\n\nAre you sure?`

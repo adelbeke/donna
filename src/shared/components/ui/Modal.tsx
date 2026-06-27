@@ -2,13 +2,13 @@ import { X } from 'lucide-react'
 import { type PropsWithChildren, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-interface Props extends PropsWithChildren {
+type Props = PropsWithChildren & {
   isOpen: boolean
   title: string
   onClose: () => void
 }
 
-export function Modal({ children, isOpen, title, onClose }: Props) {
+export const Modal = ({ children, isOpen, title, onClose }: Props) => {
   useEffect(() => {
     if (!isOpen) return
     document.body.style.overflow = 'hidden'

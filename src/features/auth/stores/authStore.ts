@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { GitHubUser } from '@/types/github'
 
-interface AuthState {
+type AuthState = {
   token: string | null
   user: GitHubUser | null
   sessionExpired: boolean

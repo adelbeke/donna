@@ -3,19 +3,19 @@ import { persist } from 'zustand/middleware'
 
 export type PRSection = 'review-requested' | 'authored' | 'mentioned'
 
-export interface GlobalFilters {
+export type GlobalFilters = {
   hiddenAuthors: string[]
   hiddenRepos: string[]
   showHidden: boolean
 }
 
-export interface ViewFilters {
+export type ViewFilters = {
   repos: string[]
   showDrafts: boolean
   search: string
 }
 
-export interface PRStore {
+export type PRStore = {
   view: 'prs' | 'branches'
   section: PRSection
   globalFilters: GlobalFilters

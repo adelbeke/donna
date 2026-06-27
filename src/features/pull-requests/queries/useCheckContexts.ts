@@ -3,7 +3,7 @@ import { createClient, PR_CHECK_CONTEXTS_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import type { CheckRunContext, StatusContextItem } from '@/types/github'
 
-interface CheckContextsResult {
+type CheckContextsResult = {
   node: {
     commits: {
       nodes: {
@@ -17,7 +17,7 @@ interface CheckContextsResult {
   } | null
 }
 
-export function useCheckContexts(prId: string, enabled: boolean) {
+export const useCheckContexts = (prId: string, enabled: boolean) => {
   const token = useAuthStore((s) => s.token)
   const userLogin = useAuthStore((s) => s.user?.login)
 

@@ -3,7 +3,7 @@ import { SearchInput } from '@/shared/components/SearchInput/SearchInput.tsx'
 import { useBranchStore } from '@/features/branches/stores/branchStore.ts'
 import type { ChangeEvent } from 'react'
 
-export function BranchDashboard() {
+export const BranchDashboard = () => {
   const { branchSearch, setBranchSearch } = useBranchStore()
   return (
     <div className={'flex flex-col gap-8'}>

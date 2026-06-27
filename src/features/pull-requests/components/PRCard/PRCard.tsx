@@ -19,7 +19,7 @@ import { useCheckContexts } from '../../queries/useCheckContexts'
 import { timeAgo } from '../../lib/timeAgo'
 import { PRCardActions } from '@/features/pull-requests/components/PRCardActions/PRCardActions.tsx'
 
-interface Props {
+type Props = {
   pr: PullRequest
   isAuthored?: boolean
 }
@@ -96,7 +96,7 @@ const reviewBadge: Record<
   },
 }
 
-export function PRCard({ pr, isAuthored = false }: Props) {
+export const PRCard = ({ pr, isAuthored = false }: Props) => {
   const [checksOpen, setChecksOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)

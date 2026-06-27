@@ -13,7 +13,7 @@ export type CheckRunConclusion =
   | 'STARTUP_FAILURE'
   | null
 
-export interface CheckRunContext {
+export type CheckRunContext = {
   __typename: 'CheckRun'
   name: string
   status: 'QUEUED' | 'IN_PROGRESS' | 'COMPLETED' | 'WAITING' | 'REQUESTED' | 'PENDING'
@@ -21,20 +21,20 @@ export interface CheckRunContext {
   detailsUrl: string | null
 }
 
-export interface StatusContextItem {
+export type StatusContextItem = {
   __typename: 'StatusContext'
   context: string
   state: CheckRollupState
   targetUrl: string | null
 }
 
-export interface ReviewRequest {
+export type ReviewRequest = {
   requestedReviewer:
     | { __typename: 'User'; login: string; avatarUrl: string }
     | { __typename: 'Team'; name: string; slug: string }
 }
 
-export interface Review {
+export type Review = {
   state: ReviewState
   author: {
     login: string
@@ -43,7 +43,7 @@ export interface Review {
   submittedAt: string
 }
 
-export interface PullRequest {
+export type PullRequest = {
   id: string
   number: number
   title: string
@@ -86,7 +86,7 @@ export interface PullRequest {
   isHidden?: boolean
 }
 
-export interface GitHubUser {
+export type GitHubUser = {
   login: string
   avatarUrl: string
   name: string

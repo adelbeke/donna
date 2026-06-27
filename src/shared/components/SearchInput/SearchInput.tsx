@@ -8,7 +8,7 @@ type Props = {
   onClear: () => void
 }
 
-export function SearchInput({ value, displayClearButton, placeholder, onClear, onChange }: Props) {
+export const SearchInput = ({ value, displayClearButton, placeholder, onClear, onChange }: Props) => {
   return (
     <div className="relative flex-1">
       <Search

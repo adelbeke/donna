@@ -17,19 +17,19 @@ vi.mock('@/features/auth/stores/authStore', () => ({
 
 const mockRequest = vi.fn()
 
-function makeWrapper() {
+const makeWrapper = () => {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={qc}>{children}</QueryClientProvider>
   )
 }
 
-function makeNode(
+const makeNode = (
   name: string,
   login: string | null,
   date: string,
   pr?: { number: number; state: string; url: string }
-) {
+) => {
   return {
     name,
     target: { committedDate: date, author: { user: login ? { login } : null } },
@@ -37,7 +37,7 @@ function makeNode(
   }
 }
 
-function makePage(nodes: ReturnType<typeof makeNode>[], hasNextPage: boolean, endCursor = '') {
+const makePage = (nodes: ReturnType<typeof makeNode>[], hasNextPage: boolean, endCursor = '') => {
   return { repository: { refs: { pageInfo: { hasNextPage, endCursor }, nodes } } }
 }
 

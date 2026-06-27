@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface BranchStore {
+type BranchStore = {
   localPaths: string[]
   branchSearch: string
   addLocalPath: (path: string) => void

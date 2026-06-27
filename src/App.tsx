@@ -19,10 +19,9 @@ const queryClient = new QueryClient({
   },
 })
 
-export default function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      {IS_NATIVE ? <AppContainer /> : <WebContainer />}
-    </QueryClientProvider>
-  )
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    {IS_NATIVE ? <AppContainer /> : <WebContainer />}
+  </QueryClientProvider>
+)
+export default App

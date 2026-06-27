@@ -10,7 +10,7 @@ const sectionLabels: Record<string, string> = {
   mentioned: 'Mentioned',
 }
 
-export function PRList() {
+export const PRList = () => {
   const {
     data: prs = [],
     priorityPRs = [],

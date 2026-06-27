@@ -1,19 +1,19 @@
 import type { PropsWithChildren } from 'react'
 
-interface Props extends PropsWithChildren {
+type Props = PropsWithChildren & {
   label: string
   onClick: () => void
   tooltipClassName?: string
   buttonClassName?: string
 }
 
-export function ButtonWithTooltip({
+export const ButtonWithTooltip = ({
   children,
   label,
   tooltipClassName,
   onClick,
   buttonClassName,
-}: Props) {
+}: Props) => {
   return (
     <div className="relative group/tooltip">
       <button

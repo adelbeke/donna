@@ -20,7 +20,7 @@ beforeEach(() => {
   })
 })
 
-function card(overrides: Partial<Parameters<typeof BranchCard>[0]> = {}) {
+const card = (overrides: Partial<Parameters<typeof BranchCard>[0]> = {}) => {
   const onDeleted = vi.fn()
   render(
     <BranchCard

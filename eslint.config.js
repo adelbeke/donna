@@ -20,5 +20,15 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+      'func-style': ['error', 'expression'],
+    },
+  },
+  {
+    files: ['**/*.d.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-definitions': 'off',
+    },
   },
 ])

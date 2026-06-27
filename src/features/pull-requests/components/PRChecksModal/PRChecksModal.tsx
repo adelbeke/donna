@@ -3,7 +3,7 @@ import type { CheckRunContext, StatusContextItem, CheckRollupState } from '@/typ
 import { Modal } from '@/shared/components/ui/Modal.tsx'
 import { PRCheckRow } from '@/features/pull-requests/components/PRCheckRow/PRCheckRow.tsx'
 
-interface Props {
+type Props = {
   isOpen: boolean
   prTitle: string
   checks: (CheckRunContext | StatusContextItem)[]
@@ -12,7 +12,7 @@ interface Props {
   isLoading?: boolean
 }
 
-export function PRChecksModal({ isOpen, prTitle, checks, rollupState, onClose, isLoading }: Props) {
+export const PRChecksModal = ({ isOpen, prTitle, checks, rollupState, onClose, isLoading }: Props) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`${prTitle}'s checks`}>
       {isLoading ? (

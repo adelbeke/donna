@@ -16,7 +16,7 @@ describe('isNewer', () => {
 })
 
 // Inline minimal banner to avoid importing App-level deps
-function UpdateBanner({ version, onDismiss }: { version: string; onDismiss: () => void }) {
+const UpdateBanner = ({ version, onDismiss }: { version: string; onDismiss: () => void }) => {
   return (
     <div>
       <span>Version {version} is available.</span>

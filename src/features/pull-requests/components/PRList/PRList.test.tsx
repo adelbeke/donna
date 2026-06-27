@@ -17,7 +17,7 @@ import { usePRStore } from '@/features/pull-requests/stores/prStore'
 const mockUsePullRequests = vi.mocked(usePullRequests)
 const mockUsePRStore = vi.mocked(usePRStore)
 
-function makePR(id: string, title: string): PullRequest {
+const makePR = (id: string, title: string): PullRequest => {
   return {
     id,
     number: parseInt(id, 10),
@@ -39,7 +39,7 @@ function makePR(id: string, title: string): PullRequest {
   }
 }
 
-function mockStoreFilters(viewOverrides: Record<string, unknown> = {}) {
+const mockStoreFilters = (viewOverrides: Record<string, unknown> = {}) => {
   mockUsePRStore.mockImplementation((selector) =>
     selector({
       section: 'review-requested',
