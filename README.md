@@ -7,6 +7,8 @@ Your GitHub companion — track PRs, manage branches and worktrees, all from a n
 [![CI](https://github.com/adelbeke/donna/actions/workflows/ci.yml/badge.svg)](https://github.com/adelbeke/donna/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+</div>
+
 | Pull requests | Branches / Worktrees |
 |---|---|
 | <img width="1277" height="761" alt="Screenshot 2026-06-27 at 09 56 18" src="https://github.com/user-attachments/assets/9c6d779b-1a48-4409-8314-7be99eaa5506" /> | <img width="1277" height="761" alt="Screenshot 2026-06-26 at 10 26 17" src="https://github.com/user-attachments/assets/2e9bc7b3-4b38-4b1c-a4b2-73fd04662632" />|
