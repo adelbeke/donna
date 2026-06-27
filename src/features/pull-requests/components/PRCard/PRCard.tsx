@@ -13,11 +13,11 @@ import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
-import { ChecksPanel } from './ChecksPanel'
+import { PRChecksModal } from '../PRChecksModal/PRChecksModal.tsx'
 import { deriveCheckState } from '../../lib/prUtils'
 import { useCheckContexts } from '../../queries/useCheckContexts'
 import { timeAgo } from '../../lib/timeAgo'
-import { PRCardActions } from '@/features/pull-requests/components/PRCard/PRCardActions/PRCardActions.tsx'
+import { PRCardActions } from '@/features/pull-requests/components/PRCardActions/PRCardActions.tsx'
 
 interface Props {
   pr: PullRequest
@@ -219,7 +219,7 @@ export function PRCard({ pr, isAuthored = false }: Props) {
                     {ciBadge.label}
                   </button>
                   {checksOpen && (
-                    <ChecksPanel
+                    <PRChecksModal
                       checks={checks}
                       isLoading={checksLoading}
                       rollupState={checkState}

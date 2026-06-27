@@ -77,7 +77,7 @@ describe('PRCard', () => {
     expect(usePRStore.getState().priorityIds).not.toContain('pr-42')
   })
 
-  describe('ChecksPanel rollup state footer', () => {
+  describe('PRChecksModal rollup state footer', () => {
     const greenCheck = {
       __typename: 'CheckRun' as const,
       name: 'CI',
