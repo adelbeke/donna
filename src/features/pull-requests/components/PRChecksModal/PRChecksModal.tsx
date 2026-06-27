@@ -1,7 +1,7 @@
 import { Clock, ExternalLink } from 'lucide-react'
 import type { CheckRunContext, StatusContextItem, CheckRollupState } from '@/types/github.ts'
-import {PRCheckIcon} from "@/features/pull-requests/components/PRChecksModal/PRCheckIcon.tsx";
-import {Modal} from "@/shared/components/ui/Modal.tsx";
+import { PRCheckIcon } from '@/features/pull-requests/components/PRChecksModal/PRCheckIcon.tsx'
+import { Modal } from '@/shared/components/ui/Modal.tsx'
 
 interface Props {
   isOpen: boolean
