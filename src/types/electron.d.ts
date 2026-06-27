@@ -19,6 +19,9 @@ interface Window {
       list: (repoPath: string) => Promise<import('../features/branches/types').Worktree[]>
       remove: (repoPath: string, worktreePath: string, force: boolean) => Promise<void>
     }
+    dirs: {
+      filterExisting: (paths: string[]) => Promise<string[]>
+    }
     dialog: {
       openDirectory: () => Promise<string | null>
     }

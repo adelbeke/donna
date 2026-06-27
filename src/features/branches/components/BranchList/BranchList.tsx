@@ -1,6 +1,6 @@
 import { useQueries } from '@tanstack/react-query'
 import { FolderPlus, RefreshCw, X } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { usePullRequests } from '@/features/pull-requests/exports'
 import { useBranchStore } from '../../stores/branchStore'
 import type { Worktree } from '../../types'
@@ -13,6 +13,16 @@ export function BranchList() {
   const { localPaths, addLocalPath, removeLocalPath } = useBranchStore()
   const { branchSearch } = useBranchStore()
   const { allPRs } = usePullRequests()
+
+  useEffect(() => {
+    window.electronAPI!.dirs
+      .filterExisting(localPaths)
+      .then((existing) => {
+        localPaths.filter((p) => !existing.includes(p)).forEach(removeLocalPath)
+      })
+      .catch(() => {}) // silently ignore — stale paths survive until next mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // ponytail: run once on mount — stale paths from previous session
 
   const branchQueries = useQueries({
     queries: localPaths.map((p) => ({

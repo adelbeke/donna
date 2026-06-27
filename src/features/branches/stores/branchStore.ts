@@ -19,6 +19,13 @@ export const useBranchStore = create<BranchStore>()(
         set((state) => ({ localPaths: state.localPaths.filter((p) => p !== path) })),
       setBranchSearch: (s) => set({ branchSearch: s }),
     }),
-    { name: 'branch-dashboard-state' }
+    {
+      name: 'branch-dashboard-state',
+      merge: (persisted, current) => {
+        const p = persisted as Partial<BranchStore>
+        return { ...current, localPaths: p.localPaths ?? current.localPaths }
+        // ponytail: skip branchSearch — ephemeral
+      },
+    }
   )
 )
