@@ -7,7 +7,7 @@ import type { PRStore } from '../../stores/prStore'
 vi.mock('../../stores/prStore', () => ({ usePRStore: vi.fn() }))
 const mockUsePRStore = vi.mocked(usePRStore)
 
-function mockStore(section = 'review-requested', setSection = vi.fn()) {
+const mockStore = (section = 'review-requested', setSection = vi.fn()) => {
   mockUsePRStore.mockImplementation((selector: (s: PRStore) => unknown) => {
     const state = { section, setSection }
     return selector(state as unknown as PRStore)

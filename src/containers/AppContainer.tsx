@@ -3,16 +3,16 @@ import { Terminal } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { ghIsInstalled, ghGraphql } from '@/providers/electron'
 import { VIEWER_QUERY } from '@/providers/github'
-import DashboardPage from './DashboardPage.tsx'
+import { DashboardPage } from './DashboardPage.tsx'
 import { FeaturesContext, type Feature } from '@/shared/features'
 import type { GitHubUser } from '../types/github.ts'
 
 const APP_FEATURES = new Set<Feature>(['branches'])
 
-async function tryNativeAuth(
+const tryNativeAuth = async (
   setToken: (t: string) => void,
   setUser: (u: GitHubUser) => void
-): Promise<string | null> {
+): Promise<string | null> => {
   const installed = await ghIsInstalled()
   if (!installed) return 'gh CLI not found. Install it at cli.github.com then relaunch.'
   try {
@@ -26,7 +26,7 @@ async function tryNativeAuth(
   }
 }
 
-function AppAuthError({ message, onRetry }: { message: string; onRetry: () => void }) {
+const AppAuthError = ({ message, onRetry }: { message: string; onRetry: () => void }) => {
   return (
     <div className="min-h-screen bg-[var(--color-surface)] flex flex-col items-center justify-center gap-4 p-8">
       <Terminal size={32} className="text-[var(--color-text-muted)]" />
@@ -41,7 +41,7 @@ function AppAuthError({ message, onRetry }: { message: string; onRetry: () => vo
   )
 }
 
-export function AppContainer() {
+export const AppContainer = () => {
   const { token, setToken, setUser } = useAuthStore()
   const [checking, setChecking] = useState(!token)
   const [error, setError] = useState<string | null>(null)

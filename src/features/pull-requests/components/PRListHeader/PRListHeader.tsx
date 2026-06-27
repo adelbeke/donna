@@ -11,7 +11,7 @@ type Props = {
   isFetching: boolean
 }
 
-export function PRListHeader({
+export const PRListHeader = ({
   title,
   displayCounter,
   counter,
@@ -19,7 +19,7 @@ export function PRListHeader({
   displayTotalCount,
   refetch,
   isFetching,
-}: Props) {
+}: Props) => {
   return (
     <div className="flex flex-wrap items-center justify-between mb-4">
       <div className="flex items-center gap-3">

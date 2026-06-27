@@ -12,7 +12,7 @@ const DEFAULT_BRANCHES = new Set([
   'production',
 ])
 
-interface BranchNode {
+type BranchNode = {
   name: string
   target: {
     committedDate?: string
@@ -21,7 +21,7 @@ interface BranchNode {
   associatedPullRequests: { nodes: { number: number; state: string; url: string }[] }
 }
 
-interface BranchesResult {
+type BranchesResult = {
   repository: {
     refs: {
       pageInfo: { hasNextPage: boolean; endCursor: string }
@@ -30,11 +30,11 @@ interface BranchesResult {
   }
 }
 
-export function mapBranchNodes(
+export const mapBranchNodes = (
   nodes: BranchNode[],
   repo: string,
   login: string | undefined
-): Branch[] {
+): Branch[] => {
   return nodes
     .filter((n) => !DEFAULT_BRANCHES.has(n.name))
     .filter((n) => {
@@ -52,7 +52,7 @@ export function mapBranchNodes(
     )
 }
 
-export function useBranches(repos: string[]) {
+export const useBranches = (repos: string[]) => {
   const token = useAuthStore((s) => s.token)
   const login = useAuthStore((s) => s.user?.login)
 

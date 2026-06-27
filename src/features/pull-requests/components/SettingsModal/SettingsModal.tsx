@@ -6,7 +6,7 @@ import { isRepoMatchedBy } from '../../lib/prFilters'
 import { ButtonWithTooltip } from '@/shared/components/ui/ButtonWithTooltip'
 import { Modal } from '@/shared/components/ui/Modal.tsx'
 
-export function SettingsModal() {
+export const SettingsModal = () => {
   const [open, setOpen] = useState(false)
   const [mutedInput, setMutedInput] = useState('')
   const [hiddenRepoInput, setHiddenRepoInput] = useState('')
@@ -29,7 +29,7 @@ export function SettingsModal() {
       ? globalFilters.hiddenAuthors.length + globalFilters.hiddenRepos.length
       : 0)
 
-  function toggleRepo(repo: string) {
+  const toggleRepo = (repo: string) => {
     setViewFilters(section, {
       repos: currentView.repos.includes(repo)
         ? currentView.repos.filter((r) => r !== repo)
@@ -37,7 +37,7 @@ export function SettingsModal() {
     })
   }
 
-  function handleMutedKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  const handleMutedKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return
     const trimmed = mutedInput.trim()
     if (trimmed) {
@@ -46,7 +46,7 @@ export function SettingsModal() {
     }
   }
 
-  function handleHiddenRepoKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  const handleHiddenRepoKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return
     const trimmed = hiddenRepoInput.trim()
     if (trimmed) {

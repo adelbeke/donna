@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { PullRequest } from '@/types/github'
 import { deriveReviewerSummary, buildSearchQuery, deriveCheckState } from './prUtils'
 
-function makePR(overrides: Partial<PullRequest> = {}): PullRequest {
+const makePR = (overrides: Partial<PullRequest> = {}): PullRequest => {
   return {
     id: 'pr-1',
     number: 1,

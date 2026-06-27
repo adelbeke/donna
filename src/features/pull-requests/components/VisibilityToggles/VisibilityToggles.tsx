@@ -1,6 +1,6 @@
 import { usePRStore } from '@/features/pull-requests/stores/prStore.ts'
 
-export function VisibilityToggles() {
+export const VisibilityToggles = () => {
   const section = usePRStore((s) => s.section)
   const globalFilters = usePRStore((s) => s.globalFilters)
   const setGlobalFilters = usePRStore((s) => s.setGlobalFilters)

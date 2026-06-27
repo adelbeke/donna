@@ -5,7 +5,7 @@ import { PRSectionsTabs } from '@/features/pull-requests/components/PRSectionsTa
 import { PRList } from '@/features/pull-requests/components/PRList/PRList.tsx'
 import { SettingsModal } from '@/features/pull-requests/components/SettingsModal/SettingsModal.tsx'
 
-export function PRDashboard() {
+export const PRDashboard = () => {
   const section = usePRStore((s) => s.section)
   const viewFilters = usePRStore((s) => s.viewFilters)
   const setViewFilters = usePRStore((s) => s.setViewFilters)

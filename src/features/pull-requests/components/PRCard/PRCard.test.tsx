@@ -86,7 +86,7 @@ describe('PRCard', () => {
       detailsUrl: null,
     }
 
-    function makePrWithRollup(state: 'PENDING' | 'EXPECTED' | 'SUCCESS') {
+    const makePrWithRollup = (state: 'PENDING' | 'EXPECTED' | 'SUCCESS') => {
       return {
         ...pr,
         commits: {
@@ -133,7 +133,7 @@ describe('PRCard', () => {
   })
 
   describe('review state badge', () => {
-    function prWithReview(state: ReviewState) {
+    const prWithReview = (state: ReviewState) => {
       return { ...pr, myReviewState: state }
     }
 
@@ -165,7 +165,7 @@ describe('PRCard', () => {
   })
 
   describe('CI checks badge', () => {
-    function prWithCheckState(state: 'SUCCESS' | 'FAILURE' | 'PENDING') {
+    const prWithCheckState = (state: 'SUCCESS' | 'FAILURE' | 'PENDING') => {
       return {
         ...pr,
         commits: {

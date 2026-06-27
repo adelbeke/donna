@@ -2,17 +2,17 @@ import type { PullRequest } from '@/types/github'
 import type { GlobalFilters, PRSection, ViewFilters } from '../stores/prStore'
 
 // supports "owner/repo" (exact) or "owner" (org-wide)
-export function isRepoMatchedBy(repoNameWithOwner: string, pattern: string): boolean {
+export const isRepoMatchedBy = (repoNameWithOwner: string, pattern: string): boolean => {
   const repo = repoNameWithOwner.toLowerCase()
   return pattern.includes('/') ? repo === pattern : repo.split('/')[0] === pattern
 }
 
-export function applyFilters(
+export const applyFilters = (
   nodes: PullRequest[],
   global: GlobalFilters,
   view: ViewFilters,
   section: PRSection
-): PullRequest[] {
+): PullRequest[] => {
   return nodes.filter((pr) => {
     if (!global.showHidden && pr.isHidden) return false
     if (section !== 'authored') {

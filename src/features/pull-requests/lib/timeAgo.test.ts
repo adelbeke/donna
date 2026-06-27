@@ -5,12 +5,12 @@ const NOW = new Date('2024-06-01T12:00:00Z').getTime()
 
 afterEach(() => vi.useRealTimers())
 
-function freeze() {
+const freeze = () => {
   vi.useFakeTimers()
   vi.setSystemTime(NOW)
 }
 
-function dateSecondsAgo(s: number) {
+const dateSecondsAgo = (s: number) => {
   return new Date(NOW - s * 1000).toISOString()
 }
 

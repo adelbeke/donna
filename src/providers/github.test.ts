@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest'
 import { ClientError } from 'graphql-request'
 import { isAuthError } from './github'
 
-function makeClientError(opts: {
+const makeClientError = (opts: {
   status?: number
   errors?: { type?: string; message?: string }[]
-}): ClientError {
+}): ClientError => {
   const err = Object.create(ClientError.prototype) as ClientError
   Object.assign(err, {
     name: 'ClientError',

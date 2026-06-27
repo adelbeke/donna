@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { sortAndPartition, deriveMyReviewState } from '../lib/prUtils'
 import type { PullRequest } from '@/types/github'
 
-function makePR(id: string, createdAt: string): PullRequest {
+const makePR = (id: string, createdAt: string): PullRequest => {
   return {
     id,
     number: parseInt(id, 10),
@@ -28,7 +28,7 @@ const mid = makePR('2', '2024-06-01T00:00:00Z')
 const newest = makePR('3', '2024-12-01T00:00:00Z')
 
 describe('deriveMyReviewState', () => {
-  function makePRWithReviews(reviews: PullRequest['reviews']['nodes']): PullRequest {
+  const makePRWithReviews = (reviews: PullRequest['reviews']['nodes']): PullRequest => {
     return { ...makePR('1', '2024-01-01T00:00:00Z'), reviews: { nodes: reviews } }
   }
 

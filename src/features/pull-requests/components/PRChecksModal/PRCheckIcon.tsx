@@ -1,7 +1,7 @@
 import type { CheckRunContext, StatusContextItem } from '@/types/github.ts'
 import { CheckCircle, Clock, XCircle } from 'lucide-react'
 
-export function PRCheckIcon({ check }: { check: CheckRunContext | StatusContextItem }) {
+export const PRCheckIcon = ({ check }: { check: CheckRunContext | StatusContextItem }) => {
   if (check.__typename === 'CheckRun') {
     const { status, conclusion } = check
     if (

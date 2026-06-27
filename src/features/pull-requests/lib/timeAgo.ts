@@ -1,4 +1,4 @@
-export function timeAgo(dateStr: string): string {
+export const timeAgo = (dateStr: string): string => {
   const diff = Date.now() - new Date(dateStr).getTime()
   const seconds = Math.floor(diff / 1000)
   if (seconds < 60) return `${seconds}s ago`

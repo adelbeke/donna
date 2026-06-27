@@ -9,7 +9,7 @@ import { BranchCard } from '@/features/branches/components/BranchList/BranchCard
 
 const REPO_HUES = [210, 140, 30, 280, 180, 60, 320, 260]
 
-export function BranchList() {
+export const BranchList = () => {
   const { localPaths, addLocalPath, removeLocalPath } = useBranchStore()
   const { branchSearch } = useBranchStore()
   const { allPRs } = usePullRequests()
@@ -49,12 +49,12 @@ export function BranchList() {
     return m
   }, [allPRs])
 
-  async function addRepo() {
+  const addRepo = async () => {
     const picked = await window.electronAPI!.dialog.openDirectory()
     if (picked && !localPaths.includes(picked)) addLocalPath(picked)
   }
 
-  function refetchAll() {
+  const refetchAll = () => {
     branchQueries.forEach((q) => q.refetch())
     worktreeQueries.forEach((q) => q.refetch())
   }

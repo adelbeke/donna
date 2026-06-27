@@ -3,7 +3,7 @@ import type { PullRequest } from '@/types/github'
 import { deriveReviewerSummary } from '../../lib/prUtils'
 import type { Reviewer } from '../../lib/prUtils'
 
-interface Props {
+type Props = {
   pr: PullRequest
   authorLogin: string
 }
@@ -19,7 +19,7 @@ const groupConfig: Record<Kind, { icon: React.ReactElement; color: string }> = {
 
 const ORDER: Kind[] = ['approved', 'changesRequested', 'commented', 'pending']
 
-export function ReviewerAvatars({ pr, authorLogin }: Props) {
+export const ReviewerAvatars = ({ pr, authorLogin }: Props) => {
   const summary = deriveReviewerSummary(pr, authorLogin)
 
   const groups: { kind: Kind; reviewers: Reviewer[] }[] = ORDER.map((kind) => ({

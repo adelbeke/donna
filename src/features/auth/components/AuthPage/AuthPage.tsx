@@ -4,20 +4,20 @@ import { Lock } from 'lucide-react'
 import { createGitHubClient, VIEWER_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import type { GitHubUser } from '@/types/github'
-import Footer from '@/shared/components/Footer/Footer'
+import { Footer } from '@/shared/components/Footer/Footer'
 
-interface ViewerResult {
+type ViewerResult = {
   viewer: GitHubUser
 }
 
-export default function AuthPage() {
+export const AuthPage = () => {
   const [token, setToken] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const { setToken: saveToken, setUser, sessionExpired } = useAuthStore()
   const queryClient = useQueryClient()
 
-  async function handleConnect() {
+  const handleConnect = async () => {
     if (!token.trim()) return
     setLoading(true)
     setError(null)

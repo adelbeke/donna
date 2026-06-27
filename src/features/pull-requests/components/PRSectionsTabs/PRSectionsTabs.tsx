@@ -6,7 +6,7 @@ const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'mentioned', label: 'Mentioned' },
 ]
 
-export function PRSectionsTabs() {
+export const PRSectionsTabs = () => {
   const section = usePRStore((s) => s.section)
   const setSection = usePRStore((s) => s.setSection)
 

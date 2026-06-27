@@ -7,7 +7,7 @@ const FEEDBACK_DURATION_DEFAULT_DELAY = 3000
 // Matches Tailwind's default transition-opacity duration
 const TOOLTIP_TRANSITION_MS = 150
 
-export function CopyWithFeedback({
+export const CopyWithFeedback = ({
   text,
   label,
   feedbackDuration = FEEDBACK_DURATION_DEFAULT_DELAY,
@@ -21,11 +21,11 @@ export function CopyWithFeedback({
   icon?: ReactNode
   children?: ReactNode
   buttonClassName?: string
-}) {
+}) => {
   const [copied, setCopied] = useState(false)
   const [showCopied, setShowCopied] = useState(false)
 
-  function handleCopy() {
+  const handleCopy = () => {
     navigator.clipboard.writeText(text)
     setCopied(true)
     setShowCopied(true)

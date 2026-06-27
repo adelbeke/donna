@@ -1,18 +1,18 @@
 import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
 
-export interface Reviewer {
+export type Reviewer = {
   login: string
   avatarUrl: string
 }
 
-export interface ReviewerSummary {
+export type ReviewerSummary = {
   approved: Reviewer[]
   changesRequested: Reviewer[]
   commented: Reviewer[]
   pending: Reviewer[]
 }
 
-export function buildSearchQuery(section: string, login: string): string {
+export const buildSearchQuery = (section: string, login: string): string => {
   const base = 'is:open is:pr archived:false'
   switch (section) {
     case 'review-requested':
@@ -26,7 +26,7 @@ export function buildSearchQuery(section: string, login: string): string {
   }
 }
 
-export function deriveMyReviewState(pr: PullRequest, login: string): ReviewState | null {
+export const deriveMyReviewState = (pr: PullRequest, login: string): ReviewState | null => {
   const myReviews = pr.reviews.nodes.filter((r) => r.author?.login === login)
   if (!myReviews.length) return null
   const sorted = [...myReviews].sort(
@@ -35,7 +35,7 @@ export function deriveMyReviewState(pr: PullRequest, login: string): ReviewState
   return sorted[0].state
 }
 
-export function deriveReviewerSummary(pr: PullRequest, authorLogin: string): ReviewerSummary {
+export const deriveReviewerSummary = (pr: PullRequest, authorLogin: string): ReviewerSummary => {
   const sorted = [...pr.reviews.nodes]
     .filter((r) => r.author && r.author.login !== authorLogin)
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
@@ -69,14 +69,14 @@ export function deriveReviewerSummary(pr: PullRequest, authorLogin: string): Rev
   return buckets
 }
 
-export function deriveCheckState(pr: PullRequest): CheckRollupState | null {
+export const deriveCheckState = (pr: PullRequest): CheckRollupState | null => {
   return pr.commits.nodes[0]?.commit?.statusCheckRollup?.state ?? null
 }
 
-export function sortAndPartition(
+export const sortAndPartition = (
   prs: PullRequest[],
   priorityIds: string[]
-): { regular: PullRequest[]; priorityPRs: PullRequest[] } {
+): { regular: PullRequest[]; priorityPRs: PullRequest[] } => {
   const byDate = [...prs].sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   )

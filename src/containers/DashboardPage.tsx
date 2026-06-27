@@ -4,10 +4,10 @@ import { usePRStore, PRDashboard } from '@/features/pull-requests/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures } from '@/shared/features'
 import { BranchDashboard } from '@/features/branches/exports'
-import Footer from '@/shared/components/Footer/Footer'
+import { Footer } from '@/shared/components/Footer/Footer'
 import { useUpdateCheck, isNewer, UpdateBanner } from '@/features/updates/exports'
 
-export default function DashboardPage() {
+export const DashboardPage = () => {
   const { user, logout } = useAuthStore()
   // TODO: the view shouldn't be drove by the PR store feature
   const { view, setView } = usePRStore()

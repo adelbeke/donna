@@ -12,7 +12,7 @@ export { useViewer } from './useViewer'
 
 const MAX_PAGES = 10
 
-interface SearchResult {
+type SearchResult = {
   search: {
     issueCount: number
     pageInfo: { hasNextPage: boolean; endCursor: string }
@@ -20,7 +20,7 @@ interface SearchResult {
   }
 }
 
-export function usePullRequests() {
+export const usePullRequests = () => {
   const token = useAuthStore((s) => s.token)
   const user = useAuthStore((s) => s.user)
   const section = usePRStore((s) => s.section)
