@@ -2,7 +2,7 @@ import { ExternalLink, Eye, EyeOff, Link2, Star } from 'lucide-react'
 import {
   OPACITY_CLASSNAME,
   PRCardAction,
-} from '@/features/pull-requests/components/PRCard/PRCardActions/PRCardAction.tsx'
+} from '@/features/pull-requests/components/PRCardActions/PRCardAction.tsx'
 import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
 
 type Props = {

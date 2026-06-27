@@ -1,4 +1,4 @@
-import { VisibilityToggles } from '@/features/pull-requests/components/PRList/VisibilityToggles/VisibilityToggles.tsx'
+import { VisibilityToggles } from '@/features/pull-requests/components/VisibilityToggles/VisibilityToggles.tsx'
 import { RefreshCw } from 'lucide-react'
 
 type Props = {

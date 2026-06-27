@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { usePullRequests } from '../../queries/useGitHubPRs'
 import { usePRStore } from '../../stores/prStore'
 import { PRCard } from '../PRCard/PRCard'
-import { PRListHeader } from '@/features/pull-requests/components/PRList/PRListHeader/PRListHeader.tsx'
+import { PRListHeader } from '@/features/pull-requests/components/PRListHeader/PRListHeader.tsx'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
