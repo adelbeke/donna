@@ -99,9 +99,7 @@ describe('BranchList — current branch sorting', () => {
       []
     )
     render(<BranchList />)
-    const names = screen
-      .getAllByText(/^(feat\/a|feat\/b|main)$/)
-      .map((el) => el.textContent)
+    const names = screen.getAllByText(/^(feat\/a|feat\/b|main)$/).map((el) => el.textContent)
     expect(names[0]).toBe('main')
     expect(names).toEqual(['main', 'feat/a', 'feat/b'])
   })
@@ -118,9 +116,7 @@ describe('BranchList — current branch sorting', () => {
       ]
     )
     render(<BranchList />)
-    const names = screen
-      .getAllByText(/^(feat\/x|main)$/)
-      .map((el) => el.textContent)
+    const names = screen.getAllByText(/^(feat\/x|main)$/).map((el) => el.textContent)
     // both render — feat/x detected as current via linked worktree, not just via isCurrent flag
     expect(names).toContain('feat/x')
     expect(names).toContain('main')
