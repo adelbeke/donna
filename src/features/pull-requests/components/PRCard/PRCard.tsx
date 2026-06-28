@@ -14,8 +14,9 @@ import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
 import { PRChecksModal } from '../PRChecksModal/PRChecksModal.tsx'
-import { deriveCheckState } from '../../lib/prUtils'
+import { deriveCheckState, deriveMyReviewState } from '../../lib/prUtils'
 import { useCheckContexts } from '../../queries/useCheckContexts'
+import { usePRDetails } from '../../queries/usePRDetails'
 import { timeAgo } from '../../lib/timeAgo'
 import { PRCardActions } from '@/features/pull-requests/components/PRCardActions/PRCardActions.tsx'
 
@@ -104,10 +105,13 @@ export const PRCard = ({ pr, isAuthored = false }: Props) => {
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
   const isPriority = priorityIds.includes(pr.id)
   const isHidden = pr.isHidden ?? false
-  const badge = !isAuthored && pr.myReviewState ? reviewBadge[pr.myReviewState] : null
-  const checkState = deriveCheckState(pr)
+  const { data: details } = usePRDetails(pr.id)
+  const merged = details ? { ...pr, ...details } : pr
+  const myReviewState = deriveMyReviewState(merged, viewerLogin)
+  const badge = !isAuthored && myReviewState ? reviewBadge[myReviewState] : null
+  const checkState = deriveCheckState(merged)
   const ciBadge = checkState ? ciStateBadge[checkState] : null
-  const showConflict = pr.mergeable === 'CONFLICTING'
+  const showConflict = merged.mergeable === 'CONFLICTING'
   const { checks, isLoading: checksLoading } = useCheckContexts(pr.id, checksOpen)
 
   const handleHide = () => {
@@ -241,7 +245,7 @@ export const PRCard = ({ pr, isAuthored = false }: Props) => {
             {/* Reviewer avatars (authored section only) */}
             {isAuthored && (
               <div className="mt-2">
-                <ReviewerAvatars pr={pr} authorLogin={viewerLogin} />
+                <ReviewerAvatars pr={merged} authorLogin={viewerLogin} />
               </div>
             )}
           </div>

@@ -19,7 +19,7 @@ export const SettingsModal = () => {
   const removeHiddenAuthor = usePRStore((s) => s.removeHiddenAuthor)
   const addHiddenRepo = usePRStore((s) => s.addHiddenRepo)
   const removeHiddenRepo = usePRStore((s) => s.removeHiddenRepo)
-  const { repos = [], hasNextPage, truncated, loadedCount, totalCount } = usePullRequests()
+  const { repos = [] } = usePullRequests()
 
   const currentView = viewFilters[section]
 
@@ -58,9 +58,6 @@ export const SettingsModal = () => {
         setViewFilters(section, { repos: remaining })
     }
   }
-
-  const showWarning =
-    (currentView.repos.length > 0 || globalFilters.showHidden) && hasNextPage && !truncated
 
   return (
     <>
@@ -196,11 +193,7 @@ export const SettingsModal = () => {
           </>
         )}
 
-        {showWarning && (
-          <p className="text-xs text-[var(--color-warning)]">
-            ⚠ Filters apply to {loadedCount} of ~{totalCount} PRs
-          </p>
-        )}
+
       </Modal>
     </>
   )

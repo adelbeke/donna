@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { PullRequest } from '@/types/github'
-import { deriveReviewerSummary, buildSearchQuery, deriveCheckState } from './prUtils'
+import { deriveReviewerSummary, buildSearchQuery, deriveCheckState, deriveMyReviewState } from './prUtils'
 
 const makePR = (overrides: Partial<PullRequest> = {}): PullRequest => {
   return {
@@ -47,7 +47,19 @@ describe('buildSearchQuery', () => {
   })
 })
 
+describe('deriveMyReviewState', () => {
+  it('GIVEN PR with undefined reviews WHEN called THEN returns null', () => {
+    const pr = makePR({ reviews: undefined })
+    expect(deriveMyReviewState(pr, 'alice')).toBeNull()
+  })
+})
+
 describe('deriveCheckState', () => {
+  it('GIVEN PR with undefined commits WHEN called THEN returns null', () => {
+    const pr = makePR({ commits: undefined })
+    expect(deriveCheckState(pr)).toBeNull()
+  })
+
   it('GIVEN PR with no commits WHEN called THEN returns null', () => {
     const pr = makePR({ commits: { nodes: [] } })
     expect(deriveCheckState(pr)).toBeNull()
@@ -92,6 +104,15 @@ describe('deriveCheckState', () => {
 })
 
 describe('deriveReviewerSummary', () => {
+  it('GIVEN PR with undefined reviews and reviewRequests WHEN called THEN all buckets are empty', () => {
+    const pr = makePR({ reviews: undefined, reviewRequests: undefined })
+    const result = deriveReviewerSummary(pr, 'author')
+    expect(result.approved).toHaveLength(0)
+    expect(result.changesRequested).toHaveLength(0)
+    expect(result.commented).toHaveLength(0)
+    expect(result.pending).toHaveLength(0)
+  })
+
   it('GIVEN empty reviews and requests WHEN called THEN all buckets are empty', () => {
     const pr = makePR()
     const result = deriveReviewerSummary(pr, 'author')
