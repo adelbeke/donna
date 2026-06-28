@@ -75,7 +75,7 @@ export const SettingsModal = () => {
         )}
       </ButtonWithTooltip>
 
-      <Modal isOpen={open} title={'Settings'} onClose={() => setOpen(false)}>
+      <Modal isOpen={open} title={'Settings'} onClose={() => setOpen(false)} className="min-w-1/2">
         {repos.length > 1 && (
           <div>
             <div className="flex items-center justify-between mb-2">

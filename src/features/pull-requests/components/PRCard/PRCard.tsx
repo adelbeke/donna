@@ -105,7 +105,7 @@ export const PRCard = ({ pr, isAuthored = false }: Props) => {
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
   const isPriority = priorityIds.includes(pr.id)
   const isHidden = pr.isHidden ?? false
-  const { data: details } = usePRDetails(pr.id)
+  const { data: details, isPending: isDetailsPending } = usePRDetails(pr.id)
   const merged = details ? { ...pr, ...details } : pr
   const myReviewState = deriveMyReviewState(merged, viewerLogin)
   const badge = !isAuthored && myReviewState ? reviewBadge[myReviewState] : null
@@ -187,6 +187,11 @@ export const PRCard = ({ pr, isAuthored = false }: Props) => {
                 <span className="text-[var(--color-success)]">+{pr.additions}</span>{' '}
                 <span className="text-[var(--color-danger)]">-{pr.deletions}</span>
               </span>
+
+              {/* Skeleton while details load */}
+              {isDetailsPending && (
+                <span className="h-5 w-20 rounded bg-[var(--color-surface-overlay)] animate-pulse" />
+              )}
 
               {/* Draft */}
               {pr.isDraft && (
