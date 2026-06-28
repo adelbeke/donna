@@ -2,6 +2,8 @@ import { usePullRequests } from '../../queries/useGitHubPRs'
 import { usePRStore } from '../../stores/prStore'
 import { PRCard } from '../PRCard/PRCard'
 import { PRListHeader } from '@/features/pull-requests/components/PRListHeader/PRListHeader.tsx'
+import { useFocusRefresh } from '../../hooks/useFocusRefresh'
+import { NewPRsBadge } from '../NewPRsBadge/NewPRsBadge'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -13,6 +15,7 @@ export const PRList = () => {
   const {
     data: prs = [],
     priorityPRs = [],
+    allPRs = [],
     isLoading,
     isFetching,
     isFetchingNextPage,
@@ -21,21 +24,40 @@ export const PRList = () => {
     totalCount,
   } = usePullRequests()
   const section = usePRStore((s) => s.section)
+  const globalFilters = usePRStore((s) => s.globalFilters)
+  const viewFilters = usePRStore((s) => s.viewFilters)
 
-  const handleRefetch = () => void refetch()
+  const { displayedPRs, displayedPriorityPRs, newCount, dismiss } = useFocusRefresh({
+    allPRs,
+    prs,
+    priorityPRs,
+    refetch: () => void refetch(),
+    isFetching,
+    isFetchingNextPage,
+    globalFilters,
+    view: viewFilters[section],
+    section,
+  })
+
+  const handleRefetch = () => {
+    dismiss()
+    void refetch()
+  }
 
   return (
     <div className="flex-1 min-w-0">
       <PRListHeader
         title={sectionLabels[section]}
         displayCounter={!isLoading}
-        counter={prs.length + priorityPRs.length}
+        counter={displayedPRs.length + displayedPriorityPRs.length}
         totalCount={totalCount}
-        displayTotalCount={totalCount > prs.length + priorityPRs.length}
+        displayTotalCount={totalCount > displayedPRs.length + displayedPriorityPRs.length}
         refetch={handleRefetch}
         isFetching={isFetching}
         isLoadingMore={isFetchingNextPage}
       />
+
+      {newCount > 0 && <NewPRsBadge count={newCount} onDismiss={dismiss} />}
 
       {isLoading && (
         <div className="space-y-3">
@@ -54,7 +76,7 @@ export const PRList = () => {
         </div>
       )}
 
-      {!isLoading && !error && prs.length === 0 && priorityPRs.length === 0 && (
+      {!isLoading && !error && displayedPRs.length === 0 && displayedPriorityPRs.length === 0 && (
         <div className="text-center py-16 text-[var(--color-text-muted)]">
           <p className="text-sm">No pull requests found.</p>
           <p className="text-xs mt-1">Try adjusting your filters.</p>
@@ -72,22 +94,22 @@ export const PRList = () => {
         </div>
       )}
 
-      {!isLoading && !error && priorityPRs.length > 0 && (
+      {!isLoading && !error && displayedPriorityPRs.length > 0 && (
         <div className="mb-4">
           <p className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">
             Top priority
           </p>
           <div className="space-y-2">
-            {priorityPRs.map((pr) => (
+            {displayedPriorityPRs.map((pr) => (
               <PRCard key={pr.id} pr={pr} isAuthored={section === 'authored'} />
             ))}
           </div>
         </div>
       )}
 
-      {!isLoading && !error && prs.length > 0 && (
+      {!isLoading && !error && displayedPRs.length > 0 && (
         <div className="space-y-2">
-          {prs.map((pr) => (
+          {displayedPRs.map((pr) => (
             <PRCard key={pr.id} pr={pr} isAuthored={section === 'authored'} />
           ))}
         </div>

@@ -13,7 +13,7 @@ export type ReviewerSummary = {
 }
 
 export const buildSearchQuery = (section: string, login: string): string => {
-  const base = 'is:open is:pr archived:false'
+  const base = 'is:open is:pr archived:false sort:updated-desc'
   switch (section) {
     case 'review-requested':
       return `${base} review-requested:${login}`
