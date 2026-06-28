@@ -34,6 +34,7 @@ CI (`.github/workflows/ci.yml`) runs `lint`, `test:run`, then `build` on every P
 - Filters: by repository (checkboxes, shown only when >1 repo loaded), title search (navbar), show/hide **drafts**, show/hide **hidden**.
 - Each card shows repo, author, `#number`, opened/updated ages, diff size (`+/-`), draft/hidden badges, **my review-state** badge, a **CI checks** badge that opens a `PRChecksModal` popover (lazy-loads per-check contexts), and a **conflict** badge when `mergeable === 'CONFLICTING'`. In the authored section, cards also show grouped **reviewer avatars** (approved / changes-requested / commented / pending).
 - Paging: pages auto-load in the background (capped at `MAX_PAGES = 10`); a spinner in the header badge shows while more pages are fetching.
+- **Focus refresh**: when the window regains focus, `useFocusRefresh` (`hooks/useFocusRefresh.ts`) snapshots the current PR IDs and triggers a refetch. If new PRs appear, a `NewPRsBadge` is shown above the list; the list stays frozen at the pre-focus snapshot until the badge is dismissed or clicked. The `authored` section is excluded from this detection. Local mutations (star/hide) pass through the snapshot filter so they are always reflected immediately.
 
 **Branches view** (`branches`, **Electron-only**) — `BranchList` reads *local* git repos the user adds via a native directory picker:
 - Lists branches per repo with **worktree detection**, a **dirty-state** dot for uncommitted changes, and the **linked open PR** (matched by `repo/headRefName`).
@@ -67,7 +68,9 @@ src/
       exports.ts               public surface: { BranchList }
     pull-requests/   PR inbox feature
       components/    Filters/ (+ Filters.test.tsx), PRCard/ (PRCard, PRCard.test.tsx,
-                     ReviewerAvatars, PRChecksModal), PRList/ (PRList, PRList.test.tsx, VisibilityToggles)
+                     ReviewerAvatars, PRChecksModal), PRList/ (PRList, PRList.test.tsx, VisibilityToggles),
+                     NewPRsBadge/ (NewPRsBadge, NewPRsBadge.test.tsx)
+      hooks/         useFocusRefresh.ts + useFocusRefresh.test.tsx
       lib/           prUtils.ts & prUtils.test.ts, prFilters.ts & prFilters.test.ts, timeAgo.ts & timeAgo.test.ts
       queries/       useGitHubPRs.ts + useGitHubPRs.test.ts, useCheckContexts.ts, usePRDetails.ts, useViewer.ts
       stores/        prStore.ts + prStore.test.ts (Zustand, persisted)
@@ -121,7 +124,7 @@ Two layers, deliberately separated:
 `usePullRequests` (`src/features/pull-requests/queries/useGitHubPRs.ts`) is the core read path:
 
 1. `buildSearchQuery(section, login)` turns the active section (`review-requested` / `authored` / `mentioned`) into a GitHub search string.
-2. `useInfiniteQuery` pages the GraphQL `search` via `PR_LIST_QUERY` (20/page, capped at `MAX_PAGES = 10`). Pages auto-fetch sequentially via a `useEffect`; `PRListHeader` shows a spinner while `isFetchingNextPage`. The list query returns only lightweight fields — `reviews`, `reviewRequests`, `commits`, and `mergeable` are **not** fetched here.
+2. `useInfiniteQuery` pages the GraphQL `search` via `PR_LIST_QUERY` (20/page, capped at `MAX_PAGES = 10`), sorted `sort:updated-desc`. Pages auto-fetch sequentially via a `useEffect`; `PRListHeader` shows a spinner while `isFetchingNextPage`. The list query returns only lightweight fields — `reviews`, `reviewRequests`, `commits`, and `mergeable` are **not** fetched here.
 3. Each node is enriched in-memory with `isTopPriority`, `isHidden`.
 4. `applyFilters` (`src/lib/prFilters.ts`) drops drafts/hidden/repo/author/search misses.
 5. `sortAndPartition` (`src/lib/prUtils.ts`) sorts by `updatedAt` and splits priority PRs (pinned on top) from the rest.
