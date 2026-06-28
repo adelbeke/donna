@@ -25,7 +25,9 @@ export const Modal = ({ children, isOpen, title, onClose, className }: Props) =>
     <>
       <div className="fixed inset-0 z-40 bg-[var(--color-overlay)]" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-        <div className={`pointer-events-auto max-w-xl max-h-[80vh] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-lg p-4 space-y-4 ${className ?? ''}`}>
+        <div
+          className={`pointer-events-auto max-w-xl max-h-[80vh] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-lg p-4 space-y-4 ${className ?? ''}`}
+        >
           <div className="flex items-center justify-between gap-4">
             <p className="text-sm font-semibold text-[var(--color-text-primary)]">{title}</p>
             <button
