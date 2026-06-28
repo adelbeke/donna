@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import type { PullRequest } from '@/types/github'
-import { deriveReviewerSummary, buildSearchQuery, deriveCheckState, deriveMyReviewState } from './prUtils'
+import {
+  deriveReviewerSummary,
+  buildSearchQuery,
+  deriveCheckState,
+  deriveMyReviewState,
+} from './prUtils'
 
 const makePR = (overrides: Partial<PullRequest> = {}): PullRequest => {
   return {

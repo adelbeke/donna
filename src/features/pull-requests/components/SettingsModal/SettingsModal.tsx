@@ -192,8 +192,6 @@ export const SettingsModal = () => {
             </div>
           </>
         )}
-
-
       </Modal>
     </>
   )

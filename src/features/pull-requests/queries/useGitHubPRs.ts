@@ -49,7 +49,11 @@ export const usePullRequests = () => {
 
   // Auto-fetch subsequent pages in background, capped at MAX_PAGES
   useEffect(() => {
-    if (query.hasNextPage && !query.isFetchingNextPage && (query.data?.pages.length ?? 0) < MAX_PAGES) {
+    if (
+      query.hasNextPage &&
+      !query.isFetchingNextPage &&
+      (query.data?.pages.length ?? 0) < MAX_PAGES
+    ) {
       void query.fetchNextPage()
     }
   }, [query.hasNextPage, query.isFetchingNextPage, query.data?.pages.length, query.fetchNextPage])

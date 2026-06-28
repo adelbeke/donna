@@ -32,7 +32,9 @@ export const PRListHeader = ({
             {displayTotalCount && (
               <span className="text-[var(--color-text-muted)]"> of {totalCount}</span>
             )}
-            {isLoadingMore && <Loader2 size={10} className="animate-spin text-[var(--color-text-muted)]" />}
+            {isLoadingMore && (
+              <Loader2 size={10} className="animate-spin text-[var(--color-text-muted)]" />
+            )}
           </span>
         )}
       </div>

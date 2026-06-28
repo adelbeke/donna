@@ -28,7 +28,9 @@ const mid = makePR('2', '2024-06-01T00:00:00Z')
 const newest = makePR('3', '2024-12-01T00:00:00Z')
 
 describe('deriveMyReviewState', () => {
-  const makePRWithReviews = (reviews: NonNullable<PullRequest['reviews']>['nodes']): PullRequest => {
+  const makePRWithReviews = (
+    reviews: NonNullable<PullRequest['reviews']>['nodes']
+  ): PullRequest => {
     return { ...makePR('1', '2024-01-01T00:00:00Z'), reviews: { nodes: reviews } }
   }
 
