@@ -1,7 +1,7 @@
 {
   "name": "donna",
   "private": true,
-  "version": "1.7.0",
+  "version": "1.8.0",
   "type": "module",
   "description": "Self-hostable GitHub PR dashboard — filter, prioritise, and track review status across all your repositories",
   "license": "MIT",
