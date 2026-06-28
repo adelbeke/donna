@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { createClient, PULL_REQUESTS_QUERY } from '@/providers/github'
+import { createClient, PR_LIST_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { usePRStore } from '@/features/pull-requests/stores/prStore'
-import { buildSearchQuery, deriveMyReviewState, sortAndPartition } from '../lib/prUtils'
+import { buildSearchQuery, sortAndPartition } from '../lib/prUtils'
 import { applyFilters } from '../lib/prFilters'
 import type { PullRequest } from '@/types/github'
 
@@ -12,7 +12,7 @@ export { useViewer } from './useViewer'
 
 const MAX_PAGES = 10
 
-type SearchResult = {
+type SearchPage = {
   search: {
     issueCount: number
     pageInfo: { hasNextPage: boolean; endCursor: string }
@@ -31,38 +31,47 @@ export const usePullRequests = () => {
 
   const searchQuery = buildSearchQuery(section, user?.login ?? '')
 
-  const query = useInfiniteQuery<SearchResult>({
+  const query = useInfiniteQuery<SearchPage>({
     queryKey: ['prs', section, user?.login],
     enabled: !!token && !!user,
     staleTime: 60_000,
-    initialPageParam: null,
+    refetchOnWindowFocus: false,
+    initialPageParam: null as string | null,
+    getNextPageParam: (last) =>
+      last.search.pageInfo.hasNextPage ? last.search.pageInfo.endCursor : undefined,
     queryFn: async ({ pageParam }) => {
-      const client = createClient(token)
-      return client.request<SearchResult>(PULL_REQUESTS_QUERY, {
+      return createClient(token).request<SearchPage>(PR_LIST_QUERY, {
         searchQuery,
-        cursor: pageParam ?? undefined,
+        cursor: pageParam,
       })
-    },
-    getNextPageParam: (lastPage, pages) => {
-      if (pages.length >= MAX_PAGES) return undefined
-      return lastPage.search.pageInfo.hasNextPage ? lastPage.search.pageInfo.endCursor : undefined
     },
   })
 
-  const { hasNextPage, isFetchingNextPage, fetchNextPage } = query
+  // Auto-fetch subsequent pages in background, capped at MAX_PAGES
+  useEffect(() => {
+    if (
+      query.hasNextPage &&
+      !query.isFetchingNextPage &&
+      (query.data?.pages.length ?? 0) < MAX_PAGES
+    ) {
+      void query.fetchNextPage()
+    }
+  }, [query.hasNextPage, query.isFetchingNextPage, query.data?.pages.length, query.fetchNextPage])
 
-  const allNodes = useMemo(
-    () =>
-      (query.data?.pages ?? [])
-        .flatMap((p) => p.search.nodes)
-        .map((pr) => ({
-          ...pr,
-          myReviewState: deriveMyReviewState(pr, user!.login),
-          isTopPriority: priorityIds.includes(pr.id),
-          isHidden: hiddenIds.includes(pr.id),
-        })),
-    [query.data, user, priorityIds, hiddenIds]
-  )
+  const allNodes = useMemo(() => {
+    const seen = new Set<string>()
+    return (query.data?.pages.flatMap((p) => p.search.nodes) ?? [])
+      .map((pr) => ({
+        ...pr,
+        isTopPriority: priorityIds.includes(pr.id),
+        isHidden: hiddenIds.includes(pr.id),
+      }))
+      .filter((pr) => {
+        if (seen.has(pr.id)) return false
+        seen.add(pr.id)
+        return true
+      })
+  }, [query.data, priorityIds, hiddenIds])
 
   const currentView = viewFilters[section]
   const filtered = useMemo(
@@ -79,11 +88,7 @@ export const usePullRequests = () => {
     [allNodes]
   )
 
-  const totalCount = query.data?.pages[0]?.search.issueCount ?? 0
-  const loadedCount = allNodes.length
-  const lastPage = query.data?.pages[query.data.pages.length - 1]
-  const hitPageCap = (query.data?.pages.length ?? 0) >= MAX_PAGES
-  const truncated = hitPageCap && !!lastPage?.search.pageInfo.hasNextPage
+  const truncated = (query.data?.pages.length ?? 0) >= MAX_PAGES && query.hasNextPage
 
   return {
     ...query,
@@ -91,11 +96,8 @@ export const usePullRequests = () => {
     priorityPRs,
     allPRs: allNodes,
     repos,
-    totalCount,
-    loadedCount,
+    totalCount: query.data?.pages[0]?.search.issueCount ?? 0,
+    loadedCount: allNodes.length,
     truncated,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
   }
 }

@@ -3,10 +3,17 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PRCard } from './PRCard'
 import { usePRStore } from '../../stores/prStore'
+import { useAuthStore } from '@/features/auth/stores/authStore'
+import { usePRDetails } from '../../queries/usePRDetails'
 import type { PullRequest, ReviewState } from '@/types/github'
+
+const mockUsePRDetails = vi.mocked(usePRDetails)
 
 vi.mock('../../queries/useCheckContexts', () => ({
   useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false })),
+}))
+vi.mock('../../queries/usePRDetails', () => ({
+  usePRDetails: vi.fn(() => ({ data: undefined })),
 }))
 
 const pr: PullRequest = {
@@ -31,6 +38,8 @@ const pr: PullRequest = {
 
 beforeEach(() => {
   usePRStore.setState({ priorityIds: [], hiddenIds: [] })
+  useAuthStore.setState({ user: { login: 'viewer', avatarUrl: '', name: 'Viewer' }, token: 'test' })
+  mockUsePRDetails.mockReturnValue({ data: undefined } as never)
 })
 
 describe('PRCard', () => {
@@ -133,33 +142,51 @@ describe('PRCard', () => {
   })
 
   describe('review state badge', () => {
-    const prWithReview = (state: ReviewState) => {
-      return { ...pr, myReviewState: state }
-    }
+    const makeDetailsWithReview = (state: ReviewState) => ({
+      data: {
+        id: pr.id,
+        reviews: {
+          nodes: [
+            {
+              state,
+              submittedAt: '2024-01-01T10:00:00Z',
+              author: { login: 'viewer', avatarUrl: '' },
+            },
+          ],
+        },
+        reviewRequests: { nodes: [] },
+        mergeable: 'MERGEABLE' as const,
+        commits: { nodes: [] },
+      },
+    })
 
-    it('GIVEN myReviewState APPROVED WHEN rendered THEN shows Approved badge', () => {
-      render(<PRCard pr={prWithReview('APPROVED')} />)
+    it('GIVEN details returns APPROVED review WHEN rendered THEN shows Approved badge', () => {
+      mockUsePRDetails.mockReturnValue(makeDetailsWithReview('APPROVED') as never)
+      render(<PRCard pr={pr} />)
       expect(screen.getByText('Approved')).toBeInTheDocument()
     })
 
-    it('GIVEN myReviewState CHANGES_REQUESTED WHEN rendered THEN shows Changes requested badge', () => {
-      render(<PRCard pr={prWithReview('CHANGES_REQUESTED')} />)
+    it('GIVEN details returns CHANGES_REQUESTED review WHEN rendered THEN shows Changes requested badge', () => {
+      mockUsePRDetails.mockReturnValue(makeDetailsWithReview('CHANGES_REQUESTED') as never)
+      render(<PRCard pr={pr} />)
       expect(screen.getByText('Changes requested')).toBeInTheDocument()
     })
 
-    it('GIVEN myReviewState COMMENTED WHEN rendered THEN shows Commented badge', () => {
-      render(<PRCard pr={prWithReview('COMMENTED')} />)
+    it('GIVEN details returns COMMENTED review WHEN rendered THEN shows Commented badge', () => {
+      mockUsePRDetails.mockReturnValue(makeDetailsWithReview('COMMENTED') as never)
+      render(<PRCard pr={pr} />)
       expect(screen.getByText('Commented')).toBeInTheDocument()
     })
 
-    it('GIVEN no myReviewState WHEN rendered THEN no review badge', () => {
-      render(<PRCard pr={{ ...pr, myReviewState: null }} />)
+    it('GIVEN details returns no matching review WHEN rendered THEN no review badge', () => {
+      render(<PRCard pr={pr} />)
       expect(screen.queryByText('Approved')).not.toBeInTheDocument()
       expect(screen.queryByText('Changes requested')).not.toBeInTheDocument()
     })
 
-    it('GIVEN isAuthored=true with APPROVED state WHEN rendered THEN no review badge shown', () => {
-      render(<PRCard pr={prWithReview('APPROVED')} isAuthored />)
+    it('GIVEN isAuthored=true WHEN rendered THEN no review badge shown', () => {
+      mockUsePRDetails.mockReturnValue(makeDetailsWithReview('APPROVED') as never)
+      render(<PRCard pr={pr} isAuthored />)
       expect(screen.queryByText('Approved')).not.toBeInTheDocument()
     })
   })

@@ -67,7 +67,7 @@ export const VIEWER_QUERY = /* GraphQL */ `
   }
 `
 
-export const PULL_REQUESTS_QUERY = /* GraphQL */ `
+export const PR_LIST_QUERY = /* GraphQL */ `
   query GetPullRequests($searchQuery: String!, $cursor: String) {
     search(query: $searchQuery, type: ISSUE, first: 20, after: $cursor) {
       issueCount
@@ -87,16 +87,6 @@ export const PULL_REQUESTS_QUERY = /* GraphQL */ `
           updatedAt
           additions
           deletions
-          mergeable
-          commits(last: 1) {
-            nodes {
-              commit {
-                statusCheckRollup {
-                  state
-                }
-              }
-            }
-          }
           author {
             login
             avatarUrl
@@ -106,29 +96,49 @@ export const PULL_REQUESTS_QUERY = /* GraphQL */ `
             nameWithOwner
             url
           }
-          reviewRequests(first: 10) {
-            nodes {
-              requestedReviewer {
-                __typename
-                ... on User {
-                  login
-                  avatarUrl
-                }
-                ... on Team {
-                  name
-                  slug
-                }
+        }
+      }
+    }
+  }
+`
+
+export const PR_DETAILS_SINGLE_QUERY = /* GraphQL */ `
+  query GetPRDetails($nodeId: ID!) {
+    node(id: $nodeId) {
+      ... on PullRequest {
+        id
+        mergeable
+        commits(last: 1) {
+          nodes {
+            commit {
+              statusCheckRollup {
+                state
               }
             }
           }
-          reviews(first: 20) {
-            nodes {
-              state
-              submittedAt
-              author {
+        }
+        reviewRequests(first: 10) {
+          nodes {
+            requestedReviewer {
+              __typename
+              ... on User {
                 login
                 avatarUrl
               }
+              ... on Team {
+                name
+                slug
+              }
+            }
+          }
+        }
+        reviews(first: 20) {
+          nodes {
+            state
+            submittedAt
+            author {
+              login
+              avatarUrl
             }
           }
         }

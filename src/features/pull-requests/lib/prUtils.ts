@@ -27,7 +27,7 @@ export const buildSearchQuery = (section: string, login: string): string => {
 }
 
 export const deriveMyReviewState = (pr: PullRequest, login: string): ReviewState | null => {
-  const myReviews = pr.reviews.nodes.filter((r) => r.author?.login === login)
+  const myReviews = (pr.reviews?.nodes ?? []).filter((r) => r.author?.login === login)
   if (!myReviews.length) return null
   const sorted = [...myReviews].sort(
     (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
@@ -36,7 +36,7 @@ export const deriveMyReviewState = (pr: PullRequest, login: string): ReviewState
 }
 
 export const deriveReviewerSummary = (pr: PullRequest, authorLogin: string): ReviewerSummary => {
-  const sorted = [...pr.reviews.nodes]
+  const sorted = [...(pr.reviews?.nodes ?? [])]
     .filter((r) => r.author && r.author.login !== authorLogin)
     .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
 
@@ -58,7 +58,7 @@ export const deriveReviewerSummary = (pr: PullRequest, authorLogin: string): Rev
     else buckets.commented.push(reviewer)
   }
 
-  for (const rr of pr.reviewRequests.nodes) {
+  for (const rr of pr.reviewRequests?.nodes ?? []) {
     if (rr.requestedReviewer.__typename !== 'User') continue
     const r = rr.requestedReviewer as { __typename: 'User'; login: string; avatarUrl: string }
     if (!seen.has(r.login)) {
@@ -70,7 +70,7 @@ export const deriveReviewerSummary = (pr: PullRequest, authorLogin: string): Rev
 }
 
 export const deriveCheckState = (pr: PullRequest): CheckRollupState | null => {
-  return pr.commits.nodes[0]?.commit?.statusCheckRollup?.state ?? null
+  return pr.commits?.nodes[0]?.commit?.statusCheckRollup?.state ?? null
 }
 
 export const sortAndPartition = (

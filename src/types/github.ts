@@ -61,16 +61,16 @@ export type PullRequest = {
     nameWithOwner: string
     url: string
   }
-  reviewRequests: {
+  reviewRequests?: {
     nodes: ReviewRequest[]
   }
-  reviews: {
+  reviews?: {
     nodes: Review[]
   }
   additions: number
   deletions: number
-  mergeable: MergeableState
-  commits: {
+  mergeable?: MergeableState
+  commits?: {
     nodes: {
       commit: {
         statusCheckRollup: {
