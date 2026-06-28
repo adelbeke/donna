@@ -60,7 +60,14 @@ describe('useFocusRefresh', () => {
     const newPR = makePR('new')
     const refetch = vi.fn()
     const { result, rerender } = renderHook((props: Props) => useHook(props), {
-      initialProps: { ...defaults, refetch, isFetching: true, allPRs: [], prs: [], priorityPRs: [] } as Props,
+      initialProps: {
+        ...defaults,
+        refetch,
+        isFetching: true,
+        allPRs: [],
+        prs: [],
+        priorityPRs: [],
+      } as Props,
     })
 
     // focus fires while initial fetch is in-flight
@@ -69,7 +76,13 @@ describe('useFocusRefresh', () => {
     })
 
     // fetch completes with data
-    rerender({ ...defaults, refetch, isFetching: false, allPRs: [existing, newPR], prs: [existing, newPR] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: false,
+      allPRs: [existing, newPR],
+      prs: [existing, newPR],
+    })
 
     expect(result.current.newCount).toBe(0)
     expect(result.current.displayedPRs).toEqual([existing, newPR])
@@ -89,9 +102,23 @@ describe('useFocusRefresh', () => {
     })
 
     // refetch in-flight
-    rerender({ ...defaults, refetch, isFetching: true, allPRs: [existing], prs: [existing], priorityPRs: [] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: true,
+      allPRs: [existing],
+      prs: [existing],
+      priorityPRs: [],
+    })
     // refetch completes with new PR
-    rerender({ ...defaults, refetch, isFetching: false, allPRs: [existing, newPR], prs: [existing, newPR], priorityPRs: [] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: false,
+      allPRs: [existing, newPR],
+      prs: [existing, newPR],
+      priorityPRs: [],
+    })
 
     expect(result.current.newCount).toBe(1)
     expect(result.current.displayedPRs).toEqual([existing])
@@ -105,12 +132,30 @@ describe('useFocusRefresh', () => {
       initialProps: { ...defaults, refetch, allPRs: [existing], prs: [existing], priorityPRs: [] },
     })
 
-    await act(async () => { window.dispatchEvent(new FocusEvent('focus')) })
-    rerender({ ...defaults, refetch, isFetching: true, allPRs: [existing], prs: [existing], priorityPRs: [] })
-    rerender({ ...defaults, refetch, isFetching: false, allPRs: [existing, newPR], prs: [existing, newPR], priorityPRs: [] })
+    await act(async () => {
+      window.dispatchEvent(new FocusEvent('focus'))
+    })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: true,
+      allPRs: [existing],
+      prs: [existing],
+      priorityPRs: [],
+    })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: false,
+      allPRs: [existing, newPR],
+      prs: [existing, newPR],
+      priorityPRs: [],
+    })
     expect(result.current.newCount).toBe(1)
 
-    act(() => { result.current.dismiss() })
+    act(() => {
+      result.current.dismiss()
+    })
 
     expect(result.current.newCount).toBe(0)
     expect(result.current.displayedPRs).toEqual([existing, newPR])
@@ -121,14 +166,36 @@ describe('useFocusRefresh', () => {
     const existing2 = makePR('existing2')
     const refetch = vi.fn()
     const { result, rerender } = renderHook((props: Props) => useHook(props), {
-      initialProps: { ...defaults, refetch, allPRs: [existing1, existing2], prs: [existing1, existing2], priorityPRs: [] },
+      initialProps: {
+        ...defaults,
+        refetch,
+        allPRs: [existing1, existing2],
+        prs: [existing1, existing2],
+        priorityPRs: [],
+      },
     })
 
-    await act(async () => { window.dispatchEvent(new FocusEvent('focus')) })
+    await act(async () => {
+      window.dispatchEvent(new FocusEvent('focus'))
+    })
 
-    rerender({ ...defaults, refetch, isFetching: true, allPRs: [existing1, existing2], prs: [existing1, existing2], priorityPRs: [] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: true,
+      allPRs: [existing1, existing2],
+      prs: [existing1, existing2],
+      priorityPRs: [],
+    })
     // existing2 removed from review list
-    rerender({ ...defaults, refetch, isFetching: false, allPRs: [existing1], prs: [existing1], priorityPRs: [] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: false,
+      allPRs: [existing1],
+      prs: [existing1],
+      priorityPRs: [],
+    })
 
     expect(result.current.newCount).toBe(0)
     expect(result.current.displayedPRs).toEqual([existing1])
@@ -140,14 +207,36 @@ describe('useFocusRefresh', () => {
     const newPR = makePR('new')
     const refetch = vi.fn()
     const { result, rerender } = renderHook((props: Props) => useHook(props), {
-      initialProps: { ...defaults, refetch, allPRs: [existing1, existing2], prs: [existing1, existing2], priorityPRs: [] },
+      initialProps: {
+        ...defaults,
+        refetch,
+        allPRs: [existing1, existing2],
+        prs: [existing1, existing2],
+        priorityPRs: [],
+      },
     })
 
-    await act(async () => { window.dispatchEvent(new FocusEvent('focus')) })
+    await act(async () => {
+      window.dispatchEvent(new FocusEvent('focus'))
+    })
 
-    rerender({ ...defaults, refetch, isFetching: true, allPRs: [existing1, existing2], prs: [existing1, existing2], priorityPRs: [] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: true,
+      allPRs: [existing1, existing2],
+      prs: [existing1, existing2],
+      priorityPRs: [],
+    })
     // existing2 gone, new PR appeared
-    rerender({ ...defaults, refetch, isFetching: false, allPRs: [existing1, newPR], prs: [existing1, newPR], priorityPRs: [] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: false,
+      allPRs: [existing1, newPR],
+      prs: [existing1, newPR],
+      priorityPRs: [],
+    })
 
     expect(result.current.newCount).toBe(1)
     expect(result.current.displayedPRs).toEqual([existing1])
@@ -162,15 +251,47 @@ describe('useFocusRefresh', () => {
     })
 
     // focus: snapshot taken of [existing], newPR appears
-    await act(async () => { window.dispatchEvent(new FocusEvent('focus')) })
-    rerender({ ...defaults, refetch, isFetching: true, allPRs: [existing], prs: [existing], priorityPRs: [] })
-    rerender({ ...defaults, refetch, isFetching: false, allPRs: [existing, newPR], prs: [existing, newPR], priorityPRs: [] })
+    await act(async () => {
+      window.dispatchEvent(new FocusEvent('focus'))
+    })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: true,
+      allPRs: [existing],
+      prs: [existing],
+      priorityPRs: [],
+    })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: false,
+      allPRs: [existing, newPR],
+      prs: [existing, newPR],
+      priorityPRs: [],
+    })
     expect(result.current.newCount).toBe(1)
 
     // second focus: newPR is gone before dismiss
-    await act(async () => { window.dispatchEvent(new FocusEvent('focus')) })
-    rerender({ ...defaults, refetch, isFetching: true, allPRs: [existing, newPR], prs: [existing, newPR], priorityPRs: [] })
-    rerender({ ...defaults, refetch, isFetching: false, allPRs: [existing], prs: [existing], priorityPRs: [] })
+    await act(async () => {
+      window.dispatchEvent(new FocusEvent('focus'))
+    })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: true,
+      allPRs: [existing, newPR],
+      prs: [existing, newPR],
+      priorityPRs: [],
+    })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetching: false,
+      allPRs: [existing],
+      prs: [existing],
+      priorityPRs: [],
+    })
 
     expect(result.current.newCount).toBe(0)
     expect(result.current.displayedPRs).toEqual([existing])
@@ -185,8 +306,22 @@ describe('useFocusRefresh', () => {
     })
 
     // load-more without a prior focus
-    rerender({ ...defaults, refetch, isFetchingNextPage: true, allPRs: [existing], prs: [existing], priorityPRs: [] })
-    rerender({ ...defaults, refetch, isFetchingNextPage: false, allPRs: [existing, paginated], prs: [existing, paginated], priorityPRs: [] })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetchingNextPage: true,
+      allPRs: [existing],
+      prs: [existing],
+      priorityPRs: [],
+    })
+    rerender({
+      ...defaults,
+      refetch,
+      isFetchingNextPage: false,
+      allPRs: [existing, paginated],
+      prs: [existing, paginated],
+      priorityPRs: [],
+    })
 
     expect(result.current.newCount).toBe(0)
   })

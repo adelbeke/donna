@@ -79,7 +79,7 @@ export const useFocusRefresh = ({
     if (count > 0) setNewCount(count)
     else {
       snapshotIds.current = null
-      setDetecting(false)  // triggers display sync with current prs
+      setDetecting(false) // triggers display sync with current prs
       setNewCount(0)
     }
     // ponytail: allPRsRef used intentionally — allPRs excluded from deps so this only fires on filter/section changes, not fetches
@@ -90,11 +90,16 @@ export const useFocusRefresh = ({
   useEffect(() => {
     if (isFetching || isFetchingNextPage || snapshotIds.current === null) return
     const newPRs = allPRsRef.current.filter((pr) => !snapshotIds.current!.has(pr.id))
-    const count = applyFilters(newPRs, globalFiltersRef.current, viewFiltersRef.current, sectionRef.current).length
+    const count = applyFilters(
+      newPRs,
+      globalFiltersRef.current,
+      viewFiltersRef.current,
+      sectionRef.current
+    ).length
     if (count > 0) setNewCount(count)
     else {
       snapshotIds.current = null
-      setDetecting(false)  // triggers display sync with current prs
+      setDetecting(false) // triggers display sync with current prs
       setNewCount(0)
     }
     // ponytail: refs used intentionally — prs/priorityPRs excluded; display sync fires via detecting state change
@@ -105,7 +110,11 @@ export const useFocusRefresh = ({
   useEffect(() => {
     const onFocus = () => {
       // don't snapshot during an in-flight fetch; stale/empty allPRs would produce a wrong baseline
-      if (isFetchingRef.current || isFetchingNextPageRef.current || sectionRef.current === 'authored') {
+      if (
+        isFetchingRef.current ||
+        isFetchingNextPageRef.current ||
+        sectionRef.current === 'authored'
+      ) {
         refetch()
         return
       }
