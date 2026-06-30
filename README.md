@@ -38,6 +38,23 @@ Download the latest `.dmg` from [Releases](https://github.com/adelbeke/donna/rel
 - Shows dirty state and linked PR per branch
 - One-click copy for `git switch <branch>` or `cd <worktree>`
 
+## How Donna works (vs GitHub Notifications)
+
+Donna queries GitHub's **search API** for open PRs directly — it is a PR tracker, not a mirror of your GitHub Notifications inbox.
+
+| | GitHub Notifications | Donna |
+|---|---|---|
+| Source | Notification events | Live PR search |
+| "Mark as done" | Dismisses the notification | No effect in Donna |
+| Scope | Only PRs that generated a notification | All open PRs matching the search criteria |
+
+This means:
+- **Hiding a PR in Donna** marks it locally — it won't affect your GitHub Notifications.
+- **PRs you've marked as done in GitHub** will still appear in Donna's *Review requested* section as long as GitHub still has you as a requested reviewer on that PR.
+- If you're seeing a large number of stale review requests, the fastest fix is to ask the PR author to re-request review or dismiss the request on GitHub.
+
+Donna's value is a focused, persistent view of what's actually open and needs your attention — independent of whether you've cleared the notification.
+
 ## Auth
 
 Donna delegates all GitHub API calls to the `gh` CLI — no token to manage, no PAT stored anywhere. Run `gh auth login` once and you're done.
