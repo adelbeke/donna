@@ -106,7 +106,12 @@ export const PRList = () => {
           </p>
           <div className="space-y-2">
             {displayedPriorityPRs.map((pr) => (
-              <PRCard key={pr.id} pr={pr} isAuthored={section === 'authored'} />
+              <PRCard
+                key={pr.id}
+                pr={pr}
+                isAuthored={section === 'authored'}
+                showHideAndStar={section === 'review-requested'}
+              />
             ))}
           </div>
         </div>
@@ -115,7 +120,12 @@ export const PRList = () => {
       {!isLoading && !error && displayedPRs.length > 0 && (
         <div className="space-y-2">
           {displayedPRs.map((pr) => (
-            <PRCard key={pr.id} pr={pr} isAuthored={section === 'authored'} />
+            <PRCard
+              key={pr.id}
+              pr={pr}
+              isAuthored={section === 'authored'}
+              showHideAndStar={section === 'review-requested'}
+            />
           ))}
         </div>
       )}

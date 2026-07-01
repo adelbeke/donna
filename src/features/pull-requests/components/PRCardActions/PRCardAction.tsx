@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { ButtonWithTooltip } from '@/shared/components/ui/ButtonWithTooltip'
 
 type Props = PropsWithChildren & {
   onClick: () => void
@@ -17,8 +18,8 @@ export const PRCardAction = ({ children, title, className, onClick }: Props) => 
   )
 
   return (
-    <button onClick={onClick} title={title} className={computedClassName}>
+    <ButtonWithTooltip onClick={onClick} label={title} buttonClassName={computedClassName}>
       {children}
-    </button>
+    </ButtonWithTooltip>
   )
 }
