@@ -1,4 +1,4 @@
-import { Clock } from 'lucide-react'
+import { Clock, RefreshCw } from 'lucide-react'
 import type { CheckRunContext, StatusContextItem, CheckRollupState } from '@/types/github.ts'
 import { Modal } from '@/shared/components/ui/Modal.tsx'
 import { PRCheckRow } from '@/features/pull-requests/components/PRCheckRow/PRCheckRow.tsx'
@@ -9,7 +9,9 @@ type Props = {
   checks: (CheckRunContext | StatusContextItem)[]
   rollupState?: CheckRollupState | null
   onClose: () => void
+  onRefresh: () => void
   isLoading?: boolean
+  isRefreshing?: boolean
 }
 
 export const PRChecksModal = ({
@@ -18,10 +20,26 @@ export const PRChecksModal = ({
   checks,
   rollupState,
   onClose,
+  onRefresh,
   isLoading,
+  isRefreshing,
 }: Props) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`${prTitle}'s checks`}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${prTitle}'s checks`}
+      actions={
+        <button
+          onClick={onRefresh}
+          disabled={isLoading || isRefreshing}
+          title="Reload checks"
+          className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+        >
+          <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
+        </button>
+      }
+    >
       {isLoading ? (
         [0, 1, 2].map((i) => (
           <div key={i} className="flex items-center gap-2 px-3 py-1.5">

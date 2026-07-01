@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import type { PullRequest } from '@/types/github'
+import type { CheckRunContext, PullRequest, StatusContextItem } from '@/types/github'
 import {
   deriveReviewerSummary,
   buildSearchQuery,
   deriveCheckState,
   deriveMyReviewState,
+  dedupeChecks,
 } from './prUtils'
 
 const makePR = (overrides: Partial<PullRequest> = {}): PullRequest => {
@@ -105,6 +106,52 @@ describe('deriveCheckState', () => {
       },
     })
     expect(deriveCheckState(pr)).toBe('FAILURE')
+  })
+})
+
+describe('dedupeChecks', () => {
+  const checkRun = (
+    name: string,
+    conclusion: CheckRunContext['conclusion'] = 'SUCCESS'
+  ): CheckRunContext => ({
+    __typename: 'CheckRun',
+    name,
+    status: 'COMPLETED',
+    conclusion,
+    detailsUrl: null,
+  })
+
+  const statusContext = (
+    context: string,
+    state: StatusContextItem['state']
+  ): StatusContextItem => ({
+    __typename: 'StatusContext',
+    context,
+    state,
+    targetUrl: null,
+  })
+
+  it('GIVEN no duplicate names WHEN called THEN returns all checks unchanged', () => {
+    const checks = [checkRun('build'), checkRun('lint')]
+    expect(dedupeChecks(checks)).toEqual(checks)
+  })
+
+  it('GIVEN a CheckRun name repeated (rerun) WHEN called THEN keeps only the last occurrence', () => {
+    const stale = checkRun('build', 'FAILURE')
+    const rerun = checkRun('build', 'SUCCESS')
+    expect(dedupeChecks([stale, rerun])).toEqual([rerun])
+  })
+
+  it('GIVEN a StatusContext context repeated WHEN called THEN keeps only the last occurrence', () => {
+    const stale = statusContext('ci/build', 'PENDING')
+    const latest = statusContext('ci/build', 'SUCCESS')
+    expect(dedupeChecks([stale, latest])).toEqual([latest])
+  })
+
+  it('GIVEN a CheckRun and a StatusContext with the same name WHEN called THEN both are kept', () => {
+    const run = checkRun('build')
+    const status = statusContext('build', 'SUCCESS')
+    expect(dedupeChecks([run, status])).toEqual([run, status])
   })
 })
 
