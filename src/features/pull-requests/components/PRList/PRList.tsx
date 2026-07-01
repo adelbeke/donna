@@ -91,17 +91,6 @@ export const PRList = () => {
         <div className="text-center py-16 text-[var(--color-text-muted)]">
           <p className="text-sm">No pull requests found.</p>
           <p className="text-xs mt-1">Try adjusting your filters.</p>
-          <p className="text-xs mt-3 text-[var(--color-text-muted)]">
-            Missing PRs from an organization?{' '}
-            <a
-              href="https://github.com/settings/tokens"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--color-accent)] hover:underline"
-            >
-              Authorize your token for SSO →
-            </a>
-          </p>
         </div>
       )}
 
