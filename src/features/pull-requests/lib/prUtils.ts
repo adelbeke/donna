@@ -1,4 +1,10 @@
-import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
+import type {
+  PullRequest,
+  ReviewState,
+  CheckRollupState,
+  CheckRunContext,
+  StatusContextItem,
+} from '@/types/github'
 
 export type Reviewer = {
   login: string
@@ -71,6 +77,19 @@ export const deriveReviewerSummary = (pr: PullRequest, authorLogin: string): Rev
 
 export const deriveCheckState = (pr: PullRequest): CheckRollupState | null => {
   return pr.commits?.nodes[0]?.commit?.statusCheckRollup?.state ?? null
+}
+
+// GitHub's rollup can list the same check name multiple times (reruns, multiple
+// check suites) — keep only the most recent entry per name.
+export const dedupeChecks = (
+  checks: (CheckRunContext | StatusContextItem)[]
+): (CheckRunContext | StatusContextItem)[] => {
+  const byKey = new Map<string, CheckRunContext | StatusContextItem>()
+  for (const check of checks) {
+    const name = check.__typename === 'CheckRun' ? check.name : check.context
+    byKey.set(`${check.__typename}:${name}`, check)
+  }
+  return [...byKey.values()]
 }
 
 export const sortAndPartition = (

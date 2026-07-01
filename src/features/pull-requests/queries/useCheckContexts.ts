@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { createClient, PR_CHECK_CONTEXTS_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { dedupeChecks } from '../lib/prUtils'
 import type { CheckRunContext, StatusContextItem } from '@/types/github'
 
 type CheckContextsResult = {
@@ -31,8 +32,9 @@ export const useCheckContexts = (prId: string, enabled: boolean) => {
     },
   })
 
-  const checks: (CheckRunContext | StatusContextItem)[] =
+  const checks: (CheckRunContext | StatusContextItem)[] = dedupeChecks(
     query.data?.node?.commits.nodes[0]?.commit?.statusCheckRollup?.contexts.nodes ?? []
+  )
 
   return {
     checks,

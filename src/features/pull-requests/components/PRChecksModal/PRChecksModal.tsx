@@ -25,8 +25,11 @@ export const PRChecksModal = ({
   isRefreshing,
 }: Props) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`${prTitle}'s checks`}>
-      <div className="flex justify-end">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${prTitle}'s checks`}
+      actions={
         <button
           onClick={onRefresh}
           disabled={isLoading || isRefreshing}
@@ -35,7 +38,8 @@ export const PRChecksModal = ({
         >
           <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
         </button>
-      </div>
+      }
+    >
       {isLoading ? (
         [0, 1, 2].map((i) => (
           <div key={i} className="flex items-center gap-2 px-3 py-1.5">
