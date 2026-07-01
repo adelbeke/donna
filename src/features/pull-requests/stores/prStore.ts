@@ -168,7 +168,8 @@ export const usePRStore = create<PRStore>()(
             },
             priorityIds: p.priorityIds ?? current.priorityIds,
             hiddenIds: p.hiddenIds ?? current.hiddenIds,
-            notificationHintDismissed: p.notificationHintDismissed ?? current.notificationHintDismissed,
+            notificationHintDismissed:
+              p.notificationHintDismissed ?? current.notificationHintDismissed,
           }
         }
         const validSections = new Set<string>(['review-requested', 'authored', 'mentioned'])
@@ -185,7 +186,8 @@ export const usePRStore = create<PRStore>()(
           ) as Record<PRSection, ViewFilters>,
           priorityIds: p.priorityIds ?? current.priorityIds,
           hiddenIds: p.hiddenIds ?? current.hiddenIds,
-          notificationHintDismissed: p.notificationHintDismissed ?? current.notificationHintDismissed,
+          notificationHintDismissed:
+            p.notificationHintDismissed ?? current.notificationHintDismissed,
         }
       },
     }
