@@ -22,6 +22,7 @@ export type PRStore = {
   viewFilters: Record<PRSection, ViewFilters>
   priorityIds: string[]
   hiddenIds: string[]
+  notificationHintDismissed: boolean
   setView: (v: 'prs' | 'branches') => void
   setSection: (s: PRSection) => void
   setGlobalFilters: (partial: Partial<GlobalFilters>) => void
@@ -32,6 +33,7 @@ export type PRStore = {
   removeHiddenRepo: (repo: string) => void
   togglePriority: (id: string) => void
   toggleHide: (id: string) => void
+  dismissNotificationHint: () => void
   resetFilters: () => void
 }
 
@@ -62,6 +64,7 @@ export const usePRStore = create<PRStore>()(
       viewFilters: defaultViewFiltersAll,
       priorityIds: [],
       hiddenIds: [],
+      notificationHintDismissed: false,
       setView: (v) => set({ view: v }),
       setSection: (s) => set({ section: s }),
       setGlobalFilters: (partial) =>
@@ -118,6 +121,7 @@ export const usePRStore = create<PRStore>()(
             ? state.hiddenIds.filter((p) => p !== id)
             : [...state.hiddenIds, id],
         })),
+      dismissNotificationHint: () => set({ notificationHintDismissed: true }),
       resetFilters: () =>
         set((state) => ({
           viewFilters: {
@@ -164,6 +168,8 @@ export const usePRStore = create<PRStore>()(
             },
             priorityIds: p.priorityIds ?? current.priorityIds,
             hiddenIds: p.hiddenIds ?? current.hiddenIds,
+            notificationHintDismissed:
+              p.notificationHintDismissed ?? current.notificationHintDismissed,
           }
         }
         const validSections = new Set<string>(['review-requested', 'authored', 'mentioned'])
@@ -180,6 +186,8 @@ export const usePRStore = create<PRStore>()(
           ) as Record<PRSection, ViewFilters>,
           priorityIds: p.priorityIds ?? current.priorityIds,
           hiddenIds: p.hiddenIds ?? current.hiddenIds,
+          notificationHintDismissed:
+            p.notificationHintDismissed ?? current.notificationHintDismissed,
         }
       },
     }

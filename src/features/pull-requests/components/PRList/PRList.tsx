@@ -5,6 +5,7 @@ import { PRCard } from '../PRCard/PRCard'
 import { PRListHeader } from '@/features/pull-requests/components/PRListHeader/PRListHeader.tsx'
 import { useFocusRefresh } from '../../hooks/useFocusRefresh'
 import { NewPRsBadge } from '../NewPRsBadge/NewPRsBadge'
+import { NotificationHint } from '../NotificationHint/NotificationHint'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -27,6 +28,8 @@ export const PRList = () => {
   const section = usePRStore((s) => s.section)
   const globalFilters = usePRStore((s) => s.globalFilters)
   const viewFilters = usePRStore((s) => s.viewFilters)
+  const notificationHintDismissed = usePRStore((s) => s.notificationHintDismissed)
+  const dismissNotificationHint = usePRStore((s) => s.dismissNotificationHint)
   const queryClient = useQueryClient()
 
   // Checks/details are fetched per-PR (usePRDetails/useCheckContexts) and won't
@@ -69,6 +72,8 @@ export const PRList = () => {
       />
 
       {newCount > 0 && <NewPRsBadge count={newCount} onDismiss={dismiss} />}
+
+      {!notificationHintDismissed && <NotificationHint onDismiss={dismissNotificationHint} />}
 
       {isLoading && (
         <div className="space-y-3">

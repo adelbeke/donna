@@ -49,6 +49,8 @@ const mockStoreFilters = () => {
       },
       priorityIds: [],
       hiddenIds: [],
+      notificationHintDismissed: true,
+      dismissNotificationHint: vi.fn(),
       setSection: vi.fn(),
       setGlobalFilters: vi.fn(),
       setViewFilters: vi.fn(),
