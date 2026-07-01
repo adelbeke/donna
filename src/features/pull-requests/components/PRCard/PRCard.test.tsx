@@ -95,6 +95,26 @@ describe('PRCard', () => {
     expect(screen.queryByRole('button', { name: 'Mark as top priority' })).not.toBeInTheDocument()
   })
 
+  describe('clicking the card', () => {
+    it('GIVEN card body clicked THEN opens the PR in a new tab', async () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+      const user = userEvent.setup()
+      render(<PRCard pr={pr} />)
+      await user.click(screen.getByText('org/repo'))
+      expect(openSpy).toHaveBeenCalledWith(pr.url, '_blank', 'noopener,noreferrer')
+      openSpy.mockRestore()
+    })
+
+    it('GIVEN star button clicked THEN does not also open the PR', async () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+      const user = userEvent.setup()
+      render(<PRCard pr={pr} />)
+      await user.click(screen.getByRole('button', { name: 'Mark as top priority' }))
+      expect(openSpy).not.toHaveBeenCalled()
+      openSpy.mockRestore()
+    })
+  })
+
   describe('PRChecksModal rollup state footer', () => {
     const greenCheck = {
       __typename: 'CheckRun' as const,

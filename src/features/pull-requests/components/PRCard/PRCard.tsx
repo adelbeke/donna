@@ -128,10 +128,13 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
     togglePriority(pr.id)
   }
 
+  const openPR = () => window.open(pr.url, '_blank', 'noopener,noreferrer')
+
   return (
     <div
+      onClick={openPR}
       className={`
-        group relative bg-[var(--color-surface-raised)] border rounded-lg p-4
+        group relative bg-[var(--color-surface-raised)] border rounded-lg p-4 cursor-pointer
         hover:border-[var(--color-accent)] hover:-translate-y-px
         shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]
         transition-all duration-150
@@ -162,6 +165,7 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
               href={pr.url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
               className="text-sm font-medium leading-snug line-clamp-2 transition-colors text-[var(--color-text-primary)] hover:text-[var(--color-accent)]"
             >
               {pr.title}
@@ -225,7 +229,7 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
 
               {/* CI checks badge */}
               {ciBadge && (
-                <div className="relative">
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
                   <button
                     onClick={() => setChecksOpen((o) => !o)}
                     className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded cursor-pointer ${ciBadge.color} ${ciBadge.bg}`}
