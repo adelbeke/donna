@@ -75,7 +75,7 @@ describe('PRCard', () => {
   it('star button click toggles priority in store', async () => {
     const user = userEvent.setup()
     render(<PRCard pr={pr} />)
-    const starBtn = screen.getByTitle('Mark as top priority')
+    const starBtn = screen.getByRole('button', { name: 'Mark as top priority' })
     await user.click(starBtn)
     expect(usePRStore.getState().priorityIds).toContain('pr-42')
   })
@@ -84,9 +84,15 @@ describe('PRCard', () => {
     const user = userEvent.setup()
     usePRStore.setState({ priorityIds: ['pr-42'] })
     render(<PRCard pr={pr} />)
-    const starBtn = screen.getByTitle('Remove priority')
+    const starBtn = screen.getByRole('button', { name: 'Remove priority' })
     await user.click(starBtn)
     expect(usePRStore.getState().priorityIds).not.toContain('pr-42')
+  })
+
+  it('GIVEN showHideAndStar=false WHEN rendered THEN hide and star buttons are not shown', () => {
+    render(<PRCard pr={pr} showHideAndStar={false} />)
+    expect(screen.queryByRole('button', { name: 'Hide PR (Donna only)' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Mark as top priority' })).not.toBeInTheDocument()
   })
 
   describe('PRChecksModal rollup state footer', () => {

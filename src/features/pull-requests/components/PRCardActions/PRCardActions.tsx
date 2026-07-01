@@ -11,6 +11,7 @@ type Props = {
   togglePriority: () => void
   isPriority: boolean
   prUrl: string
+  showHideAndStar: boolean
 }
 
 export const PRCardActions = ({
@@ -19,31 +20,36 @@ export const PRCardActions = ({
   prUrl,
   toggleHide,
   togglePriority,
+  showHideAndStar,
 }: Props) => {
   return (
     <div className="flex items-center gap-1 shrink-0 flex-col lg:flex-row">
-      <PRCardAction
-        onClick={toggleHide}
-        title={isHidden ? 'Unhide PR' : 'Hide PR'}
-        className={
-          isHidden
-            ? 'text-[var(--color-warning)]'
-            : 'text-[var(--color-text-muted)] hover:text-[var(--color-warning)]'
-        }
-      >
-        {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
-      </PRCardAction>
-      <PRCardAction
-        onClick={togglePriority}
-        title={isPriority ? 'Remove priority' : 'Mark as top priority'}
-        className={
-          isPriority
-            ? 'text-[var(--color-priority)]'
-            : 'text-[var(--color-text-muted)] hover:text-[var(--color-priority)]'
-        }
-      >
-        <Star size={14} fill={isPriority ? 'currentColor' : 'none'} />
-      </PRCardAction>
+      {showHideAndStar && (
+        <>
+          <PRCardAction
+            onClick={toggleHide}
+            title={isHidden ? 'Unhide PR (Donna only)' : 'Hide PR (Donna only)'}
+            className={
+              isHidden
+                ? 'text-[var(--color-warning)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-warning)]'
+            }
+          >
+            {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
+          </PRCardAction>
+          <PRCardAction
+            onClick={togglePriority}
+            title={isPriority ? 'Remove priority' : 'Mark as top priority'}
+            className={
+              isPriority
+                ? 'text-[var(--color-priority)]'
+                : 'text-[var(--color-text-muted)] hover:text-[var(--color-priority)]'
+            }
+          >
+            <Star size={14} fill={isPriority ? 'currentColor' : 'none'} />
+          </PRCardAction>
+        </>
+      )}
       <CopyWithFeedback
         text={prUrl}
         label="Copy PR link"

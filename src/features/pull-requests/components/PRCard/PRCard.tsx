@@ -23,6 +23,7 @@ import { PRCardActions } from '@/features/pull-requests/components/PRCardActions
 type Props = {
   pr: PullRequest
   isAuthored?: boolean
+  showHideAndStar?: boolean
 }
 
 const ciStateBadge: Record<
@@ -97,7 +98,7 @@ const reviewBadge: Record<
   },
 }
 
-export const PRCard = ({ pr, isAuthored = false }: Props) => {
+export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props) => {
   const [checksOpen, setChecksOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
@@ -270,6 +271,7 @@ export const PRCard = ({ pr, isAuthored = false }: Props) => {
           togglePriority={handleTogglePriority}
           isPriority={isPriority}
           prUrl={pr.url}
+          showHideAndStar={showHideAndStar}
         />
       </div>
     </div>
