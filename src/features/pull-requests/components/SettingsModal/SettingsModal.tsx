@@ -22,6 +22,7 @@ export const SettingsModal = () => {
   const { repos = [] } = usePullRequests()
 
   const currentView = viewFilters[section]
+  const hasContent = repos.length > 1 || section !== 'authored'
 
   const activeCount =
     currentView.repos.length +
@@ -58,6 +59,8 @@ export const SettingsModal = () => {
         setViewFilters(section, { repos: remaining })
     }
   }
+
+  if (!hasContent) return null
 
   return (
     <>
