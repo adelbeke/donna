@@ -18,6 +18,7 @@ export const ButtonWithTooltip = ({
     <div className="relative group/tooltip">
       <button
         onClick={onClick}
+        aria-label={label}
         className={
           buttonClassName ??
           'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer'
