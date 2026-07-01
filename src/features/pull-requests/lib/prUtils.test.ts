@@ -113,9 +113,18 @@ describe('dedupeChecks', () => {
   const checkRun = (
     name: string,
     conclusion: CheckRunContext['conclusion'] = 'SUCCESS'
-  ): CheckRunContext => ({ __typename: 'CheckRun', name, status: 'COMPLETED', conclusion, detailsUrl: null })
+  ): CheckRunContext => ({
+    __typename: 'CheckRun',
+    name,
+    status: 'COMPLETED',
+    conclusion,
+    detailsUrl: null,
+  })
 
-  const statusContext = (context: string, state: StatusContextItem['state']): StatusContextItem => ({
+  const statusContext = (
+    context: string,
+    state: StatusContextItem['state']
+  ): StatusContextItem => ({
     __typename: 'StatusContext',
     context,
     state,
