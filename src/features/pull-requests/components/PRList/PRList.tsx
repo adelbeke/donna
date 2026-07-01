@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { usePullRequests } from '../../queries/useGitHubPRs'
 import { usePRStore } from '../../stores/prStore'
 import { PRCard } from '../PRCard/PRCard'
@@ -26,12 +27,22 @@ export const PRList = () => {
   const section = usePRStore((s) => s.section)
   const globalFilters = usePRStore((s) => s.globalFilters)
   const viewFilters = usePRStore((s) => s.viewFilters)
+  const queryClient = useQueryClient()
+
+  // Checks/details are fetched per-PR (usePRDetails/useCheckContexts) and won't
+  // pick up window-focus refreshes on their own since refetchOnWindowFocus is
+  // disabled globally — invalidate them alongside the PR list refetch.
+  const refetchAll = () => {
+    void queryClient.invalidateQueries({ queryKey: ['pr-details'] })
+    void queryClient.invalidateQueries({ queryKey: ['pr-checks'] })
+    void refetch()
+  }
 
   const { displayedPRs, displayedPriorityPRs, newCount, dismiss } = useFocusRefresh({
     allPRs,
     prs,
     priorityPRs,
-    refetch: () => void refetch(),
+    refetch: refetchAll,
     isFetching,
     isFetchingNextPage,
     globalFilters,
@@ -41,7 +52,7 @@ export const PRList = () => {
 
   const handleRefetch = () => {
     dismiss()
-    void refetch()
+    refetchAll()
   }
 
   return (

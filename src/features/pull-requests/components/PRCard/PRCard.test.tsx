@@ -5,12 +5,14 @@ import { PRCard } from './PRCard'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { usePRDetails } from '../../queries/usePRDetails'
+import { useCheckContexts } from '../../queries/useCheckContexts'
 import type { PullRequest, ReviewState } from '@/types/github'
 
 const mockUsePRDetails = vi.mocked(usePRDetails)
+const mockUseCheckContexts = vi.mocked(useCheckContexts)
 
 vi.mock('../../queries/useCheckContexts', () => ({
-  useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false })),
+  useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false, refetch: vi.fn() })),
 }))
 vi.mock('../../queries/usePRDetails', () => ({
   usePRDetails: vi.fn(() => ({ data: undefined })),
@@ -40,6 +42,7 @@ beforeEach(() => {
   usePRStore.setState({ priorityIds: [], hiddenIds: [] })
   useAuthStore.setState({ user: { login: 'viewer', avatarUrl: '', name: 'Viewer' }, token: 'test' })
   mockUsePRDetails.mockReturnValue({ data: undefined } as never)
+  mockUseCheckContexts.mockReturnValue({ checks: [], isLoading: false, refetch: vi.fn() } as never)
 })
 
 describe('PRCard', () => {
@@ -138,6 +141,16 @@ describe('PRCard', () => {
       expect(
         screen.queryByText('Some checks may still be pending or not yet shown')
       ).not.toBeInTheDocument()
+    })
+
+    it('GIVEN checks modal open WHEN reload button clicked THEN refetch is called', async () => {
+      const refetch = vi.fn()
+      mockUseCheckContexts.mockReturnValue({ checks: [], isLoading: false, refetch } as never)
+      const user = userEvent.setup()
+      render(<PRCard pr={makePrWithRollup('SUCCESS')} />)
+      await user.click(screen.getByText('Checks pass'))
+      await user.click(screen.getByTitle('Reload checks'))
+      expect(refetch).toHaveBeenCalled()
     })
   })
 

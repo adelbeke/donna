@@ -34,5 +34,10 @@ export const useCheckContexts = (prId: string, enabled: boolean) => {
   const checks: (CheckRunContext | StatusContextItem)[] =
     query.data?.node?.commits.nodes[0]?.commit?.statusCheckRollup?.contexts.nodes ?? []
 
-  return { checks, isLoading: query.isFetching }
+  return {
+    checks,
+    isLoading: query.isFetching && !query.isRefetching,
+    isRefetching: query.isRefetching,
+    refetch: () => void query.refetch(),
+  }
 }

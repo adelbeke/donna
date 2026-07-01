@@ -112,7 +112,12 @@ export const PRCard = ({ pr, isAuthored = false }: Props) => {
   const checkState = deriveCheckState(merged)
   const ciBadge = checkState ? ciStateBadge[checkState] : null
   const showConflict = merged.mergeable === 'CONFLICTING'
-  const { checks, isLoading: checksLoading } = useCheckContexts(pr.id, checksOpen)
+  const {
+    checks,
+    isLoading: checksLoading,
+    isRefetching: checksRefetching,
+    refetch: refetchChecks,
+  } = useCheckContexts(pr.id, checksOpen)
 
   const handleHide = () => {
     toggleHide(pr.id)
@@ -232,8 +237,10 @@ export const PRCard = ({ pr, isAuthored = false }: Props) => {
                     prTitle={pr.title}
                     checks={checks}
                     isLoading={checksLoading}
+                    isRefreshing={checksRefetching}
                     rollupState={checkState}
                     onClose={() => setChecksOpen(false)}
+                    onRefresh={refetchChecks}
                   />
                 </div>
               )}

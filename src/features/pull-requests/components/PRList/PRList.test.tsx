@@ -1,12 +1,14 @@
+import type { ReactElement } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PRList } from './PRList'
 import type { PullRequest } from '@/types/github'
 
 vi.mock('@/features/pull-requests/queries/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
 vi.mock('@/features/pull-requests/stores/prStore', () => ({ usePRStore: vi.fn() }))
 vi.mock('@/features/pull-requests/queries/useCheckContexts', () => ({
-  useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false })),
+  useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false, refetch: vi.fn() })),
 }))
 vi.mock('@/features/pull-requests/queries/usePRDetails', () => ({
   usePRDetails: vi.fn(() => ({ data: undefined })),
@@ -73,15 +75,21 @@ const defaultQuery = {
   repos: [],
 }
 
+let queryClient: QueryClient
+
+const renderWithClient = (ui: ReactElement) =>
+  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockStoreFilters()
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
 })
 
 describe('PRList', () => {
   it('GIVEN no PRs THEN shows empty state', () => {
     mockUsePullRequests.mockReturnValue({ ...defaultQuery, data: [], priorityPRs: [] } as never)
-    render(<PRList />)
+    renderWithClient(<PRList />)
     expect(screen.getByText('No pull requests found.')).toBeInTheDocument()
   })
 
@@ -94,7 +102,7 @@ describe('PRList', () => {
       totalCount: 1,
       loadedCount: 1,
     } as never)
-    render(<PRList />)
+    renderWithClient(<PRList />)
     expect(screen.getByText('Top priority')).toBeInTheDocument()
   })
 
@@ -107,7 +115,7 @@ describe('PRList', () => {
       totalCount: 1,
       loadedCount: 1,
     } as never)
-    render(<PRList />)
+    renderWithClient(<PRList />)
     expect(screen.queryByText('Top priority')).not.toBeInTheDocument()
   })
 
@@ -121,7 +129,7 @@ describe('PRList', () => {
       totalCount: 2,
       loadedCount: 2,
     } as never)
-    render(<PRList />)
+    renderWithClient(<PRList />)
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
@@ -134,7 +142,25 @@ describe('PRList', () => {
       totalCount: 500,
       loadedCount: 1,
     } as never)
-    render(<PRList />)
+    renderWithClient(<PRList />)
     expect(screen.getByText(/of 500/)).toBeInTheDocument()
+  })
+
+  it('GIVEN refresh button clicked THEN pr-details and pr-checks queries are invalidated', () => {
+    const p = makePR('1', 'PR')
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: [p],
+      priorityPRs: [],
+      totalCount: 1,
+      loadedCount: 1,
+    } as never)
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries')
+    renderWithClient(<PRList />)
+
+    fireEvent.click(screen.getByTitle('Refresh'))
+
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['pr-details'] })
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['pr-checks'] })
   })
 })
