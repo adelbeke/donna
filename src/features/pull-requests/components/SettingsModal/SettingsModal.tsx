@@ -23,6 +23,10 @@ export const SettingsModal = () => {
 
   const currentView = viewFilters[section]
   const hasContent = repos.length > 1 || section !== 'authored'
+  const visibleRepos = repos.filter(
+    (r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h))
+  )
+  const orgs = [...new Set(visibleRepos.map((r) => r.split('/')[0]))]
 
   const activeCount =
     currentView.repos.length +
@@ -35,6 +39,16 @@ export const SettingsModal = () => {
       repos: currentView.repos.includes(repo)
         ? currentView.repos.filter((r) => r !== repo)
         : [...currentView.repos, repo],
+    })
+  }
+
+  const toggleOrg = (org: string) => {
+    const orgRepos = visibleRepos.filter((r) => r.split('/')[0] === org)
+    const allSelected = orgRepos.every((r) => currentView.repos.includes(r))
+    setViewFilters(section, {
+      repos: allSelected
+        ? currentView.repos.filter((r) => !orgRepos.includes(r))
+        : [...new Set([...currentView.repos, ...orgRepos])],
     })
   }
 
@@ -79,6 +93,30 @@ export const SettingsModal = () => {
       </ButtonWithTooltip>
 
       <Modal isOpen={open} title={'Settings'} onClose={() => setOpen(false)} className="min-w-1/2">
+        {orgs.length > 1 && (
+          <div>
+            <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+              Organization
+            </p>
+            <div className="flex flex-wrap gap-1 mb-3">
+              {orgs.map((org) => {
+                const orgRepos = visibleRepos.filter((r) => r.split('/')[0] === org)
+                const selected = orgRepos.every((r) => currentView.repos.includes(r))
+                return (
+                  <button
+                    key={org}
+                    onClick={() => toggleOrg(org)}
+                    className={`text-xs px-2 py-0.5 rounded-full cursor-pointer transition-colors
+                          ${selected ? 'bg-[var(--color-accent)] text-white' : 'bg-[var(--color-surface-overlay)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'}`}
+                  >
+                    {org}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {repos.length > 1 && (
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -95,30 +133,28 @@ export const SettingsModal = () => {
               )}
             </div>
             <div className="space-y-0.5 max-h-48 overflow-y-auto">
-              {repos
-                .filter((r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h)))
-                .map((repo) => {
-                  const selected = currentView.repos.includes(repo)
-                  return (
-                    <label
-                      key={repo}
-                      className={`flex items-center gap-2 px-1 py-1 rounded cursor-pointer group
+              {visibleRepos.map((repo) => {
+                const selected = currentView.repos.includes(repo)
+                return (
+                  <label
+                    key={repo}
+                    className={`flex items-center gap-2 px-1 py-1 rounded cursor-pointer group
                             ${selected ? 'bg-[var(--color-accent-subtle)]' : 'hover:bg-[var(--color-surface-overlay)]'}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleRepo(repo)}
+                      className="accent-[var(--color-accent)] cursor-pointer"
+                    />
+                    <span
+                      className={`text-xs truncate ${selected ? 'text-[var(--color-text-primary)] font-medium' : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'}`}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => toggleRepo(repo)}
-                        className="accent-[var(--color-accent)] cursor-pointer"
-                      />
-                      <span
-                        className={`text-xs truncate ${selected ? 'text-[var(--color-text-primary)] font-medium' : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'}`}
-                      >
-                        {repo.split('/')[1]}
-                      </span>
-                    </label>
-                  )
-                })}
+                      {repo.split('/')[1]}
+                    </span>
+                  </label>
+                )
+              })}
             </div>
           </div>
         )}
