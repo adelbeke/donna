@@ -134,27 +134,27 @@ export const SettingsModal = () => {
             </div>
             <div className="space-y-0.5 max-h-48 overflow-y-auto">
               {visibleRepos.map((repo) => {
-                  const selected = currentView.repos.includes(repo)
-                  return (
-                    <label
-                      key={repo}
-                      className={`flex items-center gap-2 px-1 py-1 rounded cursor-pointer group
+                const selected = currentView.repos.includes(repo)
+                return (
+                  <label
+                    key={repo}
+                    className={`flex items-center gap-2 px-1 py-1 rounded cursor-pointer group
                             ${selected ? 'bg-[var(--color-accent-subtle)]' : 'hover:bg-[var(--color-surface-overlay)]'}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleRepo(repo)}
+                      className="accent-[var(--color-accent)] cursor-pointer"
+                    />
+                    <span
+                      className={`text-xs truncate ${selected ? 'text-[var(--color-text-primary)] font-medium' : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'}`}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => toggleRepo(repo)}
-                        className="accent-[var(--color-accent)] cursor-pointer"
-                      />
-                      <span
-                        className={`text-xs truncate ${selected ? 'text-[var(--color-text-primary)] font-medium' : 'text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)]'}`}
-                      >
-                        {repo.split('/')[1]}
-                      </span>
-                    </label>
-                  )
-                })}
+                      {repo.split('/')[1]}
+                    </span>
+                  </label>
+                )
+              })}
             </div>
           </div>
         )}
