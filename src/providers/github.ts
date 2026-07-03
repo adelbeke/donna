@@ -156,44 +156,6 @@ export const PR_CHECK_CONTEXTS_QUERY = /* GraphQL */ `
   }
 `
 
-export const BRANCHES_QUERY = /* GraphQL */ `
-  query GetBranches($owner: String!, $name: String!, $cursor: String) {
-    repository(owner: $owner, name: $name) {
-      refs(
-        refPrefix: "refs/heads/"
-        first: 100
-        after: $cursor
-        orderBy: { field: TAG_COMMIT_DATE, direction: DESC }
-      ) {
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        nodes {
-          name
-          target {
-            ... on Commit {
-              committedDate
-              author {
-                user {
-                  login
-                }
-              }
-            }
-          }
-          associatedPullRequests(first: 1) {
-            nodes {
-              number
-              state
-              url
-            }
-          }
-        }
-      }
-    }
-  }
-`
-
 export const VIEWER_TEAMS_QUERY = /* GraphQL */ `
   query GetViewerTeams {
     viewer {
