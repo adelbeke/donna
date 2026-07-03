@@ -42,14 +42,12 @@ export const mapBranchNodes = (
       const authorLogin = n.target.author?.user?.login
       return !login || authorLogin === login
     })
-    .map(
-      (n): Branch => ({
-        name: n.name,
-        repo,
-        lastCommitDate: n.target!.committedDate!,
-        linkedPr: n.associatedPullRequests.nodes[0],
-      })
-    )
+    .map((n): Branch => ({
+      name: n.name,
+      repo,
+      lastCommitDate: n.target!.committedDate!,
+      linkedPr: n.associatedPullRequests.nodes[0],
+    }))
 }
 
 export const useBranches = (repos: string[]) => {
