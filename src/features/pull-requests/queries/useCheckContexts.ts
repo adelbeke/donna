@@ -27,7 +27,7 @@ export const useCheckContexts = (prId: string, enabled: boolean) => {
     enabled: enabled && !!token,
     staleTime: 30_000,
     queryFn: async () => {
-      const client = createClient(token)
+      const client = createClient()
       return client.request<CheckContextsResult>(PR_CHECK_CONTEXTS_QUERY, { nodeId: prId })
     },
   })

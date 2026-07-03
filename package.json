@@ -25,10 +25,8 @@
   "main": "out/main/index.js",
   "scripts": {
     "dev": "vite",
-    "dev:web": "vite",
     "dev:electron": "electron-vite dev",
     "build": "tsc -b && vite build",
-    "build:web": "tsc -b && vite build",
     "build:electron": "electron-vite build && electron-builder",
     "lint": "eslint .",
     "format": "prettier --write .",

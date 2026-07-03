@@ -61,14 +61,14 @@ Donna delegates all GitHub API calls to the `gh` CLI — no token to manage, no 
 
 ## Web version
 
-A browser-only build is live at [adelbeke.github.io/donna](https://adelbeke.github.io/donna/). It uses a classic PAT (`repo` + `read:org` scopes, stored in `localStorage`) and does not include the Branches tab.
+The web version is no longer maintained. [adelbeke.github.io/donna](https://adelbeke.github.io/donna/) now points to a static notice linking to the latest [release](https://github.com/adelbeke/donna/releases/latest) — download the desktop app instead.
 
 ## Dev
 
 ```bash
 npm install
 
-npm run dev            # web only (localhost:5173)
+npm run dev            # vite dev server, required by dev:electron below
 npm run dev:electron   # Electron window (requires vite dev server running)
 
 npm run lint

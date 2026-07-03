@@ -1,8 +1,5 @@
-import { GraphQLClient, ClientError } from 'graphql-request'
-import { IS_NATIVE, ghGraphql, ghRest } from './electron'
-
-const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
-const GH_BASE = 'https://api.github.com'
+import { ClientError } from 'graphql-request'
+import { ghGraphql, ghRest } from './electron'
 
 export const isAuthError = (error: unknown): boolean => {
   if (error instanceof ClientError) {
@@ -14,14 +11,6 @@ export const isAuthError = (error: unknown): boolean => {
     )
   }
   return false
-}
-
-export const createGitHubClient = (token: string) => {
-  return new GraphQLClient(GITHUB_GRAPHQL_URL, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
 }
 
 type GQLClient = { request: <T>(query: string, variables?: Record<string, unknown>) => Promise<T> }
@@ -36,25 +25,12 @@ const createElectronClient = (): GQLClient => {
   }
 }
 
-export const createClient = (token?: string | null): GQLClient => {
-  if (IS_NATIVE) return createElectronClient()
-  return createGitHubClient(token!) as unknown as GQLClient
-}
+export const createClient = (): GQLClient => createElectronClient()
 
-export const restFetch = async <T>(url: string, token?: string): Promise<T> => {
-  if (IS_NATIVE) {
-    const path = url.startsWith(GH_BASE) ? url.slice(GH_BASE.length) : url
-    return ghRest<T>(path)
-  }
-  const r = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token!}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-  })
-  if (!r.ok) throw new Error(`HTTP ${r.status}`)
-  return r.json() as Promise<T>
+export const restFetch = async <T>(url: string): Promise<T> => {
+  const GH_BASE = 'https://api.github.com'
+  const path = url.startsWith(GH_BASE) ? url.slice(GH_BASE.length) : url
+  return ghRest<T>(path)
 }
 
 export const VIEWER_QUERY = /* GraphQL */ `

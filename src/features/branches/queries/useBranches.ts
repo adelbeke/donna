@@ -59,7 +59,7 @@ export const useBranches = (repos: string[]) => {
     enabled: !!token && repos.length > 0,
     staleTime: 60_000,
     queryFn: async () => {
-      const client = createClient(token)
+      const client = createClient()
 
       const perRepo = await Promise.all(
         repos.map(async (repo) => {

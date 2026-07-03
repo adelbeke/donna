@@ -1,5 +1,3 @@
-export const IS_NATIVE = !!window.electronAPI
-
 export const ghIsInstalled = (): Promise<boolean> => window.electronAPI!.gh.isInstalled()
 
 export const ghGraphql = <T>(

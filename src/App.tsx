@@ -1,9 +1,7 @@
 import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-query'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { isAuthError } from './providers/github'
-import { IS_NATIVE } from './providers/electron'
 import { AppContainer } from './containers/AppContainer.tsx'
-import { WebContainer } from './containers/WebContainer.tsx'
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -21,7 +19,7 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    {IS_NATIVE ? <AppContainer /> : <WebContainer />}
+    <AppContainer />
   </QueryClientProvider>
 )
 export default App
