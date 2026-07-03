@@ -15,7 +15,7 @@ npm run dev            # web renderer on http://localhost:5173/donna/
 npm run dev:electron   # Electron window (expects the vite dev server above to be running)
 npm run lint           # ESLint (flat config)
 npm test               # vitest watch
-npm run test:run       # vitest once  — run a single file: npm run test:run src/lib/prUtils.test.ts
+npm run test:run       # vitest once  — run a single file: npm run test:run src/features/pull-requests/lib/prUtils.test.ts
 npm run build          # web build: tsc -b && vite build
 npm run build:electron # electron-vite build && electron-builder (produces signed .dmg)
 ```
@@ -24,16 +24,16 @@ CI (`.github/workflows/ci.yml`) runs `lint`, `test:run`, then `build` on every P
 
 ## Main Features
 
-**Pull Requests view** (`prs`) — three sections selected in the left `Filters` sidebar, each a different GitHub search (`buildSearchQuery`):
+**Pull Requests view** (`prs`) — three sections selected via the `PRSectionsTabs` sidebar tabs, each a different GitHub search (`buildSearchQuery`):
 - **Review requested** / **My PRs** (authored) / **Mentioned**.
 - Per-PR actions on each `PRCard`: **star** (top-priority, pinned above the list and persisted), **hide** (dims + filtered out unless "Hidden" toggle is on), **copy PR link**, open externally.
 - **Mute authors**: free-form patterns (e.g. `dependabot`) that filter out their PRs.
-- Filters: by repository (checkboxes, shown only when >1 repo loaded), title search (navbar), show/hide **drafts**, show/hide **hidden**.
+- Filters: by repository/org (checkboxes in the `SettingsModal` gear-icon popover, shown only when >1 repo loaded), title search (above the list), show/hide **drafts**, show/hide **hidden** (`VisibilityToggles` in the list header).
 - Each card shows repo, author, `#number`, opened/updated ages, diff size (`+/-`), draft/hidden badges, **my review-state** badge, a **CI checks** badge that opens a `PRChecksModal` popover (lazy-loads per-check contexts), and a **conflict** badge when `mergeable === 'CONFLICTING'`. In the authored section, cards also show grouped **reviewer avatars** (approved / changes-requested / commented / pending).
 - Paging: pages auto-load in the background (capped at `MAX_PAGES = 10`); a spinner in the header badge shows while more pages are fetching.
 - **Focus refresh**: when the window regains focus, `useFocusRefresh` (`hooks/useFocusRefresh.ts`) snapshots the current PR IDs and triggers a refetch. If new PRs appear, a `NewPRsBadge` is shown above the list; the list stays frozen at the pre-focus snapshot until the badge is dismissed or clicked. The `authored` section is excluded from this detection. Local mutations (star/hide) pass through the snapshot filter so they are always reflected immediately.
 
-**Branches view** (`branches`, **Electron-only**) — `BranchList` reads *local* git repos the user adds via a native directory picker:
+**Branches view** (`branches`, **Electron-only**) — `BranchDashboard` renders a branch-name search box plus `BranchList`, which reads *local* git repos the user adds via a native directory picker:
 - Lists branches per repo with **worktree detection**, a **dirty-state** dot for uncommitted changes, and the **linked open PR** (matched by `repo/headRefName`).
 - One-click copy of `git switch <branch>` and `cd <worktree-path>`.
 
@@ -56,20 +56,24 @@ src/
       stores/                authStore.ts (Zustand, persisted: token + user) + authStore.test.ts
       exports.ts             public surface: { useAuthStore }
     branches/        Electron-only Branches tab
-      components/BranchList/   BranchList.tsx + BranchList.test.tsx
-      queries/                 useBranches.ts (dormant GraphQL hook) + useBranches.test.tsx
-      stores/                  branchStore.ts (Zustand, persisted)
-      types.ts                 branch-specific TypeScript types
-      exports.ts               public surface: { BranchList }
+      components/BranchDashboard/   BranchDashboard.tsx (search input + BranchList)
+      components/BranchList/        BranchList.tsx + BranchList.test.tsx, BranchCard/ (BranchCard.tsx)
+      stores/                       branchStore.ts (Zustand, persisted)
+      types.ts                      branch-specific TypeScript types
+      exports.ts                    public surface: { BranchDashboard }
     pull-requests/   PR inbox feature
-      components/    Filters/ (+ Filters.test.tsx), PRCard/ (PRCard, PRCard.test.tsx,
-                     ReviewerAvatars, PRChecksModal), PRList/ (PRList, PRList.test.tsx, VisibilityToggles),
-                     NewPRsBadge/ (NewPRsBadge, NewPRsBadge.test.tsx)
+      components/    PRDashboard/ (search input + SettingsModal + PRSectionsTabs + PRList),
+                     PRSectionsTabs/ (+ .test.tsx — section tabs sidebar), SettingsModal/ (+ .test.tsx —
+                     repo/org checkboxes, muted authors, hidden repos), PRList/ (PRList, PRList.test.tsx),
+                     PRListHeader/, VisibilityToggles/ (drafts/hidden toggles), NewPRsBadge/ (+ .test.tsx),
+                     NotificationHint/ (+ .test.tsx), PRCard/ (PRCard, PRCard.test.tsx, ReviewerAvatars),
+                     PRCardActions/ (PRCardAction, PRCardActions), PRChecksModal/ (PRChecksModal,
+                     PRCheckIcon), PRCheckRow/ (+ .test.tsx)
       hooks/         useFocusRefresh.ts + useFocusRefresh.test.tsx
       lib/           prUtils.ts & prUtils.test.ts, prFilters.ts & prFilters.test.ts, timeAgo.ts & timeAgo.test.ts
       queries/       useGitHubPRs.ts + useGitHubPRs.test.ts, useCheckContexts.ts, usePRDetails.ts, useViewer.ts
       stores/        prStore.ts + prStore.test.ts (Zustand, persisted)
-      exports.ts     public surface: { Filters, PRList, usePRStore, … }
+      exports.ts     public surface: { usePRStore, usePullRequests, useCheckContexts, PRDashboard }
     updates/         OTA self-update (Electron-only)
       components/UpdateBanner/   UpdateBanner.tsx
       queries/                   useUpdateCheck.ts + useUpdateCheck.test.tsx
@@ -77,13 +81,11 @@ src/
   providers/         Transport layer: github.ts (createClient/restFetch + GraphQL queries),
                      github.test.ts, electron.ts (gh CLI IPC wrappers)
   shared/            Cross-feature shared code
-    components/      CopyWithFeedback/, Footer/, ui/ButtonWithTooltip
+    components/      CopyWithFeedback/, Footer/, SearchInput/, ContributeLinks/, ui/ButtonWithTooltip, ui/Modal
     features.ts      FeaturesContext (useFeatures, Feature union type)
     hooks/           useTheme.ts
   types/             github.ts (API shapes), worktree.ts, electron.d.ts (window global)
 ```
-
-`src/features/branches/queries/useBranches.ts` is **not wired into any view** (the live Branches tab uses local git via IPC, not this GraphQL hook) — treat it as dormant, not load-bearing.
 
 ### Path alias
 
@@ -117,8 +119,8 @@ Two layers, deliberately separated:
 1. `buildSearchQuery(section, login)` turns the active section (`review-requested` / `authored` / `mentioned`) into a GitHub search string.
 2. `useInfiniteQuery` pages the GraphQL `search` via `PR_LIST_QUERY` (20/page, capped at `MAX_PAGES = 10`), sorted `sort:updated-desc`. Pages auto-fetch sequentially via a `useEffect`; `PRListHeader` shows a spinner while `isFetchingNextPage`. The list query returns only lightweight fields — `reviews`, `reviewRequests`, `commits`, and `mergeable` are **not** fetched here.
 3. Each node is enriched in-memory with `isTopPriority`, `isHidden`.
-4. `applyFilters` (`src/lib/prFilters.ts`) drops drafts/hidden/repo/author/search misses.
-5. `sortAndPartition` (`src/lib/prUtils.ts`) sorts by `updatedAt` and splits priority PRs (pinned on top) from the rest.
+4. `applyFilters` (`src/features/pull-requests/lib/prFilters.ts`) drops drafts/hidden/repo/author/search misses.
+5. `sortAndPartition` (`src/features/pull-requests/lib/prUtils.ts`) sorts by `updatedAt` and splits priority PRs (pinned on top) from the rest.
 6. **Per-card detail loading**: `PRCard` calls `usePRDetails(pr.id)` (`src/features/pull-requests/queries/usePRDetails.ts`) which lazily fetches the heavy per-PR fields (`reviews`, `reviewRequests`, `mergeable`, `commits`/`statusCheckRollup`). `myReviewState`, `checkState`, and conflict badge are derived from the merged result — so they appear progressively as details load. `reviews`, `reviewRequests`, `commits`, and `mergeable` are optional on the `PullRequest` type for this reason.
 
 All GraphQL queries live as exported template strings in `src/providers/github.ts`. The pure derivation helpers in `prUtils.ts` (review summaries, check rollup state) are the most heavily unit-tested part of the app — keep them pure and add cases there rather than testing through components.
