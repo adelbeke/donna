@@ -1,3 +1,4 @@
+import { ContributeLinks } from '@/shared/components/ContributeLinks/ContributeLinks.tsx'
 import { usePRStore, type PRSection } from '../../stores/prStore'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
@@ -28,6 +29,9 @@ export const PRSectionsTabs = () => {
           </button>
         ))}
       </nav>
+      <div className="mt-6 pt-3 border-t border-[var(--color-border)] space-y-1.5 px-3">
+        <ContributeLinks />
+      </div>
     </aside>
   )
 }
