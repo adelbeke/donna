@@ -2,7 +2,7 @@ import type { PullRequest } from '@/types/github.ts'
 import type { Worktree } from '@/features/branches/types.ts'
 import { useState } from 'react'
 import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
-import { Copy, ExternalLink, MoreVertical, Trash2 } from 'lucide-react'
+import { Copy, ExternalLink, Loader2, MoreVertical, Trash2 } from 'lucide-react'
 
 export const BranchCard = ({
   branch,
@@ -27,6 +27,7 @@ export const BranchCard = ({
   const isProtected = branch === 'main' || branch === 'master'
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [isRemoving, setIsRemoving] = useState(false)
 
   const deleteBranch = async () => {
     const message = isCurrentBranch
@@ -43,18 +44,29 @@ export const BranchCard = ({
     }
   }
 
-  const removeWorktree = async () => {
+  const removeWorktree = async (force = false) => {
+    if (isRemoving) return
     const wt = worktree!
-    const message = wt.isDirty
-      ? `⚠️ "${branch}" has uncommitted changes.\n\nRemoving this worktree will permanently delete those changes.\n\nAre you sure?`
-      : `Remove worktree at "${wt.path}"?`
-    if (!window.confirm(message)) return
+    if (!force) {
+      const message = wt.isDirty
+        ? `⚠️ "${branch}" has uncommitted changes.\n\nRemoving this worktree will permanently delete those changes.\n\nAre you sure?`
+        : `Remove worktree at "${wt.path}"?`
+      if (!window.confirm(message)) return
+    }
     setIsMenuOpen(false)
+    setIsRemoving(true)
     try {
-      await window.electronAPI!.worktrees.remove(repoPath, wt.path, wt.isDirty)
+      await window.electronAPI!.worktrees.remove(repoPath, wt.path, force || wt.isDirty)
       onDeleted()
     } catch (e) {
-      setDeleteError((e as Error).message)
+      const message = (e as Error).message
+      if (!force && message.includes('contains modified or untracked files')) {
+        await removeWorktree(true)
+        return
+      }
+      setDeleteError(message)
+    } finally {
+      setIsRemoving(false)
     }
   }
 
@@ -104,10 +116,15 @@ export const BranchCard = ({
             <div className="relative">
               <button
                 onClick={() => setIsMenuOpen((v) => !v)}
-                title="More actions"
-                className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
+                title={isRemoving ? 'Removing worktree…' : 'More actions'}
+                disabled={isRemoving}
+                className="p-1 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <MoreVertical size={14} />
+                {isRemoving ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <MoreVertical size={14} />
+                )}
               </button>
               {isMenuOpen && (
                 <>
@@ -115,7 +132,7 @@ export const BranchCard = ({
                   <div className="absolute right-0 top-full z-20 mt-1 min-w-[160px] rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-lg py-1">
                     {worktree ? (
                       <button
-                        onClick={removeWorktree}
+                        onClick={() => removeWorktree()}
                         className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
                       >
                         <Trash2 size={12} />
