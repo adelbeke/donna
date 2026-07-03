@@ -14,7 +14,7 @@ export const useViewer = () => {
     queryKey: ['viewer'],
     enabled: !!token,
     queryFn: async () => {
-      const client = createClient(token)
+      const client = createClient()
       const data = await client.request<ViewerResult>(VIEWER_QUERY)
       return data.viewer
     },

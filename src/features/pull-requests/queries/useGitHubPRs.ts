@@ -40,7 +40,7 @@ export const usePullRequests = () => {
     getNextPageParam: (last) =>
       last.search.pageInfo.hasNextPage ? last.search.pageInfo.endCursor : undefined,
     queryFn: async ({ pageParam }) => {
-      return createClient(token).request<SearchPage>(PR_LIST_QUERY, {
+      return createClient().request<SearchPage>(PR_LIST_QUERY, {
         searchQuery,
         cursor: pageParam,
       })

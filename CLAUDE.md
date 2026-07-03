@@ -4,12 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Donna is an open source GitHub companion — filter, prioritise, and track review status across all your repositories — that ships as **two products from one React codebase**:
+Donna is an open source GitHub companion — filter, prioritise, and track review status across all your repositories. The **Electron app** (macOS) is the sole functional product: full features including the Branches tab, with auth and all GitHub calls delegated to the local `gh` CLI — no token is ever stored.
 
-- **Electron app** (macOS, the primary target): full features including the Branches tab. Auth and all GitHub calls are delegated to the local `gh` CLI — no token is ever stored.
-- **Web app** (GitHub Pages at `adelbeke.github.io/donna`): browser-only, authenticates with a classic PAT kept in `localStorage`, and **omits the Branches tab**.
-
-Understanding the split between these two modes is the key to working in this repo.
+The React renderer previously also shipped as a browser-only web app (GitHub Pages at `adelbeke.github.io/donna`), authenticating with a classic PAT kept in `localStorage`. That web app has been retired — GitHub Pages now serves a static `web-deprecated/index.html` pointing visitors to the latest release, built and deployed independently of the React app (see `.github/workflows/deploy.yml`). The renderer source no longer contains a web entry point (`WebContainer`/`AuthPage` were removed); `authStore` remains shared infrastructure used by the Electron app's `gh-cli` sentinel token flow.
 
 ## Commands
 
@@ -49,17 +46,15 @@ electron/            Electron main + preload (Node side; the only place that she
   main.ts            ipcMain handlers: gh:graphql/rest/installed, branches/worktrees list, dialog, updater
   preload.ts         contextBridge → window.electronAPI (typed in src/types/electron.d.ts)
 src/
-  App.tsx            QueryClient setup + container switch (IS_NATIVE → AppContainer or WebContainer)
+  App.tsx            QueryClient setup, always mounts AppContainer
   main.tsx           React entry
   index.css          Tailwind v4 @theme tokens + [data-theme="light"] overrides
   containers/        AppContainer.tsx (Electron: gh CLI auth probe, error screen, mounts DashboardPage)
-                     WebContainer.tsx (Web: PAT gate, mounts AuthPage or DashboardPage)
                      DashboardPage.tsx (navbar + view switch)
   features/          Feature slices — each has components/, queries/, stores/ + exports.ts barrel
-    auth/            Web-only auth (PAT gate)
-      components/AuthPage/   AuthPage.tsx (web PAT entry form)
+    auth/            authStore (token + user), backing AppContainer's gh-cli sentinel token flow
       stores/                authStore.ts (Zustand, persisted: token + user) + authStore.test.ts
-      exports.ts             public surface: { useAuthStore, AuthPage }
+      exports.ts             public surface: { useAuthStore }
     branches/        Electron-only Branches tab
       components/BranchList/   BranchList.tsx + BranchList.test.tsx
       queries/                 useBranches.ts (dormant GraphQL hook) + useBranches.test.tsx
@@ -80,7 +75,7 @@ src/
       queries/                   useUpdateCheck.ts + useUpdateCheck.test.tsx
       exports.ts                 public surface: { useUpdateCheck, isNewer, UpdateBanner }
   providers/         Transport layer: github.ts (createClient/restFetch + GraphQL queries),
-                     github.test.ts, electron.ts (IS_NATIVE)
+                     github.test.ts, electron.ts (gh CLI IPC wrappers)
   shared/            Cross-feature shared code
     components/      CopyWithFeedback/, Footer/, ui/ButtonWithTooltip
     features.ts      FeaturesContext (useFeatures, Feature union type)
@@ -94,19 +89,15 @@ src/
 
 `@/` resolves to `src/` in both Vite configs and `tsconfig.app.json`. Use it for any cross-feature import instead of deep relative paths (`../../..`).
 
-## The native-vs-web abstraction
+## App bootstrap and transport
 
-The renderer never branches on platform ad hoc. It goes through three seams:
+`App.tsx` always mounts `AppContainer`, which auto-probes `gh` on launch via `tryNativeAuth`, sets a sentinel token `'gh-cli'` in `authStore` on success, and shows an `AppAuthError` screen with a Retry button if `gh` is missing or not logged in.
 
-1. **`AppContainer` / `WebContainer`** — the top-level split. `App.tsx` uses `IS_NATIVE` exactly once to choose which container to render. All platform-specific bootstrap logic (auth flow, error screens) lives in these two files and nowhere else.
+`FeaturesContext` (`src/shared/features.ts`) is a static React context carrying the set of gated `Feature` values; `AppContainer` provides `new Set(['branches'])`. Components read it via `useFeatures()` rather than assuming a feature is always available — this is what lets `branches` stay conceptually optional even though only one container exists.
 
-2. **`FeaturesContext`** (`src/shared/features.ts`) — a static React context (never updated after mount) that carries the set of gated `Feature` values. `AppContainer` provides `new Set(['branches'])`; `WebContainer` leaves the default empty Set. Components read it via `useFeatures()` — **never import `IS_NATIVE` inside a component**, use `features.has('branches')` instead. To add a new gated feature: add it to the `Feature` union type and set it in `AppContainer`.
-
-3. **`createClient(token)` / `restFetch(url, token)`** (`src/providers/github.ts`) — the transport seam. In Electron they call `window.electronAPI.gh.graphql/.rest`, which IPCs to `electron/main.ts` and shells out to `gh api`. In the browser they hit `api.github.com` directly with the PAT. **Data hooks stay platform-agnostic by always going through these functions** — never call `fetch` to GitHub or read `window.electronAPI` directly from a hook/component.
+`createClient()` / `restFetch(url)` (`src/providers/github.ts`) are the transport seam: they call `window.electronAPI.gh.graphql/.rest`, which IPCs to `electron/main.ts` and shells out to `gh api`. **Data hooks stay decoupled from IPC details by always going through these functions** — never call `fetch` to GitHub or read `window.electronAPI` directly from a hook/component.
 
 Anything that touches the local filesystem (list branches, list worktrees, directory picker) is Electron-only and lives as an `ipcMain.handle` in `electron/main.ts`, exposed through `preload.ts`, typed in `src/types/electron.d.ts`. These shell out to local `git`. `main.ts` augments `PATH` with Homebrew dirs so the bundled `.app` can find `gh`/`git`.
-
-Auth flow differs by container: `WebContainer` shows `AuthPage` until a PAT is set; `AppContainer` auto-probes `gh` on launch, sets a sentinel token `'gh-cli'`, and shows an error screen with a Retry button if `gh` is missing or not logged in.
 
 ## State management
 

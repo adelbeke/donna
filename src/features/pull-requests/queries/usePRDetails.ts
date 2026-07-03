@@ -14,7 +14,7 @@ export const usePRDetails = (prId: string) => {
     enabled: !!token,
     staleTime: 60_000,
     queryFn: async () => {
-      const data = await createClient(token).request<NodeResult>(PR_DETAILS_SINGLE_QUERY, {
+      const data = await createClient().request<NodeResult>(PR_DETAILS_SINGLE_QUERY, {
         nodeId: prId,
       })
       return data.node
