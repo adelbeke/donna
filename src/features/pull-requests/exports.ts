@@ -1,4 +1,5 @@
 export { usePRStore } from './stores/prStore'
 export { usePullRequests } from './queries/useGitHubPRs'
 export { useCheckContexts } from './queries/useCheckContexts'
+export { usePRNotifications } from './queries/usePRNotifications'
 export { PRDashboard } from './components/PRDashboard/PRDashboard'

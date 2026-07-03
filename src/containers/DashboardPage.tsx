@@ -1,6 +1,6 @@
 import { LogOut, Moon, Sun } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/exports'
-import { usePRStore, PRDashboard } from '@/features/pull-requests/exports'
+import { usePRStore, PRDashboard, usePRNotifications } from '@/features/pull-requests/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures } from '@/shared/features'
 import { BranchDashboard } from '@/features/branches/exports'
@@ -15,6 +15,7 @@ export const DashboardPage = () => {
   const showBanner = latestVersion && isNewer(latestVersion, __APP_VERSION__)
   const { theme, toggle } = useTheme()
   const features = useFeatures()
+  usePRNotifications()
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">
