@@ -2,6 +2,7 @@ import { useQueries } from '@tanstack/react-query'
 import { FolderPlus, RefreshCw, X } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { usePullRequests } from '@/features/pull-requests/exports'
+import { ContributeLinks } from '@/shared/components/ContributeLinks/ContributeLinks.tsx'
 import { useBranchStore } from '../../stores/branchStore'
 import type { Branch, Worktree } from '../../types'
 import type { PullRequest } from '@/types/github'
@@ -205,6 +206,10 @@ export const BranchList = () => {
             </button>
           )
         })}
+      </div>
+
+      <div className="flex justify-end gap-4 text-xs">
+        <ContributeLinks />
       </div>
 
       <div className="space-y-2">
