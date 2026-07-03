@@ -240,4 +240,50 @@ describe('BranchCard — worktree branch', () => {
     expect(mockRemove).toHaveBeenCalledWith('/repos/my-repo', '/repos/my-repo-wt', true)
     await waitFor(() => expect(onDeleted).toHaveBeenCalled())
   })
+
+  it('GIVEN clean-looking worktree that is actually dirty WHEN remove fails with modified-files error THEN auto-retries with force=true and calls onDeleted', async () => {
+    mockRemove.mockRejectedValueOnce(
+      new Error("fatal: '/repos/my-repo-wt' contains modified or untracked files, use --force to delete it")
+    )
+    const user = userEvent.setup()
+    const { onDeleted } = card({ worktree })
+    await user.click(screen.getByTitle('More actions'))
+    await user.click(screen.getByText('Remove worktree'))
+    await waitFor(() => expect(mockRemove).toHaveBeenCalledTimes(2))
+    expect(mockRemove).toHaveBeenNthCalledWith(1, '/repos/my-repo', '/repos/my-repo-wt', false)
+    expect(mockRemove).toHaveBeenNthCalledWith(2, '/repos/my-repo', '/repos/my-repo-wt', true)
+    await waitFor(() => expect(onDeleted).toHaveBeenCalled())
+  })
+
+  it('GIVEN remove fails with an unrelated error WHEN Remove worktree clicked THEN shows the error inline and does not retry', async () => {
+    mockRemove.mockRejectedValueOnce(new Error('worktree is locked'))
+    const user = userEvent.setup()
+    card({ worktree })
+    await user.click(screen.getByTitle('More actions'))
+    await user.click(screen.getByText('Remove worktree'))
+    await waitFor(() => expect(screen.getByText('worktree is locked')).toBeInTheDocument())
+    expect(mockRemove).toHaveBeenCalledTimes(1)
+  })
+
+  it('GIVEN worktree removal is slow WHEN Remove worktree clicked THEN the trigger is disabled until it settles, preventing a duplicate command', async () => {
+    let resolveRemove: () => void
+    mockRemove.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveRemove = resolve
+      })
+    )
+    const user = userEvent.setup()
+    const { onDeleted } = card({ worktree })
+    await user.click(screen.getByTitle('More actions'))
+    await user.click(screen.getByText('Remove worktree'))
+
+    expect(screen.getByTitle('Removing worktree…')).toBeDisabled()
+    await user.click(screen.getByTitle('Removing worktree…'))
+    expect(screen.queryByText('Remove worktree')).not.toBeInTheDocument()
+    expect(mockRemove).toHaveBeenCalledTimes(1)
+
+    resolveRemove!()
+    await waitFor(() => expect(onDeleted).toHaveBeenCalled())
+    expect(screen.getByTitle('More actions')).not.toBeDisabled()
+  })
 })
