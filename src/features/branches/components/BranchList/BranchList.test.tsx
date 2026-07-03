@@ -243,7 +243,9 @@ describe('BranchCard — worktree branch', () => {
 
   it('GIVEN clean-looking worktree that is actually dirty WHEN remove fails with modified-files error THEN auto-retries with force=true and calls onDeleted', async () => {
     mockRemove.mockRejectedValueOnce(
-      new Error("fatal: '/repos/my-repo-wt' contains modified or untracked files, use --force to delete it")
+      new Error(
+        "fatal: '/repos/my-repo-wt' contains modified or untracked files, use --force to delete it"
+      )
     )
     const user = userEvent.setup()
     const { onDeleted } = card({ worktree })
