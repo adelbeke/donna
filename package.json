@@ -1,7 +1,7 @@
 {
   "name": "donna",
   "private": true,
-  "version": "1.8.0",
+  "version": "1.9.0",
   "type": "module",
   "description": "Self-hostable GitHub PR dashboard — filter, prioritise, and track review status across all your repositories",
   "license": "MIT",
@@ -38,8 +38,8 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.3.1",
-    "@tanstack/react-query": "^5.101.0",
+    "@tailwindcss/vite": "^4.3.2",
+    "@tanstack/react-query": "^5.101.2",
     "electron-updater": "^6.6.2",
     "graphql-request": "^7.4.0",
     "lucide-react": "^1.21.0",
@@ -63,7 +63,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -77,10 +77,10 @@
     "globals": "^17.7.0",
     "graphql": "^17.0.1",
     "jsdom": "^29.1.1",
-    "prettier": "^3.5.3",
+    "prettier": "^3.9.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.62.0",
-    "vite": "^8.1.0",
+    "vite": "^8.1.3",
     "vitest": "^4.1.9"
   }
 }
