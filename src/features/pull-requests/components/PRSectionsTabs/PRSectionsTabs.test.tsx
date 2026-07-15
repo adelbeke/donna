@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PRSectionsTabs } from './PRSectionsTabs'
 import { usePRStore } from '../../stores/prStore'
 import type { PRStore } from '../../stores/prStore'
@@ -14,6 +15,15 @@ const mockStore = (section = 'review-requested', setSection = vi.fn()) => {
   })
 }
 
+const renderWithClient = () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={client}>
+      <PRSectionsTabs />
+    </QueryClientProvider>
+  )
+}
+
 beforeEach(() => {
   vi.clearAllMocks()
   mockStore()
@@ -21,7 +31,7 @@ beforeEach(() => {
 
 describe('PRSectionsTabs — section tabs', () => {
   it('renders all three section tabs', () => {
-    render(<PRSectionsTabs />)
+    renderWithClient()
     expect(screen.getByText('Review requested')).toBeInTheDocument()
     expect(screen.getByText('My PRs')).toBeInTheDocument()
     expect(screen.getByText('Mentioned')).toBeInTheDocument()
@@ -29,7 +39,7 @@ describe('PRSectionsTabs — section tabs', () => {
 
   it('active section tab has accent styling', () => {
     mockStore('authored')
-    render(<PRSectionsTabs />)
+    renderWithClient()
     const activeBtn = screen.getByText('My PRs')
     expect(activeBtn.className).toContain('text-[var(--color-accent)]')
   })
@@ -37,7 +47,7 @@ describe('PRSectionsTabs — section tabs', () => {
   it('clicking a tab calls setSection', () => {
     const setSection = vi.fn()
     mockStore('review-requested', setSection)
-    render(<PRSectionsTabs />)
+    renderWithClient()
     fireEvent.click(screen.getByText('My PRs'))
     expect(setSection).toHaveBeenCalledWith('authored')
   })
