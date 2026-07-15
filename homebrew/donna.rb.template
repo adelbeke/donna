@@ -1,0 +1,23 @@
+cask "donna" do
+  arch arm: "arm64"
+
+  version "__VERSION__"
+  sha256 arm:   "__SHA_ARM64__",
+         intel: "__SHA_INTEL__"
+
+  url "https://github.com/adelbeke/donna/releases/download/v#{version}/Donna-#{version}#{"-arm64" if arch == "arm64"}.dmg"
+  name "Donna"
+  desc "GitHub PR dashboard — filter, prioritise, track review status"
+  homepage "https://github.com/adelbeke/donna"
+
+  auto_updates true
+  depends_on :macos
+
+  app "Donna.app"
+
+  zap trash: [
+    "~/Library/Application Support/Donna",
+    "~/Library/Preferences/com.dbkable.donna.plist",
+    "~/Library/Saved Application State/com.dbkable.donna.savedState",
+  ]
+end

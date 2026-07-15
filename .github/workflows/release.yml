@@ -138,6 +138,26 @@ jobs:
           files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update Homebrew tap
+        run: |
+          VERSION="${{ needs.bump.outputs.version }}"
+          SHA_INTEL=$(sha256sum "artifacts/Donna-${VERSION}.dmg" | awk '{print $1}')
+          SHA_ARM64=$(sha256sum "artifacts/Donna-${VERSION}-arm64.dmg" | awk '{print $1}')
+
+          git clone "https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/adelbeke/homebrew-donna.git" tap
+          sed -e "s/__VERSION__/${VERSION}/g" -e "s/__SHA_ARM64__/${SHA_ARM64}/g" -e "s/__SHA_INTEL__/${SHA_INTEL}/g" \
+            homebrew/donna.rb.template > tap/Casks/donna.rb
+
+          cd tap
+          git config user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config user.name "${{ secrets.GIT_USER_NAME }}"
+          if git diff --quiet; then
+            echo "No cask changes, skipping"
+          else
+            git add Casks/donna.rb
+            git commit -m "chore: update donna to v$VERSION"
+            git push
+          fi
 
   cleanup:
     needs: [bump, build, release]
