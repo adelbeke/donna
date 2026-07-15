@@ -1,4 +1,5 @@
 import { Bug, Lightbulb } from 'lucide-react'
+import { ChangelogButton } from '@/features/updates/exports.ts'
 
 const LINK_CLASSES =
   'flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors'
@@ -25,6 +26,7 @@ export const ContributeLinks = () => {
         <Bug size={13} />
         Report a bug
       </a>
+      <ChangelogButton />
     </>
   )
 }

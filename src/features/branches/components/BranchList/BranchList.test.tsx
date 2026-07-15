@@ -1,17 +1,30 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BranchCard } from './BranchCard/BranchCard'
 import { BranchList } from './BranchList'
 import type { Branch, Worktree } from '../../types'
 
-vi.mock('@tanstack/react-query', () => ({ useQueries: vi.fn() }))
+vi.mock('@tanstack/react-query', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@tanstack/react-query')>()),
+  useQueries: vi.fn(),
+}))
 vi.mock('../../stores/branchStore', () => ({ useBranchStore: vi.fn() }))
 vi.mock('@/features/pull-requests/exports', () => ({ usePullRequests: vi.fn() }))
 
 import { useQueries } from '@tanstack/react-query'
 import { useBranchStore } from '../../stores/branchStore'
 import { usePullRequests } from '@/features/pull-requests/exports'
+
+const renderBranchList = () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={client}>
+      <BranchList />
+    </QueryClientProvider>
+  )
+}
 
 const mockUseQueries = vi.mocked(useQueries)
 const mockUseBranchStore = vi.mocked(useBranchStore)
@@ -98,7 +111,7 @@ describe('BranchList — current branch sorting', () => {
       ],
       []
     )
-    render(<BranchList />)
+    renderBranchList()
     const names = screen.getAllByText(/^(feat\/a|feat\/b|main)$/).map((el) => el.textContent)
     expect(names[0]).toBe('main')
     expect(names).toEqual(['main', 'feat/a', 'feat/b'])
@@ -115,7 +128,7 @@ describe('BranchList — current branch sorting', () => {
         { path: `${REPO}-feat-x`, branch: 'feat/x', commit: 'bbb', isMain: false, isDirty: false },
       ]
     )
-    render(<BranchList />)
+    renderBranchList()
     const names = screen.getAllByText(/^(feat\/x|main)$/).map((el) => el.textContent)
     // main floats to top; feat/x has a worktree badge but is not treated as current
     expect(names[0]).toBe('main')
