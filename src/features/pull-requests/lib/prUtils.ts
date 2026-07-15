@@ -92,6 +92,11 @@ export const dedupeChecks = (
   return [...byKey.values()]
 }
 
+export const isOverContextSwitchThreshold = (
+  authoredOpenCount: number,
+  threshold: number
+): boolean => authoredOpenCount > threshold
+
 export const sortAndPartition = (
   prs: PullRequest[],
   priorityIds: string[]

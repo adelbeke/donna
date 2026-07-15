@@ -23,6 +23,7 @@ export type PRStore = {
   priorityIds: string[]
   hiddenIds: string[]
   notificationHintDismissed: boolean
+  contextSwitchThreshold: number
   setView: (v: 'prs' | 'branches') => void
   setSection: (s: PRSection) => void
   setGlobalFilters: (partial: Partial<GlobalFilters>) => void
@@ -34,6 +35,7 @@ export type PRStore = {
   togglePriority: (id: string) => void
   toggleHide: (id: string) => void
   dismissNotificationHint: () => void
+  setContextSwitchThreshold: (n: number) => void
   resetFilters: () => void
 }
 
@@ -65,6 +67,7 @@ export const usePRStore = create<PRStore>()(
       priorityIds: [],
       hiddenIds: [],
       notificationHintDismissed: false,
+      contextSwitchThreshold: 4,
       setView: (v) => set({ view: v }),
       setSection: (s) => set({ section: s }),
       setGlobalFilters: (partial) =>
@@ -122,6 +125,7 @@ export const usePRStore = create<PRStore>()(
             : [...state.hiddenIds, id],
         })),
       dismissNotificationHint: () => set({ notificationHintDismissed: true }),
+      setContextSwitchThreshold: (n) => set({ contextSwitchThreshold: n }),
       resetFilters: () =>
         set((state) => ({
           viewFilters: {
@@ -170,6 +174,7 @@ export const usePRStore = create<PRStore>()(
             hiddenIds: p.hiddenIds ?? current.hiddenIds,
             notificationHintDismissed:
               p.notificationHintDismissed ?? current.notificationHintDismissed,
+            contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,
           }
         }
         const validSections = new Set<string>(['review-requested', 'authored', 'mentioned'])
@@ -188,6 +193,7 @@ export const usePRStore = create<PRStore>()(
           hiddenIds: p.hiddenIds ?? current.hiddenIds,
           notificationHintDismissed:
             p.notificationHintDismissed ?? current.notificationHintDismissed,
+          contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,
         }
       },
     }

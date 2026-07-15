@@ -11,13 +11,41 @@ vi.mock('../../queries/useGitHubPRs', () => ({
 const mockUsePullRequests = vi.mocked(usePullRequests)
 
 describe('SettingsModal', () => {
-  it('GIVEN authored section with a single repo WHEN rendered THEN renders nothing', () => {
+  it('GIVEN authored section with a single repo WHEN rendered THEN still shows the settings button (context-switch threshold is global)', () => {
     usePRStore.setState({ section: 'authored' })
     mockUsePullRequests.mockReturnValue({ repos: ['org/repo'] } as never)
 
-    const { container } = render(<SettingsModal />)
+    render(<SettingsModal />)
 
-    expect(container).toBeEmptyDOMElement()
+    expect(screen.getByText('Settings')).toBeInTheDocument()
+  })
+
+  it('GIVEN a contextSwitchThreshold in the store WHEN opened THEN the input reflects it and updates the store on change', () => {
+    usePRStore.setState({ section: 'authored', contextSwitchThreshold: 4 })
+    mockUsePullRequests.mockReturnValue({ repos: ['org/repo'] } as never)
+
+    render(<SettingsModal />)
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }))
+    const input = screen.getByLabelText(/context-switching warning threshold/i) as HTMLInputElement
+
+    expect(input.value).toBe('4')
+
+    fireEvent.change(input, { target: { value: '2' } })
+
+    expect(usePRStore.getState().contextSwitchThreshold).toBe(2)
+  })
+
+  it('GIVEN the threshold input WHEN entering 0 THEN the store clamps to 1', () => {
+    usePRStore.setState({ section: 'authored', contextSwitchThreshold: 4 })
+    mockUsePullRequests.mockReturnValue({ repos: ['org/repo'] } as never)
+
+    render(<SettingsModal />)
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }))
+    const input = screen.getByLabelText(/context-switching warning threshold/i) as HTMLInputElement
+
+    fireEvent.change(input, { target: { value: '0' } })
+
+    expect(usePRStore.getState().contextSwitchThreshold).toBe(1)
   })
 
   it('GIVEN authored section with multiple repos WHEN rendered THEN shows the settings button', () => {
