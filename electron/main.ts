@@ -188,6 +188,14 @@ const createWindow = () => {
     return { action: 'deny' }
   })
 
+  // ponytail: checkForUpdates() only runs once at startup otherwise — a long-lived
+  // session never learns about releases published after launch until relaunched
+  win.on('focus', () => {
+    if (app.isPackaged && !updateDownloaded) {
+      autoUpdater.checkForUpdates()?.catch((err) => console.error('[updater]', err.message))
+    }
+  })
+
   if (!app.isPackaged) {
     const url = 'http://localhost:5173/donna/'
     win.webContents.on('did-fail-load', () => setTimeout(() => win.loadURL(url), 500))

@@ -5,14 +5,13 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures } from '@/shared/features'
 import { BranchDashboard } from '@/features/branches/exports'
 import { Footer } from '@/shared/components/Footer/Footer'
-import { useUpdateCheck, isNewer, UpdateBanner } from '@/features/updates/exports'
+import { useUpdateCheck, UpdateBanner } from '@/features/updates/exports'
 
 export const DashboardPage = () => {
   const { user, logout } = useAuthStore()
   // TODO: the view shouldn't be drove by the PR store feature
   const { view, setView } = usePRStore()
   const { data: latestVersion } = useUpdateCheck()
-  const showBanner = latestVersion && isNewer(latestVersion, __APP_VERSION__)
   const { theme, toggle } = useTheme()
   const features = useFeatures()
 
@@ -71,7 +70,7 @@ export const DashboardPage = () => {
         </div>
       </header>
 
-      {showBanner && <UpdateBanner version={latestVersion} />}
+      {latestVersion && <UpdateBanner version={latestVersion} />}
 
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
