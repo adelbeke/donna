@@ -20,7 +20,11 @@ Your GitHub companion — track PRs, manage branches and worktrees, all from a n
 
 ## Install
 
-Download the latest `.dmg` from [Releases](https://github.com/adelbeke/donna/releases), mount it, drag Donna to Applications.
+```bash
+brew install --cask adelbeke/donna/donna
+```
+
+Or download the latest `.dmg` from [Releases](https://github.com/adelbeke/donna/releases), mount it, drag Donna to Applications.
 
 ## Features
 
