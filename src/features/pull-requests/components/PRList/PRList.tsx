@@ -6,6 +6,8 @@ import { PRListHeader } from '@/features/pull-requests/components/PRListHeader/P
 import { useFocusRefresh } from '../../hooks/useFocusRefresh'
 import { NewPRsBadge } from '../NewPRsBadge/NewPRsBadge'
 import { NotificationHint } from '../NotificationHint/NotificationHint'
+import { ContextSwitchWarningBanner } from '../ContextSwitchWarningBanner/ContextSwitchWarningBanner'
+import { isOverContextSwitchThreshold } from '../../lib/prUtils'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -30,6 +32,7 @@ export const PRList = () => {
   const viewFilters = usePRStore((s) => s.viewFilters)
   const notificationHintDismissed = usePRStore((s) => s.notificationHintDismissed)
   const dismissNotificationHint = usePRStore((s) => s.dismissNotificationHint)
+  const contextSwitchThreshold = usePRStore((s) => s.contextSwitchThreshold)
   const queryClient = useQueryClient()
 
   // Checks/details are fetched per-PR (usePRDetails/useCheckContexts) and won't
@@ -70,6 +73,11 @@ export const PRList = () => {
         isFetching={isFetching}
         isLoadingMore={isFetchingNextPage}
       />
+
+      {section === 'authored' &&
+        isOverContextSwitchThreshold(allPRs.length, contextSwitchThreshold) && (
+          <ContextSwitchWarningBanner count={allPRs.length} threshold={contextSwitchThreshold} />
+        )}
 
       {newCount > 0 && <NewPRsBadge count={newCount} onDismiss={dismiss} />}
 

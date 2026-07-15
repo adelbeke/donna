@@ -6,6 +6,7 @@ import {
   deriveCheckState,
   deriveMyReviewState,
   dedupeChecks,
+  isOverContextSwitchThreshold,
 } from './prUtils'
 
 const makePR = (overrides: Partial<PullRequest> = {}): PullRequest => {
@@ -152,6 +153,20 @@ describe('dedupeChecks', () => {
     const run = checkRun('build')
     const status = statusContext('build', 'SUCCESS')
     expect(dedupeChecks([run, status])).toEqual([run, status])
+  })
+})
+
+describe('isOverContextSwitchThreshold', () => {
+  it('GIVEN count under threshold WHEN called THEN returns false', () => {
+    expect(isOverContextSwitchThreshold(3, 4)).toBe(false)
+  })
+
+  it('GIVEN count exactly at threshold WHEN called THEN returns false', () => {
+    expect(isOverContextSwitchThreshold(4, 4)).toBe(false)
+  })
+
+  it('GIVEN count over threshold WHEN called THEN returns true', () => {
+    expect(isOverContextSwitchThreshold(5, 4)).toBe(true)
   })
 })
 

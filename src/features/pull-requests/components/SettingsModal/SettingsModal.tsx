@@ -19,10 +19,11 @@ export const SettingsModal = () => {
   const removeHiddenAuthor = usePRStore((s) => s.removeHiddenAuthor)
   const addHiddenRepo = usePRStore((s) => s.addHiddenRepo)
   const removeHiddenRepo = usePRStore((s) => s.removeHiddenRepo)
+  const contextSwitchThreshold = usePRStore((s) => s.contextSwitchThreshold)
+  const setContextSwitchThreshold = usePRStore((s) => s.setContextSwitchThreshold)
   const { repos = [] } = usePullRequests()
 
   const currentView = viewFilters[section]
-  const hasContent = repos.length > 1 || section !== 'authored'
   const visibleRepos = repos.filter(
     (r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h))
   )
@@ -74,8 +75,6 @@ export const SettingsModal = () => {
     }
   }
 
-  if (!hasContent) return null
-
   return (
     <>
       <ButtonWithTooltip
@@ -93,6 +92,23 @@ export const SettingsModal = () => {
       </ButtonWithTooltip>
 
       <Modal isOpen={open} title={'Settings'} onClose={() => setOpen(false)} className="min-w-1/2">
+        <div>
+          <label
+            htmlFor="context-switch-threshold"
+            className="block text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2"
+          >
+            Context-switching warning threshold (open authored PRs)
+          </label>
+          <input
+            id="context-switch-threshold"
+            type="number"
+            min={1}
+            value={contextSwitchThreshold}
+            onChange={(e) => setContextSwitchThreshold(Math.max(1, Number(e.target.value) || 1))}
+            className="w-full text-xs px-2 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+          />
+        </div>
+
         {orgs.length > 1 && (
           <div>
             <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
