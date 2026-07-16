@@ -142,6 +142,42 @@ ipcMain.handle(
   }
 )
 
+const SHORTCUT_TIMEOUT_MS = 5 * 60_000
+const SHORTCUT_MAX_BUFFER = 5 * 1024 * 1024
+
+ipcMain.handle('shortcuts:run', async (_e, repoPath: string, prNumber: number, body: string) => {
+  // ponytail: hardcoded to `gh pr comment` — no shell, no user-controlled command string,
+  // the comment body is passed as a single argv element so it can't break out of the command
+  try {
+    const { stdout, stderr } = await execFileAsync(
+      'gh',
+      ['pr', 'comment', String(prNumber), '--body', body],
+      {
+        cwd: repoPath,
+        timeout: SHORTCUT_TIMEOUT_MS,
+        maxBuffer: SHORTCUT_MAX_BUFFER,
+        env: { ...process.env, PATH: GH_PATH },
+      }
+    )
+    return { stdout, stderr, exitCode: 0, timedOut: false }
+  } catch (e) {
+    const err = e as {
+      stdout?: string
+      stderr?: string
+      code?: number | string
+      killed?: boolean
+      signal?: string | null
+    }
+    if (err.stdout === undefined && err.stderr === undefined) throw gitError(err)
+    return {
+      stdout: err.stdout ?? '',
+      stderr: err.stderr ?? '',
+      exitCode: typeof err.code === 'number' ? err.code : null,
+      timedOut: err.killed === true && err.signal === 'SIGTERM',
+    }
+  }
+})
+
 ipcMain.handle('dialog:open', async () => {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
   return canceled ? null : filePaths[0]

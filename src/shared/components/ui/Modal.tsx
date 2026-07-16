@@ -24,9 +24,16 @@ export const Modal = ({ children, isOpen, title, onClose, className, actions }: 
   // ponytail: portal escapes any ancestor with transform/filter that would break fixed positioning
   return createPortal(
     <>
-      <div className="fixed inset-0 z-40 bg-[var(--color-overlay)]" onClick={onClose} />
+      <div
+        className="fixed inset-0 z-40 bg-[var(--color-overlay)]"
+        onClick={(e) => {
+          e.stopPropagation()
+          onClose()
+        }}
+      />
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
+          onClick={(e) => e.stopPropagation()}
           className={`pointer-events-auto max-w-xl max-h-[80vh] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-lg p-4 space-y-4 ${className ?? ''}`}
         >
           <div className="flex items-center justify-between gap-4">
