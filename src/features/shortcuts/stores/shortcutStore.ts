@@ -22,6 +22,12 @@ export const useShortcutStore = create<ShortcutStore>()(
           shortcuts: state.shortcuts.map((s) => (s.id === id ? { ...s, ...patch } : s)),
         })),
     }),
-    { name: 'shortcuts-dashboard-state' }
+    {
+      name: 'shortcuts-dashboard-state',
+      merge: (persisted, current) => {
+        const p = persisted as Partial<ShortcutStore>
+        return { ...current, shortcuts: p.shortcuts ?? current.shortcuts }
+      },
+    }
   )
 )
