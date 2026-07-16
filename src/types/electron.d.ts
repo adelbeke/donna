@@ -22,6 +22,13 @@ interface Window {
     dirs: {
       filterExisting: (paths: string[]) => Promise<string[]>
     }
+    shortcuts: {
+      run: (
+        repoPath: string,
+        prNumber: number,
+        body: string
+      ) => Promise<import('../features/shortcuts/types').ShortcutRunResult>
+    }
     dialog: {
       openDirectory: () => Promise<string | null>
     }

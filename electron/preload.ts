@@ -24,6 +24,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
     filterExisting: (paths: string[]): Promise<string[]> =>
       ipcRenderer.invoke('dirs:filter-existing', paths),
   },
+  shortcuts: {
+    run: (
+      repoPath: string,
+      prNumber: number,
+      body: string
+    ): Promise<import('../src/features/shortcuts/types').ShortcutRunResult> =>
+      ipcRenderer.invoke('shortcuts:run', repoPath, prNumber, body),
+  },
   dialog: {
     openDirectory: (): Promise<string | null> => ipcRenderer.invoke('dialog:open'),
   },

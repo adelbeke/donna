@@ -1,4 +1,4 @@
-import { ExternalLink, Eye, EyeOff, Link2, Star } from 'lucide-react'
+import { ExternalLink, Eye, EyeOff, Link2, Star, Terminal } from 'lucide-react'
 import { PRCardAction } from '@/features/pull-requests/components/PRCardActions/PRCardAction.tsx'
 import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
 
@@ -9,6 +9,8 @@ type Props = {
   isPriority: boolean
   prUrl: string
   showHideAndStar: boolean
+  showRunShortcut: boolean
+  onRunShortcut: () => void
 }
 
 export const PRCardActions = ({
@@ -18,6 +20,8 @@ export const PRCardActions = ({
   toggleHide,
   togglePriority,
   showHideAndStar,
+  showRunShortcut,
+  onRunShortcut,
 }: Props) => {
   return (
     <div
@@ -49,6 +53,15 @@ export const PRCardActions = ({
             <Star size={14} fill={isPriority ? 'currentColor' : 'none'} />
           </PRCardAction>
         </>
+      )}
+      {showRunShortcut && (
+        <PRCardAction
+          onClick={onRunShortcut}
+          title="Run shortcut"
+          className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
+        >
+          <Terminal size={14} />
+        </PRCardAction>
       )}
       <CopyWithFeedback
         text={prUrl}

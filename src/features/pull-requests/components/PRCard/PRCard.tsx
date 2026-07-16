@@ -12,6 +12,7 @@ import {
 import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { useBranchStore } from '@/features/branches/stores/branchStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
 import { PRChecksModal } from '../PRChecksModal/PRChecksModal.tsx'
 import { deriveCheckState, deriveMyReviewState } from '../../lib/prUtils'
@@ -19,6 +20,7 @@ import { useCheckContexts } from '../../queries/useCheckContexts'
 import { usePRDetails } from '../../queries/usePRDetails'
 import { timeAgo } from '../../lib/timeAgo'
 import { PRCardActions } from '@/features/pull-requests/components/PRCardActions/PRCardActions.tsx'
+import { PRShortcutsModal, resolveLocalRepoPath } from '@/features/shortcuts/exports'
 
 type Props = {
   pr: PullRequest
@@ -100,10 +102,13 @@ const reviewBadge: Record<
 
 export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props) => {
   const [checksOpen, setChecksOpen] = useState(false)
+  const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
+  const localPaths = useBranchStore((s) => s.localPaths)
+  const repoPath = isAuthored ? resolveLocalRepoPath(localPaths, pr.repository.name) : null
   const isPriority = priorityIds.includes(pr.id)
   const isHidden = pr.isHidden ?? false
   const { data: details, isPending: isDetailsPending } = usePRDetails(pr.id)
@@ -276,8 +281,19 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
           isPriority={isPriority}
           prUrl={pr.url}
           showHideAndStar={showHideAndStar}
+          showRunShortcut={isAuthored && !!repoPath}
+          onRunShortcut={() => setShortcutsOpen(true)}
         />
       </div>
+      {isAuthored && repoPath && (
+        <PRShortcutsModal
+          key={shortcutsOpen ? '1' : '0'}
+          isOpen={shortcutsOpen}
+          onClose={() => setShortcutsOpen(false)}
+          pr={pr}
+          repoPath={repoPath}
+        />
+      )}
     </div>
   )
 }
