@@ -42,7 +42,7 @@
     "graphql-request": "^7.4.0",
     "lucide-react": "^1.24.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6",
+    "react-dom": "^19.2.8",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",
     "zustand": "^5.0.14"
