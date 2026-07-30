@@ -1,3 +1,5 @@
+import type { CheckRollupState } from '@/types/github'
+
 export type PRFileStatus =
   'added' | 'removed' | 'modified' | 'renamed' | 'copied' | 'changed' | 'unchanged'
 
@@ -73,6 +75,7 @@ export type PRDetailMeta = {
   headRefName: string
   author: { login: string; avatarUrl: string } | null
   repository: { name: string; nameWithOwner: string; url: string }
+  commits?: { nodes: { commit: { statusCheckRollup: { state: CheckRollupState } | null } }[] }
 }
 
 export type PRKey = { owner: string; repo: string; number: number }

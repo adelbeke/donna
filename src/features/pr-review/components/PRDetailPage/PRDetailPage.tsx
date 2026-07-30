@@ -42,13 +42,14 @@ export const PRDetailPage = () => {
         </div>
       )}
 
-      {!isLoading && !error && filesData && (
+      {!isLoading && !error && filesData && threadsData?.pr && (
         <DiffFileList
           files={filesData.files}
-          threads={threadsData?.threads ?? []}
+          threads={threadsData.threads}
           filesTruncated={filesData.truncated}
           prKey={prKey}
-          pullRequestId={threadsData?.pr.id ?? null}
+          pullRequestId={threadsData.pr.id}
+          baseRef={threadsData.pr.baseRefName}
         />
       )}
     </div>

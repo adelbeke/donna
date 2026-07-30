@@ -1,10 +1,37 @@
 import { Plus } from 'lucide-react'
+import { Highlight, type Language } from 'prism-react-renderer'
 import type { DiffRow } from '../../types'
 
 type Props = {
   row: DiffRow
   onAddComment?: () => void
+  language?: Language
 }
+
+const TOKEN_CLASS: Record<string, string> = {
+  keyword: 'text-[var(--color-syntax-keyword)]',
+  string: 'text-[var(--color-syntax-string)]',
+  number: 'text-[var(--color-syntax-number)]',
+  comment: 'text-[var(--color-syntax-comment)]',
+  function: 'text-[var(--color-syntax-function)]',
+  punctuation: 'text-[var(--color-syntax-punctuation)]',
+}
+
+const EMPTY_THEME = { plain: {}, styles: [] }
+
+// ponytail: each row is tokenized on its own, so a multi-line block comment or template literal
+// highlights per-line rather than as one span. Acceptable for review reading.
+const HighlightedCode = ({ code, language }: { code: string; language: Language }) => (
+  <Highlight code={code} language={language} theme={EMPTY_THEME}>
+    {({ tokens }) =>
+      tokens[0]?.map((token, i) => (
+        <span key={i} className={TOKEN_CLASS[token.types[0]] ?? ''}>
+          {token.content}
+        </span>
+      ))
+    }
+  </Highlight>
+)
 
 const ROW_BG: Record<DiffRow['type'], string> = {
   hunk: 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]',
@@ -15,7 +42,7 @@ const ROW_BG: Record<DiffRow['type'], string> = {
 
 const SIGN: Record<DiffRow['type'], string> = { hunk: '', add: '+', del: '-', context: ' ' }
 
-export const DiffRowView = ({ row, onAddComment }: Props) => {
+export const DiffRowView = ({ row, onAddComment, language }: Props) => {
   if (row.type === 'hunk') {
     return (
       <div className={`px-2 py-0.5 text-xs font-mono ${ROW_BG.hunk}`}>
@@ -46,7 +73,7 @@ export const DiffRowView = ({ row, onAddComment }: Props) => {
         {SIGN[row.type]}
       </div>
       <div className="flex-1 whitespace-pre overflow-x-auto pr-2">
-        {row.content}
+        {language ? <HighlightedCode code={row.content} language={language} /> : row.content}
         {row.noNewline && (
           <span className="italic text-[var(--color-text-muted)]">
             {' '}

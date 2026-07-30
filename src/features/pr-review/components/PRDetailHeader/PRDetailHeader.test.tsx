@@ -1,8 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { PRDetailHeader } from './PRDetailHeader'
 import type { PRDetailMeta } from '../../types'
+
+vi.mock('@/features/pull-requests/queries/useCheckContexts', () => ({
+  useCheckContexts: vi.fn(() => ({ checks: [], isLoading: false, refetch: vi.fn() })),
+}))
 
 const pr: PRDetailMeta = {
   id: 'pr-1',
@@ -39,6 +43,28 @@ describe('PRDetailHeader', () => {
       </MemoryRouter>
     )
     expect(screen.getByText('Draft')).toBeInTheDocument()
+  })
+
+  it('given a pr with a check rollup state, when rendered, then shows the checks badge', () => {
+    const prWithChecks: PRDetailMeta = {
+      ...pr,
+      commits: { nodes: [{ commit: { statusCheckRollup: { state: 'SUCCESS' } } }] },
+    }
+    render(
+      <MemoryRouter>
+        <PRDetailHeader pr={prWithChecks} />
+      </MemoryRouter>
+    )
+    expect(screen.getByText('Checks pass')).toBeInTheDocument()
+  })
+
+  it('given a pr with no commits, when rendered, then no checks badge', () => {
+    render(
+      <MemoryRouter>
+        <PRDetailHeader pr={pr} />
+      </MemoryRouter>
+    )
+    expect(screen.queryByText('Checks pass')).not.toBeInTheDocument()
   })
 
   it('given a pr, when rendered, then the GitHub link opens externally', () => {

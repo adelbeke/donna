@@ -180,6 +180,15 @@ export const PR_REVIEW_THREADS_QUERY = /* GraphQL */ `
           nameWithOwner
           url
         }
+        commits(last: 1) {
+          nodes {
+            commit {
+              statusCheckRollup {
+                state
+              }
+            }
+          }
+        }
         reviewThreads(first: 50, after: $cursor) {
           pageInfo {
             hasNextPage
@@ -265,16 +274,11 @@ export const UNRESOLVE_THREAD_MUTATION = /* GraphQL */ `
 `
 
 export const VIEWER_TEAMS_QUERY = /* GraphQL */ `
-  query GetViewerTeams {
-    viewer {
-      organizations(first: 20) {
+  query GetViewerTeams($org: String!, $login: String!) {
+    organization(login: $org) {
+      teams(first: 100, userLogins: [$login]) {
         nodes {
-          teams(first: 50, userLogins: [$login]) {
-            nodes {
-              name
-              slug
-            }
-          }
+          combinedSlug
         }
       }
     }

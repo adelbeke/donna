@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { parsePatch, unavailableReason } from '../../lib/parsePatch'
-import { anchorThreadsToRows, commentTargetForRow, rowKeys } from '../../lib/threadAnchor'
+import { anchorId, anchorThreadsToRows, commentTargetForRow, rowKeys } from '../../lib/threadAnchor'
+import { languageFor } from '../../lib/language'
 import { DiffFileHeader } from '../DiffFileHeader/DiffFileHeader'
 import { DiffRowView } from '../DiffRowView/DiffRowView'
 import { DiffThread } from '../DiffThread/DiffThread'
@@ -9,6 +10,9 @@ import { useCreateThread } from '../../queries/useCreateThread'
 import { useReplyToThread } from '../../queries/useReplyToThread'
 import { useResolveThread } from '../../queries/useResolveThread'
 import type { PRFile, PRKey, PRReviewThread } from '../../types'
+
+// ponytail: tokenizing thousands of rows on expand janks the frame — big files render plain.
+const MAX_HIGHLIGHT_ROWS = 500
 
 type Props = {
   file: PRFile
@@ -30,6 +34,9 @@ export const DiffFile = ({ file, threads, isExpanded, onToggle, prKey, pullReque
     () => (isExpanded ? parsePatch(file.patch) : null),
     [isExpanded, file.patch]
   )
+  const language = useMemo(() => languageFor(file.filename), [file.filename])
+  const highlightLanguage =
+    parsed?.kind === 'rows' && parsed.rows.length <= MAX_HIGHLIGHT_ROWS ? language : undefined
 
   const anchored = useMemo(() => {
     if (!parsed || parsed.kind !== 'rows') return null
@@ -39,7 +46,10 @@ export const DiffFile = ({ file, threads, isExpanded, onToggle, prKey, pullReque
   const commentCount = threads.reduce((n, t) => n + t.comments.nodes.length, 0)
 
   return (
-    <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] overflow-hidden">
+    <div
+      id={anchorId(file.filename)}
+      className="scroll-mt-20 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] overflow-hidden"
+    >
       <DiffFileHeader
         file={file}
         isExpanded={isExpanded}
@@ -77,6 +87,7 @@ export const DiffFile = ({ file, threads, isExpanded, onToggle, prKey, pullReque
                 <DiffRowView
                   row={row}
                   onAddComment={target ? () => setComposerAt(key) : undefined}
+                  language={highlightLanguage}
                 />
                 {rowThreads.map((thread) => (
                   <DiffThread
