@@ -139,4 +139,40 @@ describe('prStore', () => {
     const merged = merge!(persisted, usePRStore.getState())
     expect(merged.knownRepos['review-requested']).toEqual(['org/repo-a'])
   })
+
+  it('given a stale persisted view key, when merged, then it is dropped without crashing', () => {
+    const persisted = {
+      view: 'branches',
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+    }
+    const { merge } = usePRStore.persist.getOptions()
+    const merged = merge!(persisted, usePRStore.getState()) as Record<string, unknown>
+    expect(merged.view).toBeUndefined()
+  })
+
+  it('openPRsInDonna defaults to true', () => {
+    expect(usePRStore.getState().openPRsInDonna).toBe(true)
+  })
+
+  it('setOpenPRsInDonna updates the flag', () => {
+    usePRStore.getState().setOpenPRsInDonna(false)
+    expect(usePRStore.getState().openPRsInDonna).toBe(false)
+  })
+
+  it('dismissDonnaPRViewHint sets the dismissed flag', () => {
+    usePRStore.getState().dismissDonnaPRViewHint()
+    expect(usePRStore.getState().donnaPRViewHintDismissed).toBe(true)
+  })
+
+  it('persisted merge restores openPRsInDonna and donnaPRViewHintDismissed', () => {
+    const persisted = {
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+      openPRsInDonna: false,
+      donnaPRViewHintDismissed: true,
+    }
+    const { merge } = usePRStore.persist.getOptions()
+    const merged = merge!(persisted, usePRStore.getState())
+    expect(merged.openPRsInDonna).toBe(false)
+    expect(merged.donnaPRViewHintDismissed).toBe(true)
+  })
 })

@@ -156,6 +156,114 @@ export const PR_CHECK_CONTEXTS_QUERY = /* GraphQL */ `
   }
 `
 
+export const PR_REVIEW_THREADS_QUERY = /* GraphQL */ `
+  query GetPRReviewThreads($owner: String!, $name: String!, $number: Int!, $cursor: String) {
+    repository(owner: $owner, name: $name) {
+      pullRequest(number: $number) {
+        id
+        number
+        title
+        url
+        isDraft
+        additions
+        deletions
+        createdAt
+        updatedAt
+        baseRefName
+        headRefName
+        author {
+          login
+          avatarUrl
+        }
+        repository {
+          name
+          nameWithOwner
+          url
+        }
+        reviewThreads(first: 50, after: $cursor) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            id
+            path
+            line
+            originalLine
+            startLine
+            originalStartLine
+            diffSide
+            startDiffSide
+            isResolved
+            isOutdated
+            isCollapsed
+            subjectType
+            viewerCanReply
+            viewerCanResolve
+            viewerCanUnresolve
+            resolvedBy {
+              login
+            }
+            comments(first: 50) {
+              nodes {
+                id
+                body
+                createdAt
+                url
+                viewerDidAuthor
+                author {
+                  login
+                  avatarUrl
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+export const ADD_REVIEW_THREAD_MUTATION = /* GraphQL */ `
+  mutation AddReviewThread($input: AddPullRequestReviewInput!) {
+    addPullRequestReview(input: $input) {
+      clientMutationId
+    }
+  }
+`
+
+export const ADD_THREAD_REPLY_MUTATION = /* GraphQL */ `
+  mutation AddThreadReply($threadId: ID!, $body: String!) {
+    addPullRequestReviewThreadReply(input: { pullRequestReviewThreadId: $threadId, body: $body }) {
+      comment {
+        id
+      }
+    }
+  }
+`
+
+export const RESOLVE_THREAD_MUTATION = /* GraphQL */ `
+  mutation ResolveThread($threadId: ID!) {
+    resolveReviewThread(input: { threadId: $threadId }) {
+      thread {
+        id
+        isResolved
+      }
+    }
+  }
+`
+
+export const UNRESOLVE_THREAD_MUTATION = /* GraphQL */ `
+  mutation UnresolveThread($threadId: ID!) {
+    unresolveReviewThread(input: { threadId: $threadId }) {
+      thread {
+        id
+        isResolved
+      }
+    }
+  }
+`
+
 export const VIEWER_TEAMS_QUERY = /* GraphQL */ `
   query GetViewerTeams {
     viewer {

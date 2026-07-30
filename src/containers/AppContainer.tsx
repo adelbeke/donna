@@ -3,7 +3,7 @@ import { Terminal } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { ghIsInstalled, ghGraphql } from '@/providers/electron'
 import { VIEWER_QUERY } from '@/providers/github'
-import { DashboardPage } from './DashboardPage.tsx'
+import { AppRouter } from '@/routes/AppRouter/AppRouter'
 import { FeaturesContext, type Feature } from '@/shared/features'
 import type { GitHubUser } from '../types/github.ts'
 
@@ -64,7 +64,7 @@ export const AppContainer = () => {
   if (error) return <AppAuthError message={error} onRetry={runAuth} />
   return (
     <FeaturesContext.Provider value={APP_FEATURES}>
-      <DashboardPage />
+      <AppRouter />
     </FeaturesContext.Provider>
   )
 }

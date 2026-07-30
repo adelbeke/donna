@@ -16,7 +16,6 @@ export type ViewFilters = {
 }
 
 export type PRStore = {
-  view: 'prs' | 'branches'
   section: PRSection
   globalFilters: GlobalFilters
   viewFilters: Record<PRSection, ViewFilters>
@@ -25,7 +24,8 @@ export type PRStore = {
   knownRepos: Record<PRSection, string[]>
   notificationHintDismissed: boolean
   contextSwitchThreshold: number
-  setView: (v: 'prs' | 'branches') => void
+  openPRsInDonna: boolean
+  donnaPRViewHintDismissed: boolean
   setSection: (s: PRSection) => void
   setGlobalFilters: (partial: Partial<GlobalFilters>) => void
   setViewFilters: (s: PRSection, partial: Partial<ViewFilters>) => void
@@ -38,6 +38,8 @@ export type PRStore = {
   toggleHide: (id: string) => void
   dismissNotificationHint: () => void
   setContextSwitchThreshold: (n: number) => void
+  setOpenPRsInDonna: (v: boolean) => void
+  dismissDonnaPRViewHint: () => void
   resetFilters: () => void
 }
 
@@ -68,7 +70,6 @@ const defaultKnownReposAll: Record<PRSection, string[]> = {
 export const usePRStore = create<PRStore>()(
   persist(
     (set) => ({
-      view: 'prs' as const,
       section: 'review-requested' as PRSection,
       globalFilters: defaultGlobalFilters,
       viewFilters: defaultViewFiltersAll,
@@ -77,7 +78,8 @@ export const usePRStore = create<PRStore>()(
       knownRepos: defaultKnownReposAll,
       notificationHintDismissed: false,
       contextSwitchThreshold: 4,
-      setView: (v) => set({ view: v }),
+      openPRsInDonna: true,
+      donnaPRViewHintDismissed: false,
       setSection: (s) => set({ section: s }),
       setGlobalFilters: (partial) =>
         set((state) => ({ globalFilters: { ...state.globalFilters, ...partial } })),
@@ -137,6 +139,8 @@ export const usePRStore = create<PRStore>()(
         })),
       dismissNotificationHint: () => set({ notificationHintDismissed: true }),
       setContextSwitchThreshold: (n) => set({ contextSwitchThreshold: n }),
+      setOpenPRsInDonna: (v) => set({ openPRsInDonna: v }),
+      dismissDonnaPRViewHint: () => set({ donnaPRViewHintDismissed: true }),
       resetFilters: () =>
         set((state) => ({
           viewFilters: {
@@ -149,7 +153,9 @@ export const usePRStore = create<PRStore>()(
       name: 'pr-dashboard-state',
       merge: (persisted, current) => {
         const p = persisted as Partial<PRStore>
-        const validViews = new Set<string>(['prs', 'branches'])
+        // ponytail: v1's `view` key (prs|branches nav tab) is dropped in 2.0 in favour of the
+        // router — deliberately not migrated, since neither branch below spreads `p` wholesale a
+        // stale `"view"` in localStorage is silently ignored and gone after the next write.
         // migrate from pre-1.6.0 format: flat `filters` key → globalFilters + viewFilters + section
         if (!p.globalFilters) {
           const old = (
@@ -166,7 +172,6 @@ export const usePRStore = create<PRStore>()(
           const section: PRSection = old?.section ?? current.section
           return {
             ...current,
-            ...(p.view && validViews.has(p.view) ? { view: p.view } : {}),
             section,
             globalFilters: {
               ...current.globalFilters,
@@ -187,12 +192,14 @@ export const usePRStore = create<PRStore>()(
             notificationHintDismissed:
               p.notificationHintDismissed ?? current.notificationHintDismissed,
             contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,
+            openPRsInDonna: p.openPRsInDonna ?? current.openPRsInDonna,
+            donnaPRViewHintDismissed:
+              p.donnaPRViewHintDismissed ?? current.donnaPRViewHintDismissed,
           }
         }
         const validSections = new Set<string>(['review-requested', 'authored', 'mentioned'])
         return {
           ...current,
-          ...(p.view && validViews.has(p.view) ? { view: p.view } : {}),
           ...(p.section && validSections.has(p.section) ? { section: p.section } : {}),
           globalFilters: { ...current.globalFilters, ...(p.globalFilters ?? {}) },
           viewFilters: Object.fromEntries(
@@ -207,6 +214,8 @@ export const usePRStore = create<PRStore>()(
           notificationHintDismissed:
             p.notificationHintDismissed ?? current.notificationHintDismissed,
           contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,
+          openPRsInDonna: p.openPRsInDonna ?? current.openPRsInDonna,
+          donnaPRViewHintDismissed: p.donnaPRViewHintDismissed ?? current.donnaPRViewHintDismissed,
         }
       },
     }

@@ -1,4 +1,5 @@
 import { useState, type ReactElement } from 'react'
+import { useNavigate } from 'react-router'
 import {
   GitMerge,
   MessageSquare,
@@ -101,11 +102,13 @@ const reviewBadge: Record<
 }
 
 export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props) => {
+  const navigate = useNavigate()
   const [checksOpen, setChecksOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
+  const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
   const localPaths = useBranchStore((s) => s.localPaths)
   const repoPath = isAuthored ? resolveLocalRepoPath(localPaths, pr.repository.name) : null
@@ -133,7 +136,12 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
     togglePriority(pr.id)
   }
 
-  const openPR = () => window.open(pr.url, '_blank', 'noopener,noreferrer')
+  const openExternally = () => window.open(pr.url, '_blank', 'noopener,noreferrer')
+  const openInDonna = () => {
+    const [owner, repo] = pr.repository.nameWithOwner.split('/')
+    navigate(`/prs/${owner}/${repo}/${pr.number}`)
+  }
+  const openPR = openPRsInDonna ? openInDonna : openExternally
 
   return (
     <div
@@ -170,7 +178,13 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
               href={pr.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (openPRsInDonna) {
+                  e.preventDefault()
+                  openInDonna()
+                }
+              }}
               className="text-sm font-medium leading-snug line-clamp-2 transition-colors text-[var(--color-text-primary)] hover:text-[var(--color-accent)]"
             >
               {pr.title}
@@ -284,6 +298,9 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
           showHideAndStar={showHideAndStar}
           showRunShortcut={isAuthored && !!repoPath}
           onRunShortcut={() => setShortcutsOpen(true)}
+          onOpenExternally={openExternally}
+          showReviewInDonna={!openPRsInDonna}
+          onReviewInDonna={openInDonna}
         />
       </div>
       {isAuthored && repoPath && (

@@ -121,4 +121,15 @@ describe('SettingsModal', () => {
 
     expect(screen.queryByText('Organization')).not.toBeInTheDocument()
   })
+
+  it('GIVEN openPRsInDonna true WHEN the toggle is unchecked THEN the store updates', () => {
+    usePRStore.setState({ section: 'authored', openPRsInDonna: true })
+    mockUsePullRequests.mockReturnValue({ repos: ['org/repo'] } as never)
+
+    render(<SettingsModal />)
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }))
+    fireEvent.click(screen.getByText('Open pull requests in Donna'))
+
+    expect(usePRStore.getState().openPRsInDonna).toBe(false)
+  })
 })

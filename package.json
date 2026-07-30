@@ -1,7 +1,7 @@
 {
   "name": "donna",
   "private": true,
-  "version": "1.12.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "Self-hostable GitHub PR dashboard — filter, prioritise, and track review status across all your repositories",
   "license": "MIT",
@@ -41,8 +41,11 @@
     "electron-updater": "^6.6.2",
     "graphql-request": "^7.4.0",
     "lucide-react": "^1.24.0",
-    "react": "^19.2.6",
+    "react": "^19.2.7",
     "react-dom": "^19.2.8",
+    "react-markdown": "^10.1.0",
+    "react-router": "^8.3.0",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",
     "zustand": "^5.0.14"
