@@ -1,4 +1,4 @@
-import { ExternalLink, Eye, EyeOff, Link2, Star, Terminal } from 'lucide-react'
+import { Eye, EyeOff, GitBranch, Link2, Star, Terminal } from 'lucide-react'
 import { PRCardAction } from '@/features/pull-requests/components/PRCardActions/PRCardAction.tsx'
 import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
 
@@ -8,6 +8,7 @@ type Props = {
   togglePriority: () => void
   isPriority: boolean
   prUrl: string
+  prNumber: number
   showHideAndStar: boolean
   showRunShortcut: boolean
   onRunShortcut: () => void
@@ -17,6 +18,7 @@ export const PRCardActions = ({
   isHidden,
   isPriority,
   prUrl,
+  prNumber,
   toggleHide,
   togglePriority,
   showHideAndStar,
@@ -69,14 +71,12 @@ export const PRCardActions = ({
         icon={<Link2 size={14} />}
         buttonClassName="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
       />
-      <a
-        href={prUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
-      >
-        <ExternalLink size={14} />
-      </a>
+      <CopyWithFeedback
+        text={`gh pr checkout ${prNumber}`}
+        label="Copy checkout command"
+        icon={<GitBranch size={14} />}
+        buttonClassName="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+      />
     </div>
   )
 }

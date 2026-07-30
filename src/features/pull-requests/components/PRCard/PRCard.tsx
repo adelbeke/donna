@@ -280,6 +280,7 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
           togglePriority={handleTogglePriority}
           isPriority={isPriority}
           prUrl={pr.url}
+          prNumber={pr.number}
           showHideAndStar={showHideAndStar}
           showRunShortcut={isAuthored && !!repoPath}
           onRunShortcut={() => setShortcutsOpen(true)}
