@@ -49,6 +49,8 @@ const mockStoreFilters = () => {
       },
       priorityIds: [],
       hiddenIds: [],
+      knownRepos: { 'review-requested': [], authored: [], mentioned: [] },
+      setKnownRepos: vi.fn(),
       notificationHintDismissed: true,
       dismissNotificationHint: vi.fn(),
       contextSwitchThreshold: 4,

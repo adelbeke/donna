@@ -12,6 +12,7 @@ beforeEach(() => {
     },
     priorityIds: [],
     hiddenIds: [],
+    knownRepos: { 'review-requested': [], authored: [], mentioned: [] },
   })
 })
 
@@ -119,5 +120,23 @@ describe('prStore', () => {
     expect(viewFilters['review-requested'].repos).toEqual([])
     // global filters are preserved
     expect(globalFilters.hiddenAuthors).toContain('renovate')
+  })
+
+  it('setKnownRepos updates only the given section', () => {
+    usePRStore.getState().setKnownRepos('review-requested', ['org/repo-a'])
+    const { knownRepos } = usePRStore.getState()
+    expect(knownRepos['review-requested']).toEqual(['org/repo-a'])
+    expect(knownRepos.authored).toEqual([])
+    expect(knownRepos.mentioned).toEqual([])
+  })
+
+  it('persisted merge restores knownRepos', () => {
+    const persisted = {
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+      knownRepos: { 'review-requested': ['org/repo-a'], authored: [], mentioned: [] },
+    }
+    const { merge } = usePRStore.persist.getOptions()
+    const merged = merge!(persisted, usePRStore.getState())
+    expect(merged.knownRepos['review-requested']).toEqual(['org/repo-a'])
   })
 })
