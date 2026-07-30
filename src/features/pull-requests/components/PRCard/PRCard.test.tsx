@@ -95,6 +95,15 @@ describe('PRCard', () => {
     expect(screen.queryByRole('button', { name: 'Mark as top priority' })).not.toBeInTheDocument()
   })
 
+  it('copy checkout command button click copies gh pr checkout command to clipboard', async () => {
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
+    const user = userEvent.setup()
+    render(<PRCard pr={pr} />)
+    await user.click(screen.getByRole('button', { name: 'Copy checkout command' }))
+    expect(writeText).toHaveBeenCalledWith(`gh pr checkout ${pr.number}`)
+    writeText.mockRestore()
+  })
+
   describe('clicking the card', () => {
     it('GIVEN card body clicked THEN opens the PR in a new tab', async () => {
       const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
@@ -103,6 +112,17 @@ describe('PRCard', () => {
       await user.click(screen.getByText('org/repo'))
       expect(openSpy).toHaveBeenCalledWith(pr.url, '_blank', 'noopener,noreferrer')
       openSpy.mockRestore()
+    })
+
+    it('GIVEN copy checkout command button clicked THEN does not also open the PR', async () => {
+      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+      const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
+      const user = userEvent.setup()
+      render(<PRCard pr={pr} />)
+      await user.click(screen.getByRole('button', { name: 'Copy checkout command' }))
+      expect(openSpy).not.toHaveBeenCalled()
+      openSpy.mockRestore()
+      writeText.mockRestore()
     })
 
     it('GIVEN star button clicked THEN does not also open the PR', async () => {
