@@ -234,9 +234,7 @@ describe('usePullRequests auto-select on new repo discovery', () => {
       knownRepos: { 'review-requested': ['acme/repo-a'], authored: [], mentioned: [] },
     })
     usePRStore.getState().setViewFilters('review-requested', { repos: ['acme/repo-a'] })
-    const graphql = vi
-      .fn()
-      .mockResolvedValue(mockSearchResponse(['acme/repo-a', 'acme/repo-c']))
+    const graphql = vi.fn().mockResolvedValue(mockSearchResponse(['acme/repo-a', 'acme/repo-c']))
     window.electronAPI = { gh: { graphql } } as unknown as typeof window.electronAPI
 
     const { result } = renderHook(() => usePullRequests(), { wrapper })
