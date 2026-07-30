@@ -22,12 +22,14 @@ export type PRStore = {
   viewFilters: Record<PRSection, ViewFilters>
   priorityIds: string[]
   hiddenIds: string[]
+  knownRepos: Record<PRSection, string[]>
   notificationHintDismissed: boolean
   contextSwitchThreshold: number
   setView: (v: 'prs' | 'branches') => void
   setSection: (s: PRSection) => void
   setGlobalFilters: (partial: Partial<GlobalFilters>) => void
   setViewFilters: (s: PRSection, partial: Partial<ViewFilters>) => void
+  setKnownRepos: (s: PRSection, repos: string[]) => void
   addHiddenAuthor: (pattern: string) => void
   removeHiddenAuthor: (pattern: string) => void
   addHiddenRepo: (repo: string) => void
@@ -57,6 +59,12 @@ const defaultViewFiltersAll: Record<PRSection, ViewFilters> = {
   mentioned: { ...defaultViewFilters },
 }
 
+const defaultKnownReposAll: Record<PRSection, string[]> = {
+  'review-requested': [],
+  authored: [],
+  mentioned: [],
+}
+
 export const usePRStore = create<PRStore>()(
   persist(
     (set) => ({
@@ -66,6 +74,7 @@ export const usePRStore = create<PRStore>()(
       viewFilters: defaultViewFiltersAll,
       priorityIds: [],
       hiddenIds: [],
+      knownRepos: defaultKnownReposAll,
       notificationHintDismissed: false,
       contextSwitchThreshold: 4,
       setView: (v) => set({ view: v }),
@@ -76,6 +85,8 @@ export const usePRStore = create<PRStore>()(
         set((state) => ({
           viewFilters: { ...state.viewFilters, [s]: { ...state.viewFilters[s], ...partial } },
         })),
+      setKnownRepos: (s, repos) =>
+        set((state) => ({ knownRepos: { ...state.knownRepos, [s]: repos } })),
       addHiddenAuthor: (pattern) =>
         set((state) => {
           const normalized = pattern.toLowerCase()
@@ -172,6 +183,7 @@ export const usePRStore = create<PRStore>()(
             },
             priorityIds: p.priorityIds ?? current.priorityIds,
             hiddenIds: p.hiddenIds ?? current.hiddenIds,
+            knownRepos: p.knownRepos ?? current.knownRepos,
             notificationHintDismissed:
               p.notificationHintDismissed ?? current.notificationHintDismissed,
             contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,
@@ -191,6 +203,7 @@ export const usePRStore = create<PRStore>()(
           ) as Record<PRSection, ViewFilters>,
           priorityIds: p.priorityIds ?? current.priorityIds,
           hiddenIds: p.hiddenIds ?? current.hiddenIds,
+          knownRepos: p.knownRepos ?? current.knownRepos,
           notificationHintDismissed:
             p.notificationHintDismissed ?? current.notificationHintDismissed,
           contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,

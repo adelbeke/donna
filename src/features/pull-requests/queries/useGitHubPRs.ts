@@ -4,7 +4,7 @@ import { createClient, PR_LIST_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { usePRStore } from '@/features/pull-requests/stores/prStore'
 import { buildSearchQuery, sortAndPartition } from '../lib/prUtils'
-import { applyFilters } from '../lib/prFilters'
+import { applyFilters, isRepoMatchedBy } from '../lib/prFilters'
 import type { PullRequest } from '@/types/github'
 
 export { deriveMyReviewState, sortAndPartition } from '../lib/prUtils'
@@ -28,6 +28,9 @@ export const usePullRequests = () => {
   const viewFilters = usePRStore((s) => s.viewFilters)
   const priorityIds = usePRStore((s) => s.priorityIds)
   const hiddenIds = usePRStore((s) => s.hiddenIds)
+  const knownRepos = usePRStore((s) => s.knownRepos)
+  const setViewFilters = usePRStore((s) => s.setViewFilters)
+  const setKnownRepos = usePRStore((s) => s.setKnownRepos)
 
   const searchQuery = buildSearchQuery(section, user?.login ?? '')
 
@@ -87,6 +90,31 @@ export const usePullRequests = () => {
     () => [...new Set(allNodes.map((pr) => pr.repository.nameWithOwner))].sort(),
     [allNodes]
   )
+
+  const visibleRepos = useMemo(
+    () => repos.filter((r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h))),
+    [repos, globalFilters.hiddenRepos]
+  )
+
+  // Auto-select repos newly discovered under an org whose previously-known repos were all selected.
+  useEffect(() => {
+    const previouslyKnown = knownRepos[section]
+    const newRepos = visibleRepos.filter((r) => !previouslyKnown.includes(r))
+    if (newRepos.length === 0) return
+
+    const toAutoSelect = newRepos.filter((r) => {
+      const org = r.split('/')[0]
+      const orgReposKnownBefore = previouslyKnown.filter((k) => k.split('/')[0] === org)
+      return (
+        orgReposKnownBefore.length > 0 &&
+        orgReposKnownBefore.every((k) => currentView.repos.includes(k))
+      )
+    })
+    if (toAutoSelect.length > 0) {
+      setViewFilters(section, { repos: [...currentView.repos, ...toAutoSelect] })
+    }
+    setKnownRepos(section, visibleRepos)
+  }, [visibleRepos, section, knownRepos, currentView.repos, setViewFilters, setKnownRepos])
 
   const truncated = (query.data?.pages.length ?? 0) >= MAX_PAGES && query.hasNextPage
 
