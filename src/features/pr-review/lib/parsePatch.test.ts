@@ -194,9 +194,7 @@ describe('parsePatch', () => {
     const actual = parsePatch('@@ -1,2 +1,2 @@\n a\n b\n@@ -20,1 +20,1 @@\n c')
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
-    const gap = actual.rows.find(
-      (r, i) => r.type === 'expand' && i !== actual.rows.length - 1
-    )
+    const gap = actual.rows.find((r, i) => r.type === 'expand' && i !== actual.rows.length - 1)
     expect(gap).toEqual({
       type: 'expand',
       content: '',

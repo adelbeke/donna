@@ -40,7 +40,9 @@ export const DiffFileHeader = ({
         {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         <span
           className="text-xs font-mono truncate flex-1"
-          title={file.previous_filename ? `${file.previous_filename} → ${file.filename}` : file.filename}
+          title={
+            file.previous_filename ? `${file.previous_filename} → ${file.filename}` : file.filename
+          }
         >
           {file.previous_filename ? `${file.previous_filename} → ${file.filename}` : file.filename}
         </span>

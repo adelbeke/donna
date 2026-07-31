@@ -76,7 +76,8 @@ export const DiffFile = ({
   )
 
   const language = useMemo(() => languageFor(file.filename), [file.filename])
-  const highlightLanguage = rows.length > 0 && rows.length <= MAX_HIGHLIGHT_ROWS ? language : undefined
+  const highlightLanguage =
+    rows.length > 0 && rows.length <= MAX_HIGHLIGHT_ROWS ? language : undefined
 
   const anchored = useMemo(() => {
     if (!parsed || parsed.kind !== 'rows') return null
