@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PRList } from './PRList'
 import type { PullRequest } from '@/types/github'
@@ -65,8 +66,10 @@ const mockStoreFilters = () => {
       removeHiddenAuthor: vi.fn(),
       addHiddenRepo: vi.fn(),
       removeHiddenRepo: vi.fn(),
-      setView: vi.fn(),
-      view: 'prs' as const,
+      openPRsInDonna: true,
+      setOpenPRsInDonna: vi.fn(),
+      donnaPRViewHintDismissed: true,
+      dismissDonnaPRViewHint: vi.fn(),
     })
   )
 }
@@ -84,7 +87,11 @@ const defaultQuery = {
 let queryClient: QueryClient
 
 const renderWithClient = (ui: ReactElement) =>
-  render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
+  render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>{ui}</MemoryRouter>
+    </QueryClientProvider>
+  )
 
 beforeEach(() => {
   vi.clearAllMocks()

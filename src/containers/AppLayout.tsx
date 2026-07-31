@@ -1,16 +1,18 @@
 import { LogOut, Moon, Sun } from 'lucide-react'
+import { NavLink, Outlet } from 'react-router'
 import { useAuthStore } from '@/features/auth/exports'
-import { usePRStore, PRDashboard } from '@/features/pull-requests/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { useFeatures } from '@/shared/features'
-import { BranchDashboard } from '@/features/branches/exports'
+import { useFeatures, type Feature } from '@/shared/features'
 import { Footer } from '@/shared/components/Footer/Footer'
 import { useUpdateCheck, UpdateBanner } from '@/features/updates/exports'
 
-export const DashboardPage = () => {
+const NAV_TABS: { to: string; label: string; feature?: Feature }[] = [
+  { to: '/prs', label: 'Pull Requests' },
+  { to: '/branches', label: 'Branches', feature: 'branches' },
+]
+
+export const AppLayout = () => {
   const { user, logout } = useAuthStore()
-  // TODO: the view shouldn't be drove by the PR store feature
-  const { view, setView } = usePRStore()
   const { data: latestVersion } = useUpdateCheck()
   const { theme, toggle } = useTheme()
   const features = useFeatures()
@@ -26,22 +28,22 @@ export const DashboardPage = () => {
             </h1>
 
             <div className="flex items-center gap-1 shrink-0">
-              {(['prs', ...(features.has('branches') ? ['branches' as const] : [])] as const).map(
-                (v) => (
-                  <button
-                    key={v}
-                    onClick={() => setView(v)}
-                    className={`text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
+              {NAV_TABS.filter((t) => !t.feature || features.has(t.feature)).map((t) => (
+                <NavLink
+                  key={t.to}
+                  to={t.to}
+                  className={({ isActive }) =>
+                    `text-xs px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer
                     ${
-                      view === v
+                      isActive
                         ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
                         : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
-                    }`}
-                  >
-                    {v === 'prs' ? 'Pull Requests' : 'Branches'}
-                  </button>
-                )
-              )}
+                    }`
+                  }
+                >
+                  {t.label}
+                </NavLink>
+              ))}
             </div>
           </div>
 
@@ -74,7 +76,7 @@ export const DashboardPage = () => {
 
       {/* Main layout */}
       <main className="flex-1 max-w-6xl mx-auto px-6 py-8 w-full">
-        {view === 'branches' ? <BranchDashboard /> : <PRDashboard />}
+        <Outlet />
       </main>
       <Footer />
     </div>
