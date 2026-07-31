@@ -45,8 +45,6 @@ describe('DiffRowView', () => {
   it('given a language, when rendered, then still shows the full code text', () => {
     const row: DiffRow = { type: 'add', content: 'const a = 1', oldLine: null, newLine: 3 }
     render(<DiffRowView row={row} language="typescript" />)
-    expect(
-      screen.getByText((_, el) => el?.textContent === 'const a = 1')
-    ).toBeInTheDocument()
+    expect(screen.getByText((_, el) => el?.textContent === 'const a = 1')).toBeInTheDocument()
   })
 })

@@ -71,7 +71,8 @@ export const ReviewActions = ({ pendingReview, pullRequestId, prAuthorLogin, prK
       {!justSubmitted && pendingReview && (
         <>
           <span className="text-xs text-[var(--color-text-secondary)]">
-            {pendingReview.commentCount} pending comment{pendingReview.commentCount === 1 ? '' : 's'}
+            {pendingReview.commentCount} pending comment
+            {pendingReview.commentCount === 1 ? '' : 's'}
           </span>
           <button
             onClick={discard}

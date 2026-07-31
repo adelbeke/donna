@@ -37,7 +37,9 @@ describe('CommentBody', () => {
   })
 
   it('given raw <details>/<summary> HTML, when rendered, then it renders as a native disclosure', () => {
-    render(<CommentBody body={'<details><summary>Show details</summary>hidden content</details>'} />)
+    render(
+      <CommentBody body={'<details><summary>Show details</summary>hidden content</details>'} />
+    )
     const summary = screen.getByText('Show details')
     expect(summary.closest('details')).toBeInTheDocument()
     expect(screen.getByText(/hidden content/)).toBeInTheDocument()

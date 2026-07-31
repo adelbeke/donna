@@ -9,9 +9,7 @@ describe('parseCodeowners', () => {
 
   it('given a rule with multiple owners, then captures all of them', () => {
     const rules = parseCodeowners('src/ @alice @org/team bob@example.com')
-    expect(rules).toEqual([
-      { pattern: 'src/', owners: ['@alice', '@org/team', 'bob@example.com'] },
-    ])
+    expect(rules).toEqual([{ pattern: 'src/', owners: ['@alice', '@org/team', 'bob@example.com'] }])
   })
 })
 

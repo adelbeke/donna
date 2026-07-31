@@ -24,7 +24,12 @@ const collapse = (dir: DirBuilder): DirBuilder => {
   let node = dir
   while (node.files.length === 0 && node.dirs.size === 1) {
     const onlyChild = [...node.dirs.values()][0]
-    node = { name: `${node.name}/${onlyChild.name}`, path: onlyChild.path, dirs: onlyChild.dirs, files: onlyChild.files }
+    node = {
+      name: `${node.name}/${onlyChild.name}`,
+      path: onlyChild.path,
+      dirs: onlyChild.dirs,
+      files: onlyChild.files,
+    }
   }
   return node
 }
@@ -37,7 +42,11 @@ const childrenOf = (dir: DirBuilder): TreeNode[] => {
 
   const fileNodes: TreeNode[] = [...dir.files]
     .sort((a, b) => a.filename.localeCompare(b.filename))
-    .map((f) => ({ kind: 'file' as const, name: f.filename.split('/').at(-1) ?? f.filename, file: f }))
+    .map((f) => ({
+      kind: 'file' as const,
+      name: f.filename.split('/').at(-1) ?? f.filename,
+      file: f,
+    }))
 
   return [...dirNodes, ...fileNodes]
 }

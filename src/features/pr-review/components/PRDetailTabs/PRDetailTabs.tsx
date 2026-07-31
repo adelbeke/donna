@@ -11,7 +11,10 @@ const TABS: { id: PRDetailTab; label: string }[] = [
 ]
 
 export const PRDetailTabs = ({ active, onChange }: Props) => (
-  <div className="mb-4 flex items-center gap-1 border-b border-[var(--color-border)]" role="tablist">
+  <div
+    className="mb-4 flex items-center gap-1 border-b border-[var(--color-border)]"
+    role="tablist"
+  >
     {TABS.map((tab) => (
       <button
         key={tab.id}

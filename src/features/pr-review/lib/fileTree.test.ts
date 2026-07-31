@@ -37,7 +37,11 @@ describe('buildFileTree', () => {
     expect(node.name).toBe('src/features/pr-review/lib')
     expect(node.path).toBe('src/features/pr-review/lib')
     expect(node.children).toEqual([
-      { kind: 'file', name: 'fileTree.ts', file: given_file('src/features/pr-review/lib/fileTree.ts') },
+      {
+        kind: 'file',
+        name: 'fileTree.ts',
+        file: given_file('src/features/pr-review/lib/fileTree.ts'),
+      },
     ])
   })
 
