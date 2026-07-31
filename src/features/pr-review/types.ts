@@ -16,7 +16,7 @@ export type PRFile = {
 }
 
 export type DiffSide = 'LEFT' | 'RIGHT'
-export type DiffRowType = 'hunk' | 'context' | 'add' | 'del'
+export type DiffRowType = 'hunk' | 'context' | 'add' | 'del' | 'expand'
 
 export type DiffRow = {
   type: DiffRowType
@@ -25,6 +25,12 @@ export type DiffRow = {
   oldLine: number | null // base-side (LEFT) line number
   newLine: number | null // head-side (RIGHT) line number
   noNewline?: true // a '\ No newline at end of file' marker followed this row
+  // 'expand' rows only: collapsed-context gap. count is null for the open-ended gap after the
+  // last hunk (unknown until the file blob loads); afterOldLine/afterNewLine are the last line
+  // numbers already shown before the gap (0 if the gap starts at the top of the file)
+  expandCount?: number | null
+  expandAfterOldLine?: number
+  expandAfterNewLine?: number
 }
 
 export type ParsedPatch =
@@ -74,6 +80,7 @@ export type PRDetailMeta = {
   updatedAt: string
   baseRefName: string
   headRefName: string
+  headRefOid: string
   author: { login: string; avatarUrl: string } | null
   repository: { name: string; nameWithOwner: string; url: string }
   commits?: { nodes: { commit: { statusCheckRollup: { state: CheckRollupState } | null } }[] }

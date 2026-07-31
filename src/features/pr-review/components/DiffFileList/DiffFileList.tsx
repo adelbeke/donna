@@ -16,6 +16,7 @@ type Props = {
   prKey: PRKey
   pullRequestId: string | null
   baseRef: string
+  headRefOid: string
   pendingReview?: PendingReview | null
 }
 
@@ -26,6 +27,7 @@ export const DiffFileList = ({
   prKey,
   pullRequestId,
   baseRef,
+  headRefOid,
   pendingReview = null,
 }: Props) => {
   const [expansion, setExpansion] = useState(() => computeInitialExpansion(files))
@@ -94,6 +96,7 @@ export const DiffFileList = ({
             prKey={prKey}
             pullRequestId={pullRequestId}
             pendingReview={pendingReview}
+            headRefOid={headRefOid}
           />
         ))}
         {filesTruncated && (

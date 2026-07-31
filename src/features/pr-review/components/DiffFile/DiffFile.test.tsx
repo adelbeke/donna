@@ -5,17 +5,21 @@ import { DiffFile } from './DiffFile'
 import { useCreateThread } from '../../queries/useCreateThread'
 import { useReplyToThread } from '../../queries/useReplyToThread'
 import { useResolveThread } from '../../queries/useResolveThread'
+import { useFileBlob } from '../../queries/useFileBlob'
 import type { PRFile, PRReviewThread } from '../../types'
 
 const mockUseCreateThread = vi.mocked(useCreateThread)
 const mockUseReplyToThread = vi.mocked(useReplyToThread)
 const mockUseResolveThread = vi.mocked(useResolveThread)
+const mockUseFileBlob = vi.mocked(useFileBlob)
 
 vi.mock('../../queries/useCreateThread', () => ({ useCreateThread: vi.fn() }))
 vi.mock('../../queries/useReplyToThread', () => ({ useReplyToThread: vi.fn() }))
 vi.mock('../../queries/useResolveThread', () => ({ useResolveThread: vi.fn() }))
+vi.mock('../../queries/useFileBlob', () => ({ useFileBlob: vi.fn() }))
 
 const prKey = { owner: 'o', repo: 'r', number: 1 }
+const headRefOid = 'abc123'
 
 const given_file = (overrides: Partial<PRFile> = {}): PRFile => ({
   sha: 'abc',
@@ -56,6 +60,7 @@ beforeEach(() => {
   mockUseCreateThread.mockReturnValue(mutateMock())
   mockUseReplyToThread.mockReturnValue(mutateMock())
   mockUseResolveThread.mockReturnValue(mutateMock())
+  mockUseFileBlob.mockReturnValue({ data: undefined, isFetching: false } as never)
 })
 
 describe('DiffFile', () => {
@@ -67,6 +72,7 @@ describe('DiffFile', () => {
         isExpanded={false}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId="pr-1"
       />
     )
@@ -81,6 +87,7 @@ describe('DiffFile', () => {
         isExpanded={true}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId="pr-1"
       />
     )
@@ -95,6 +102,7 @@ describe('DiffFile', () => {
         isExpanded={true}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId="pr-1"
       />
     )
@@ -109,6 +117,7 @@ describe('DiffFile', () => {
         isExpanded={true}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId="pr-1"
       />
     )
@@ -123,6 +132,7 @@ describe('DiffFile', () => {
         isExpanded={true}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId={null}
       />
     )
@@ -138,6 +148,7 @@ describe('DiffFile', () => {
         isExpanded={true}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId="pr-1"
       />
     )
@@ -157,6 +168,7 @@ describe('DiffFile', () => {
         isExpanded={true}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId="pr-1"
       />
     )
@@ -176,7 +188,29 @@ describe('DiffFile', () => {
     )
   })
 
-  it('given the review pill is picked, when submitted, then createThread.mutate carries review mode and the pending review id', async () => {
+  it('given a file blob is loaded, when the full file button is clicked, then the modal shows content only present in the blob', async () => {
+    mockUseFileBlob.mockReturnValue({
+      data: { lines: ['a', 'c', 'd', 'lineOnlyInFullFile'] },
+      isFetching: false,
+    } as never)
+    const user = userEvent.setup()
+    render(
+      <DiffFile
+        file={given_file()}
+        threads={[]}
+        isExpanded={false}
+        onToggle={vi.fn()}
+        prKey={prKey}
+        headRefOid={headRefOid}
+        pullRequestId="pr-1"
+      />
+    )
+    expect(screen.queryByText('lineOnlyInFullFile')).not.toBeInTheDocument()
+    await user.click(screen.getByLabelText('View full file'))
+    expect(screen.getByText('lineOnlyInFullFile')).toBeInTheDocument()
+  })
+
+  it('given a pending review, when a composer opens, then it is already locked to review mode with no toggle shown', async () => {
     const mutate = vi.fn()
     mockUseCreateThread.mockReturnValue({ mutate, isPending: false, isError: false } as never)
     const user = userEvent.setup()
@@ -187,13 +221,15 @@ describe('DiffFile', () => {
         isExpanded={true}
         onToggle={vi.fn()}
         prKey={prKey}
+        headRefOid={headRefOid}
         pullRequestId="pr-1"
         pendingReview={{ id: 'review-1', commentCount: 2 }}
       />
     )
     const buttons = screen.getAllByLabelText('Add comment')
     await user.click(buttons[0])
-    await user.click(screen.getByRole('button', { name: 'Part of review' }))
+    expect(screen.queryByRole('button', { name: 'Single comment' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Part of review' })).not.toBeInTheDocument()
     await user.type(screen.getByPlaceholderText('Leave a comment'), 'nit')
     await user.click(screen.getByRole('button', { name: 'Add to review' }))
     expect(mutate).toHaveBeenCalledWith(

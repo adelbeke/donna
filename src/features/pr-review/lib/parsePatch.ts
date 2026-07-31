@@ -12,10 +12,23 @@ export const parsePatch = (patch: string | undefined): ParsedPatch => {
   if (lines[lines.length - 1] === '') lines.pop()
 
   const rows: DiffRow[] = []
-  let oldCursor = 0
-  let newCursor = 0
+  // start at 1 (not 0) so the gap before the first hunk is detected the same way as any other:
+  // "next line to show" defaults to the top of the file
+  let oldCursor = 1
+  let newCursor = 1
   let truncated = false
   let sawHunk = false
+
+  const pushExpandGap = (count: number | null) =>
+    rows.push({
+      type: 'expand',
+      content: '',
+      oldLine: null,
+      newLine: null,
+      expandCount: count,
+      expandAfterOldLine: oldCursor - 1,
+      expandAfterNewLine: newCursor - 1,
+    })
 
   for (const line of lines) {
     if (rows.length >= MAX_ROWS_PER_FILE) {
@@ -25,8 +38,11 @@ export const parsePatch = (patch: string | undefined): ParsedPatch => {
 
     const hunkMatch = HUNK_RE.exec(line)
     if (hunkMatch) {
+      const newStart = Number(hunkMatch[3])
+      const gap = newStart - newCursor
+      if (gap > 0) pushExpandGap(gap)
       oldCursor = Number(hunkMatch[1])
-      newCursor = Number(hunkMatch[3])
+      newCursor = newStart
       rows.push({ type: 'hunk', content: line, oldLine: null, newLine: null })
       sawHunk = true
       continue
@@ -60,6 +76,8 @@ export const parsePatch = (patch: string | undefined): ParsedPatch => {
     }
     // garbage before the first hunk (diff --git / index / --- / +++ preambles) — skip
   }
+
+  if (sawHunk && !truncated) pushExpandGap(null)
 
   return { kind: 'rows', rows, truncated }
 }

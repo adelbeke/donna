@@ -1,18 +1,23 @@
 import { useMemo, useState } from 'react'
 import { parsePatch, unavailableReason } from '../../lib/parsePatch'
 import { anchorId, anchorThreadsToRows, commentTargetForRow, rowKeys } from '../../lib/threadAnchor'
+import {
+  buildFullFileRows,
+  expandGapId,
+  MAX_HIGHLIGHT_ROWS,
+  mergeExpandedContext,
+} from '../../lib/expandContext'
 import { languageFor } from '../../lib/language'
 import { DiffFileHeader } from '../DiffFileHeader/DiffFileHeader'
 import { DiffRowView } from '../DiffRowView/DiffRowView'
 import { DiffThread } from '../DiffThread/DiffThread'
 import { CommentComposer } from '../CommentComposer/CommentComposer'
+import { FullFileModal } from '../FullFileModal/FullFileModal'
 import { useCreateThread } from '../../queries/useCreateThread'
 import { useReplyToThread } from '../../queries/useReplyToThread'
 import { useResolveThread } from '../../queries/useResolveThread'
+import { useFileBlob } from '../../queries/useFileBlob'
 import type { CommentMode, PendingReview, PRFile, PRKey, PRReviewThread } from '../../types'
-
-// ponytail: tokenizing thousands of rows on expand janks the frame — big files render plain.
-const MAX_HIGHLIGHT_ROWS = 500
 
 type Props = {
   file: PRFile
@@ -22,6 +27,7 @@ type Props = {
   prKey: PRKey
   pullRequestId: string | null // null while usePRThreads is still pending — blocks new-thread creation
   pendingReview?: PendingReview | null
+  headRefOid: string
 }
 
 export const DiffFile = ({
@@ -32,28 +38,56 @@ export const DiffFile = ({
   prKey,
   pullRequestId,
   pendingReview = null,
+  headRefOid,
 }: Props) => {
   const [composerAt, setComposerAt] = useState<string | null>(null)
   const [composerMode, setComposerMode] = useState<CommentMode>('one-shot')
+  const [expandedGapIds, setExpandedGapIds] = useState<Set<string>>(new Set())
+  const [isFullFileOpen, setIsFullFileOpen] = useState(false)
 
   const createThread = useCreateThread(prKey)
   const replyToThread = useReplyToThread(prKey)
   const resolveThread = useResolveThread(prKey)
 
   const parsed = useMemo(
-    () => (isExpanded ? parsePatch(file.patch) : null),
-    [isExpanded, file.patch]
+    () => (isExpanded || isFullFileOpen ? parsePatch(file.patch) : null),
+    [isExpanded, isFullFileOpen, file.patch]
   )
+
+  const { data: blob, isFetching: isBlobFetching } = useFileBlob(
+    prKey,
+    headRefOid,
+    file.filename,
+    expandedGapIds.size > 0 || isFullFileOpen
+  )
+
+  const rows = useMemo(
+    () =>
+      parsed?.kind === 'rows' ? mergeExpandedContext(parsed.rows, blob?.lines, expandedGapIds) : [],
+    [parsed, blob, expandedGapIds]
+  )
+
+  const fullFile = useMemo(
+    () =>
+      isFullFileOpen && parsed?.kind === 'rows'
+        ? buildFullFileRows(parsed.rows, blob?.lines)
+        : { rows: [], truncated: false },
+    [isFullFileOpen, parsed, blob]
+  )
+
   const language = useMemo(() => languageFor(file.filename), [file.filename])
   const highlightLanguage =
-    parsed?.kind === 'rows' && parsed.rows.length <= MAX_HIGHLIGHT_ROWS ? language : undefined
+    rows.length > 0 && rows.length <= MAX_HIGHLIGHT_ROWS ? language : undefined
 
   const anchored = useMemo(() => {
     if (!parsed || parsed.kind !== 'rows') return null
-    return anchorThreadsToRows(threads, parsed.rows)
-  }, [parsed, threads])
+    return anchorThreadsToRows(threads, rows)
+  }, [parsed, threads, rows])
 
   const commentCount = threads.reduce((n, t) => n + t.comments.nodes.length, 0)
+
+  const onExpand = (row: (typeof rows)[number]) =>
+    setExpandedGapIds((prev) => new Set(prev).add(expandGapId(row)))
 
   return (
     <div
@@ -67,6 +101,18 @@ export const DiffFile = ({
         commentCount={commentCount}
         outdatedThreads={anchored?.unanchored ?? []}
         fileLevelThreads={anchored?.fileLevel ?? []}
+        onOpenFullFile={file.patch ? () => setIsFullFileOpen(true) : undefined}
+      />
+
+      <FullFileModal
+        isOpen={isFullFileOpen}
+        onClose={() => setIsFullFileOpen(false)}
+        filename={file.filename}
+        blobUrl={file.blob_url}
+        rows={fullFile.rows}
+        truncated={fullFile.truncated}
+        language={language}
+        isLoading={isFullFileOpen && !blob}
       />
 
       {isExpanded && parsed?.kind === 'unavailable' && (
@@ -85,11 +131,11 @@ export const DiffFile = ({
 
       {isExpanded && parsed?.kind === 'rows' && anchored && (
         <div>
-          {parsed.rows.map((row, i) => {
+          {rows.map((row, i) => {
             const keys = rowKeys(row)
             const rowThreads = keys.flatMap((k) => anchored.byRow.get(k) ?? [])
             const target = pullRequestId ? commentTargetForRow(row) : null
-            const key = keys[0] ?? `row-${i}`
+            const key = keys[0] ?? (row.type === 'expand' ? expandGapId(row) : `row-${i}`)
             const isComposerOpen = composerAt === key
 
             return (
@@ -99,12 +145,14 @@ export const DiffFile = ({
                   onAddComment={
                     target
                       ? () => {
-                          setComposerMode('one-shot')
+                          setComposerMode(pendingReview ? 'review' : 'one-shot')
                           setComposerAt(key)
                         }
                       : undefined
                   }
                   language={highlightLanguage}
+                  onExpand={row.type === 'expand' ? () => onExpand(row) : undefined}
+                  isExpanding={row.type === 'expand' && isBlobFetching}
                 />
                 {rowThreads.map((thread) => (
                   <DiffThread
@@ -138,7 +186,7 @@ export const DiffFile = ({
                     isPending={createThread.isPending}
                     error={createThread.isError ? createThread.error.message : null}
                     mode={composerMode}
-                    onModeChange={setComposerMode}
+                    onModeChange={pendingReview ? undefined : setComposerMode}
                     autoFocus
                     submitLabel={
                       composerMode === 'one-shot'
