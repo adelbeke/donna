@@ -66,6 +66,7 @@ export type PRDetailMeta = {
   number: number
   title: string
   url: string
+  body: string
   isDraft: boolean
   additions: number
   deletions: number
@@ -79,3 +80,20 @@ export type PRDetailMeta = {
 }
 
 export type PRKey = { owner: string; repo: string; number: number }
+
+export type CommentMode = 'one-shot' | 'review'
+
+export type PendingReview = { id: string; commentCount: number }
+
+export type PullRequestReviewEvent = 'COMMENT' | 'APPROVE' | 'REQUEST_CHANGES'
+
+export type PRReviewState = 'PENDING' | 'COMMENTED' | 'APPROVED' | 'CHANGES_REQUESTED' | 'DISMISSED'
+
+export type PRReview = {
+  id: string
+  state: PRReviewState
+  body: string
+  submittedAt: string | null
+  author: { login: string; avatarUrl: string } | null
+  viewerDidAuthor: boolean
+}

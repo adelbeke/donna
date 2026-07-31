@@ -13,6 +13,7 @@ const pr: PRDetailMeta = {
   number: 42,
   title: 'Fix the thing',
   url: 'https://github.com/org/repo/pull/42',
+  body: '',
   isDraft: false,
   additions: 10,
   deletions: 5,

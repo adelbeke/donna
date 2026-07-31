@@ -7,7 +7,7 @@ import { useCodeowners } from '../../queries/useCodeowners'
 import { useViewerHandles } from '../../queries/useViewerHandles'
 import { DiffFile } from '../DiffFile/DiffFile'
 import { FileTree } from '../FileTree/FileTree'
-import type { PRFile, PRKey, PRReviewThread } from '../../types'
+import type { PendingReview, PRFile, PRKey, PRReviewThread } from '../../types'
 
 type Props = {
   files: PRFile[]
@@ -16,6 +16,7 @@ type Props = {
   prKey: PRKey
   pullRequestId: string | null
   baseRef: string
+  pendingReview?: PendingReview | null
 }
 
 export const DiffFileList = ({
@@ -25,6 +26,7 @@ export const DiffFileList = ({
   prKey,
   pullRequestId,
   baseRef,
+  pendingReview = null,
 }: Props) => {
   const [expansion, setExpansion] = useState(() => computeInitialExpansion(files))
   const [onlyMine, setOnlyMine] = useState(false)
@@ -37,7 +39,9 @@ export const DiffFileList = ({
     () =>
       new Set(
         files
-          .filter((f) => ownersFor(f.filename, codeownersRules).some((o) => viewerHandles.includes(o)))
+          .filter((f) =>
+            ownersFor(f.filename, codeownersRules).some((o) => viewerHandles.includes(o))
+          )
           .map((f) => f.filename)
       ),
     [files, codeownersRules, viewerHandles]
@@ -89,6 +93,7 @@ export const DiffFileList = ({
             onToggle={() => toggle(file.filename)}
             prKey={prKey}
             pullRequestId={pullRequestId}
+            pendingReview={pendingReview}
           />
         ))}
         {filesTruncated && (

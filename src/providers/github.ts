@@ -164,6 +164,7 @@ export const PR_REVIEW_THREADS_QUERY = /* GraphQL */ `
         number
         title
         url
+        body
         isDraft
         additions
         deletions
@@ -186,6 +187,35 @@ export const PR_REVIEW_THREADS_QUERY = /* GraphQL */ `
               statusCheckRollup {
                 state
               }
+            }
+          }
+        }
+        comments(first: 50) {
+          nodes {
+            id
+            body
+            createdAt
+            url
+            viewerDidAuthor
+            author {
+              login
+              avatarUrl
+            }
+          }
+        }
+        reviews(first: 20) {
+          nodes {
+            id
+            state
+            body
+            submittedAt
+            viewerDidAuthor
+            author {
+              login
+              avatarUrl
+            }
+            comments {
+              totalCount
             }
           }
         }
@@ -269,6 +299,40 @@ export const UNRESOLVE_THREAD_MUTATION = /* GraphQL */ `
         id
         isResolved
       }
+    }
+  }
+`
+
+export const ADD_ISSUE_COMMENT_MUTATION = /* GraphQL */ `
+  mutation AddIssueComment($subjectId: ID!, $body: String!) {
+    addComment(input: { subjectId: $subjectId, body: $body }) {
+      clientMutationId
+    }
+  }
+`
+
+export const ADD_PENDING_REVIEW_THREAD_MUTATION = /* GraphQL */ `
+  mutation AddPendingReviewThread($input: AddPullRequestReviewThreadInput!) {
+    addPullRequestReviewThread(input: $input) {
+      thread {
+        id
+      }
+    }
+  }
+`
+
+export const SUBMIT_REVIEW_MUTATION = /* GraphQL */ `
+  mutation SubmitReview($reviewId: ID!, $event: PullRequestReviewEvent!, $body: String) {
+    submitPullRequestReview(input: { pullRequestReviewId: $reviewId, event: $event, body: $body }) {
+      clientMutationId
+    }
+  }
+`
+
+export const DELETE_REVIEW_MUTATION = /* GraphQL */ `
+  mutation DeleteReview($reviewId: ID!) {
+    deletePullRequestReview(input: { pullRequestReviewId: $reviewId }) {
+      clientMutationId
     }
   }
 `

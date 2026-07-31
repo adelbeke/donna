@@ -1,5 +1,6 @@
 export { usePRStore } from './stores/prStore'
 export { usePullRequests } from './queries/useGitHubPRs'
+export { useViewer } from './queries/useViewer'
 export { useCheckContexts } from './queries/useCheckContexts'
 export { PRDashboard } from './components/PRDashboard/PRDashboard'
 export { PRChecksBadge } from './components/PRChecksBadge/PRChecksBadge'

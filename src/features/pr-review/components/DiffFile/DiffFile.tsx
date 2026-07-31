@@ -9,7 +9,7 @@ import { CommentComposer } from '../CommentComposer/CommentComposer'
 import { useCreateThread } from '../../queries/useCreateThread'
 import { useReplyToThread } from '../../queries/useReplyToThread'
 import { useResolveThread } from '../../queries/useResolveThread'
-import type { PRFile, PRKey, PRReviewThread } from '../../types'
+import type { CommentMode, PendingReview, PRFile, PRKey, PRReviewThread } from '../../types'
 
 // ponytail: tokenizing thousands of rows on expand janks the frame — big files render plain.
 const MAX_HIGHLIGHT_ROWS = 500
@@ -21,10 +21,20 @@ type Props = {
   onToggle: () => void
   prKey: PRKey
   pullRequestId: string | null // null while usePRThreads is still pending — blocks new-thread creation
+  pendingReview?: PendingReview | null
 }
 
-export const DiffFile = ({ file, threads, isExpanded, onToggle, prKey, pullRequestId }: Props) => {
+export const DiffFile = ({
+  file,
+  threads,
+  isExpanded,
+  onToggle,
+  prKey,
+  pullRequestId,
+  pendingReview = null,
+}: Props) => {
   const [composerAt, setComposerAt] = useState<string | null>(null)
+  const [composerMode, setComposerMode] = useState<CommentMode>('one-shot')
 
   const createThread = useCreateThread(prKey)
   const replyToThread = useReplyToThread(prKey)
@@ -86,7 +96,14 @@ export const DiffFile = ({ file, threads, isExpanded, onToggle, prKey, pullReque
               <div key={key}>
                 <DiffRowView
                   row={row}
-                  onAddComment={target ? () => setComposerAt(key) : undefined}
+                  onAddComment={
+                    target
+                      ? () => {
+                          setComposerMode('one-shot')
+                          setComposerAt(key)
+                        }
+                      : undefined
+                  }
                   language={highlightLanguage}
                 />
                 {rowThreads.map((thread) => (
@@ -106,13 +123,30 @@ export const DiffFile = ({ file, threads, isExpanded, onToggle, prKey, pullReque
                   <CommentComposer
                     onSubmit={(body) =>
                       createThread.mutate(
-                        { pullRequestId, path: file.filename, ...target, body },
+                        {
+                          pullRequestId,
+                          path: file.filename,
+                          ...target,
+                          body,
+                          mode: composerMode,
+                          pendingReviewId: pendingReview?.id ?? null,
+                        },
                         { onSuccess: () => setComposerAt(null) }
                       )
                     }
                     onCancel={() => setComposerAt(null)}
                     isPending={createThread.isPending}
                     error={createThread.isError ? createThread.error.message : null}
+                    mode={composerMode}
+                    onModeChange={setComposerMode}
+                    autoFocus
+                    submitLabel={
+                      composerMode === 'one-shot'
+                        ? 'Comment'
+                        : pendingReview
+                          ? 'Add to review'
+                          : 'Start a review'
+                    }
                   />
                 )}
               </div>

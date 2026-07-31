@@ -2,14 +2,25 @@ import { useQuery } from '@tanstack/react-query'
 import { createClient, PR_REVIEW_THREADS_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { prThreadsKey } from '../lib/queryKeys'
-import type { PRDetailMeta, PRKey, PRReviewThread } from '../types'
+import type {
+  PRDetailMeta,
+  PRKey,
+  PRReview,
+  PRReviewComment,
+  PRReviewThread,
+  PendingReview,
+} from '../types'
 
 const MAX_THREAD_PAGES = 4 // 200-thread ceiling
+
+type ReviewNode = PRReview & { comments: { totalCount: number } }
 
 type ThreadsPage = {
   repository: {
     pullRequest:
       | (PRDetailMeta & {
+          comments: { nodes: PRReviewComment[] }
+          reviews: { nodes: ReviewNode[] }
           reviewThreads: {
             pageInfo: { hasNextPage: boolean; endCursor: string }
             nodes: PRReviewThread[]
@@ -19,12 +30,21 @@ type ThreadsPage = {
   } | null
 }
 
-export type PRThreadsResult = { pr: PRDetailMeta; threads: PRReviewThread[]; truncated: boolean }
+export type PRThreadsResult = {
+  pr: PRDetailMeta
+  threads: PRReviewThread[]
+  truncated: boolean
+  comments: PRReviewComment[]
+  reviews: PRReview[]
+  pendingReview: PendingReview | null
+}
 
 const fetchAllThreads = async (key: PRKey): Promise<PRThreadsResult> => {
   const client = createClient()
   const threads: PRReviewThread[] = []
   let pr: PRDetailMeta | null = null
+  let comments: PRReviewComment[] = []
+  let reviewNodes: ReviewNode[] = []
   let cursor: string | null = null
   let truncated = false
 
@@ -38,6 +58,8 @@ const fetchAllThreads = async (key: PRKey): Promise<PRThreadsResult> => {
     const pullRequest = data.repository?.pullRequest
     if (!pullRequest) break
     pr = pullRequest
+    comments = pullRequest.comments.nodes
+    reviewNodes = pullRequest.reviews.nodes
     threads.push(...pullRequest.reviewThreads.nodes)
 
     if (!pullRequest.reviewThreads.pageInfo.hasNextPage) break
@@ -49,7 +71,12 @@ const fetchAllThreads = async (key: PRKey): Promise<PRThreadsResult> => {
   }
 
   if (!pr) throw new Error('Pull request not found')
-  return { pr, threads, truncated }
+  const pendingReviewNode = reviewNodes.find((n) => n.viewerDidAuthor && n.state === 'PENDING')
+  const pendingReview: PendingReview | null = pendingReviewNode
+    ? { id: pendingReviewNode.id, commentCount: pendingReviewNode.comments.totalCount }
+    : null
+  const reviews = reviewNodes.filter((n) => n.state !== 'PENDING')
+  return { pr, threads, truncated, comments, reviews, pendingReview }
 }
 
 export const usePRThreads = (key: PRKey) => {

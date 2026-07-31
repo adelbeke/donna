@@ -56,4 +56,49 @@ describe('CommentComposer', () => {
     )
     expect(screen.getByText('failed')).toBeInTheDocument()
   })
+
+  it('given no autoFocus prop, when rendered, then the textarea does not steal focus', () => {
+    render(<CommentComposer onSubmit={vi.fn()} onCancel={vi.fn()} isPending={false} />)
+    expect(screen.getByPlaceholderText('Leave a comment')).not.toHaveFocus()
+  })
+
+  it('given autoFocus, when rendered, then the textarea is focused', () => {
+    render(<CommentComposer onSubmit={vi.fn()} onCancel={vi.fn()} isPending={false} autoFocus />)
+    expect(screen.getByPlaceholderText('Leave a comment')).toHaveFocus()
+  })
+
+  it('given no mode prop, when rendered, then no mode toggle is shown', () => {
+    render(<CommentComposer onSubmit={vi.fn()} onCancel={vi.fn()} isPending={false} />)
+    expect(screen.queryByRole('button', { name: 'Single comment' })).not.toBeInTheDocument()
+  })
+
+  it('given a mode prop, when rendered, then the mode toggle is shown', () => {
+    render(
+      <CommentComposer
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+        isPending={false}
+        mode="one-shot"
+        onModeChange={vi.fn()}
+      />
+    )
+    expect(screen.getByRole('button', { name: 'Single comment' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Part of review' })).toBeInTheDocument()
+  })
+
+  it('given the review pill is clicked, then onModeChange fires with review', async () => {
+    const onModeChange = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <CommentComposer
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+        isPending={false}
+        mode="one-shot"
+        onModeChange={onModeChange}
+      />
+    )
+    await user.click(screen.getByRole('button', { name: 'Part of review' }))
+    expect(onModeChange).toHaveBeenCalledWith('review')
+  })
 })

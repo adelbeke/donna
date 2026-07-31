@@ -26,8 +26,20 @@ describe('CommentBody', () => {
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
-  it('given raw HTML in the body, when rendered, then it stays inert text', () => {
-    render(<CommentBody body="<img src=x onerror=alert(1)>" />)
-    expect(document.querySelector('img')).not.toBeInTheDocument()
+  it('given an img with an onerror handler, when rendered, then the handler is stripped', () => {
+    render(<CommentBody body='<img src="x" onerror="window.xssFired = true">' />)
+    expect(document.querySelector('img')).not.toHaveAttribute('onerror')
+  })
+
+  it('given a script tag, when rendered, then it is dropped', () => {
+    render(<CommentBody body="<script>window.xssFired = true</script>" />)
+    expect(document.querySelector('script')).not.toBeInTheDocument()
+  })
+
+  it('given raw <details>/<summary> HTML, when rendered, then it renders as a native disclosure', () => {
+    render(<CommentBody body={'<details><summary>Show details</summary>hidden content</details>'} />)
+    const summary = screen.getByText('Show details')
+    expect(summary.closest('details')).toBeInTheDocument()
+    expect(screen.getByText(/hidden content/)).toBeInTheDocument()
   })
 })

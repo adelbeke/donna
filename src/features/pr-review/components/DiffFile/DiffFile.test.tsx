@@ -165,7 +165,39 @@ describe('DiffFile', () => {
     await user.type(screen.getByPlaceholderText('Leave a comment'), 'looks good')
     await user.click(screen.getByRole('button', { name: 'Comment' }))
     expect(mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ pullRequestId: 'pr-1', path: 'src/foo.ts', body: 'looks good' }),
+      expect.objectContaining({
+        pullRequestId: 'pr-1',
+        path: 'src/foo.ts',
+        body: 'looks good',
+        mode: 'one-shot',
+        pendingReviewId: null,
+      }),
+      expect.anything()
+    )
+  })
+
+  it('given the review pill is picked, when submitted, then createThread.mutate carries review mode and the pending review id', async () => {
+    const mutate = vi.fn()
+    mockUseCreateThread.mockReturnValue({ mutate, isPending: false, isError: false } as never)
+    const user = userEvent.setup()
+    render(
+      <DiffFile
+        file={given_file()}
+        threads={[]}
+        isExpanded={true}
+        onToggle={vi.fn()}
+        prKey={prKey}
+        pullRequestId="pr-1"
+        pendingReview={{ id: 'review-1', commentCount: 2 }}
+      />
+    )
+    const buttons = screen.getAllByLabelText('Add comment')
+    await user.click(buttons[0])
+    await user.click(screen.getByRole('button', { name: 'Part of review' }))
+    await user.type(screen.getByPlaceholderText('Leave a comment'), 'nit')
+    await user.click(screen.getByRole('button', { name: 'Add to review' }))
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({ mode: 'review', pendingReviewId: 'review-1', body: 'nit' }),
       expect.anything()
     )
   })

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import type { CommentMode } from '../../types'
 
 type Props = {
   onSubmit: (body: string) => void
@@ -7,7 +8,17 @@ type Props = {
   error?: string | null
   placeholder?: string
   submitLabel?: string
+  mode?: CommentMode
+  onModeChange?: (mode: CommentMode) => void
+  autoFocus?: boolean
 }
+
+const modePillClass = (isActive: boolean) =>
+  `text-xs px-2 py-0.5 rounded-full cursor-pointer transition-colors ${
+    isActive
+      ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
+  }`
 
 export const CommentComposer = ({
   onSubmit,
@@ -16,6 +27,9 @@ export const CommentComposer = ({
   error,
   placeholder = 'Leave a comment',
   submitLabel = 'Comment',
+  mode,
+  onModeChange,
+  autoFocus = false,
 }: Props) => {
   const [body, setBody] = useState('')
   const trimmed = body.trim()
@@ -51,8 +65,26 @@ export const CommentComposer = ({
 
   return (
     <div className="p-2 space-y-2">
+      {mode && onModeChange && (
+        <div className="flex items-center gap-1" role="group" aria-label="Comment mode">
+          <button
+            type="button"
+            onClick={() => onModeChange('one-shot')}
+            className={modePillClass(mode === 'one-shot')}
+          >
+            Single comment
+          </button>
+          <button
+            type="button"
+            onClick={() => onModeChange('review')}
+            className={modePillClass(mode === 'review')}
+          >
+            Part of review
+          </button>
+        </div>
+      )}
       <textarea
-        autoFocus
+        autoFocus={autoFocus}
         value={body}
         onChange={(e) => setBody(e.target.value)}
         onKeyDown={handleKeyDown}
