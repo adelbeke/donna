@@ -31,6 +31,15 @@ describe('parsePatch', () => {
         { type: 'hunk', content: '@@ -1,2 +1,2 @@', oldLine: null, newLine: null },
         { type: 'context', content: 'a', oldLine: 1, newLine: 1 },
         { type: 'context', content: 'b', oldLine: 2, newLine: 2 },
+        {
+          type: 'expand',
+          content: '',
+          oldLine: null,
+          newLine: null,
+          expandCount: null,
+          expandAfterOldLine: 2,
+          expandAfterNewLine: 2,
+        },
       ],
     })
   })
@@ -39,7 +48,7 @@ describe('parsePatch', () => {
     const actual = parsePatch('@@ -1,0 +1,2 @@\n+a\n+b')
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
-    expect(actual.rows.slice(1)).toEqual([
+    expect(actual.rows.slice(1, 3)).toEqual([
       { type: 'add', content: 'a', oldLine: null, newLine: 1 },
       { type: 'add', content: 'b', oldLine: null, newLine: 2 },
     ])
@@ -49,7 +58,7 @@ describe('parsePatch', () => {
     const actual = parsePatch('@@ -1,2 +1,0 @@\n-a\n-b')
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
-    expect(actual.rows.slice(1)).toEqual([
+    expect(actual.rows.slice(1, 3)).toEqual([
       { type: 'del', content: 'a', oldLine: 1, newLine: null },
       { type: 'del', content: 'b', oldLine: 2, newLine: null },
     ])
@@ -66,6 +75,7 @@ describe('parsePatch', () => {
       ['del', 2, null],
       ['add', null, 2],
       ['context', 3, 3],
+      ['expand', null, null],
     ])
   })
 
@@ -80,7 +90,7 @@ describe('parsePatch', () => {
     const actual = parsePatch('@@ -10,7 +10,7 @@ export const foo = () => {\n a')
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
-    expect(actual.rows[0]).toEqual({
+    expect(actual.rows[1]).toEqual({
       type: 'hunk',
       content: '@@ -10,7 +10,7 @@ export const foo = () => {',
       oldLine: null,
@@ -95,8 +105,10 @@ describe('parsePatch', () => {
     expect(actual.rows.map((r) => [r.type, r.oldLine, r.newLine])).toEqual([
       ['hunk', null, null],
       ['context', 1, 1],
+      ['expand', null, null],
       ['hunk', null, null],
       ['context', 90, 90],
+      ['expand', null, null],
     ])
   })
 
@@ -104,7 +116,7 @@ describe('parsePatch', () => {
     const actual = parsePatch('@@ -1,0 +1,1 @@\n+a\n\\ No newline at end of file')
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
-    expect(actual.rows).toHaveLength(2)
+    expect(actual.rows).toHaveLength(3)
     expect(actual.rows[1]).toEqual({
       type: 'add',
       content: 'a',
@@ -133,7 +145,7 @@ describe('parsePatch', () => {
     const actual = parsePatch('@@ -1,1 +1,1 @@\n a\n')
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
-    expect(actual.rows).toHaveLength(2)
+    expect(actual.rows).toHaveLength(3)
   })
 
   it('given garbage lines before the first hunk, when parsed, then they are skipped without throwing', () => {
@@ -142,17 +154,80 @@ describe('parsePatch', () => {
     )
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
-    expect(actual.rows).toHaveLength(2)
+    expect(actual.rows).toHaveLength(3)
     expect(actual.rows[0].type).toBe('hunk')
   })
 
-  it('given a patch exceeding the row cap, when parsed, then it truncates', () => {
+  it('given a patch exceeding the row cap, when parsed, then it truncates and adds no trailing gap', () => {
     const body = Array.from({ length: 2500 }, (_, i) => ` line${i}`).join('\n')
     const actual = parsePatch(`@@ -1,2500 +1,2500 @@\n${body}`)
     expect(actual.kind).toBe('rows')
     if (actual.kind !== 'rows') return
     expect(actual.rows).toHaveLength(2000)
     expect(actual.truncated).toBe(true)
+  })
+
+  it('given a hunk that starts after line 1, when parsed, then a top expand gap is inserted', () => {
+    const actual = parsePatch('@@ -10,1 +10,1 @@\n a')
+    expect(actual.kind).toBe('rows')
+    if (actual.kind !== 'rows') return
+    expect(actual.rows[0]).toEqual({
+      type: 'expand',
+      content: '',
+      oldLine: null,
+      newLine: null,
+      expandCount: 9,
+      expandAfterOldLine: 0,
+      expandAfterNewLine: 0,
+    })
+    expect(actual.rows[1].type).toBe('hunk')
+  })
+
+  it('given a hunk that starts at line 1, when parsed, then no top expand gap is inserted', () => {
+    const actual = parsePatch('@@ -1,1 +1,1 @@\n a')
+    expect(actual.kind).toBe('rows')
+    if (actual.kind !== 'rows') return
+    expect(actual.rows[0].type).toBe('hunk')
+  })
+
+  it('given two hunks with a gap between them, when parsed, then the gap expand row has the right count and anchors', () => {
+    const actual = parsePatch('@@ -1,2 +1,2 @@\n a\n b\n@@ -20,1 +20,1 @@\n c')
+    expect(actual.kind).toBe('rows')
+    if (actual.kind !== 'rows') return
+    const gap = actual.rows.find(
+      (r, i) => r.type === 'expand' && i !== actual.rows.length - 1
+    )
+    expect(gap).toEqual({
+      type: 'expand',
+      content: '',
+      oldLine: null,
+      newLine: null,
+      expandCount: 17,
+      expandAfterOldLine: 2,
+      expandAfterNewLine: 2,
+    })
+  })
+
+  it('given adjacent hunks with no gap between them, when parsed, then no expand row is inserted between them', () => {
+    const actual = parsePatch('@@ -1,1 +1,1 @@\n a\n@@ -2,1 +2,1 @@\n b')
+    expect(actual.kind).toBe('rows')
+    if (actual.kind !== 'rows') return
+    expect(actual.rows.map((r) => r.type)).toEqual(['hunk', 'context', 'hunk', 'context', 'expand'])
+  })
+
+  it('given a hunk, when parsed, then a bottom expand gap with unknown count is appended', () => {
+    const actual = parsePatch('@@ -1,1 +1,1 @@\n a')
+    expect(actual.kind).toBe('rows')
+    if (actual.kind !== 'rows') return
+    expect(actual.rows[actual.rows.length - 1]).toEqual({
+      type: 'expand',
+      content: '',
+      oldLine: null,
+      newLine: null,
+      expandCount: null,
+      expandAfterOldLine: 1,
+      expandAfterNewLine: 1,
+    })
   })
 })
 

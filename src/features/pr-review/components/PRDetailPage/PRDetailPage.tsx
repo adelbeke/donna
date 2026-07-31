@@ -73,6 +73,7 @@ export const PRDetailPage = () => {
               prKey={prKey}
               pullRequestId={threadsData.pr.id}
               baseRef={threadsData.pr.baseRefName}
+              headRefOid={threadsData.pr.headRefOid}
               pendingReview={threadsData.pendingReview}
             />
           )}

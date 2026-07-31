@@ -21,6 +21,7 @@ const pr: PRDetailMeta = {
   updatedAt: '2024-01-02T00:00:00Z',
   baseRefName: 'main',
   headRefName: 'fix-the-thing',
+  headRefOid: 'abc123',
   author: { login: 'alice', avatarUrl: '' },
   repository: { name: 'repo', nameWithOwner: 'org/repo', url: '' },
 }

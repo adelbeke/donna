@@ -33,7 +33,9 @@ export const FileTree = ({ nodes, onSelectFile }: Props) => {
               ) : (
                 <ChevronDown size={12} className="shrink-0" />
               )}
-              <span className="truncate">{node.name}</span>
+              <span className="truncate" title={node.path}>
+                {node.name}
+              </span>
             </button>
             {!isCollapsed && (
               <div className="ml-2 pl-2 border-l border-[var(--color-border-subtle)]">
@@ -51,7 +53,9 @@ export const FileTree = ({ nodes, onSelectFile }: Props) => {
           className="flex items-center gap-1 w-full text-left text-xs px-2 py-1 rounded cursor-pointer text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-overlay)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
         >
           <FileText size={12} className="shrink-0 text-[var(--color-text-muted)]" />
-          <span className="truncate flex-1">{node.name}</span>
+          <span className="truncate flex-1" title={node.file.filename}>
+            {node.name}
+          </span>
           <span className="shrink-0 font-mono">
             <span className="text-[var(--color-success)]">+{node.file.additions}</span>{' '}
             <span className="text-[var(--color-danger)]">-{node.file.deletions}</span>

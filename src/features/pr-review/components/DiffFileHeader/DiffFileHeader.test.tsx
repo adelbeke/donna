@@ -109,6 +109,38 @@ describe('DiffFileHeader', () => {
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
+  it('given onOpenFullFile is passed, then the button renders and fires it when clicked', async () => {
+    const onOpenFullFile = vi.fn()
+    const user = userEvent.setup()
+    render(
+      <DiffFileHeader
+        file={given_file()}
+        isExpanded={false}
+        onToggle={vi.fn()}
+        commentCount={0}
+        outdatedThreads={[]}
+        fileLevelThreads={[]}
+        onOpenFullFile={onOpenFullFile}
+      />
+    )
+    await user.click(screen.getByLabelText('View full file'))
+    expect(onOpenFullFile).toHaveBeenCalled()
+  })
+
+  it('given onOpenFullFile is not passed, then the button is absent', () => {
+    render(
+      <DiffFileHeader
+        file={given_file()}
+        isExpanded={false}
+        onToggle={vi.fn()}
+        commentCount={0}
+        outdatedThreads={[]}
+        fileLevelThreads={[]}
+      />
+    )
+    expect(screen.queryByLabelText('View full file')).not.toBeInTheDocument()
+  })
+
   it('given outdated threads, when rendered, then the outdated panel is shown', () => {
     render(
       <DiffFileHeader

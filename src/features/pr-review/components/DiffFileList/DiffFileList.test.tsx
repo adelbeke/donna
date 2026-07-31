@@ -7,6 +7,7 @@ import { useViewerHandles } from '../../queries/useViewerHandles'
 import { useCreateThread } from '../../queries/useCreateThread'
 import { useReplyToThread } from '../../queries/useReplyToThread'
 import { useResolveThread } from '../../queries/useResolveThread'
+import { useFileBlob } from '../../queries/useFileBlob'
 import type { PRFile } from '../../types'
 
 vi.mock('../../queries/useCodeowners', () => ({ useCodeowners: vi.fn() }))
@@ -14,6 +15,7 @@ vi.mock('../../queries/useViewerHandles', () => ({ useViewerHandles: vi.fn() }))
 vi.mock('../../queries/useCreateThread', () => ({ useCreateThread: vi.fn() }))
 vi.mock('../../queries/useReplyToThread', () => ({ useReplyToThread: vi.fn() }))
 vi.mock('../../queries/useResolveThread', () => ({ useResolveThread: vi.fn() }))
+vi.mock('../../queries/useFileBlob', () => ({ useFileBlob: vi.fn() }))
 
 const mockUseCodeowners = vi.mocked(useCodeowners)
 const mockUseViewerHandles = vi.mocked(useViewerHandles)
@@ -35,6 +37,7 @@ beforeEach(() => {
   vi.mocked(useCreateThread).mockReturnValue(mutateMock())
   vi.mocked(useReplyToThread).mockReturnValue(mutateMock())
   vi.mocked(useResolveThread).mockReturnValue(mutateMock())
+  vi.mocked(useFileBlob).mockReturnValue({ data: undefined, isFetching: false } as never)
 })
 
 describe('DiffFileList', () => {
@@ -54,6 +57,7 @@ describe('DiffFileList', () => {
         prKey={prKey}
         pullRequestId="pr-1"
         baseRef="main"
+        headRefOid="abc123"
       />
     )
 
@@ -78,6 +82,7 @@ describe('DiffFileList', () => {
         prKey={prKey}
         pullRequestId="pr-1"
         baseRef="main"
+        headRefOid="abc123"
       />
     )
 

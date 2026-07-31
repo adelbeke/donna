@@ -47,4 +47,38 @@ describe('DiffRowView', () => {
     render(<DiffRowView row={row} language="typescript" />)
     expect(screen.getByText((_, el) => el?.textContent === 'const a = 1')).toBeInTheDocument()
   })
+
+  it('given an expand row with a known count, when rendered, then shows the line count', () => {
+    const row: DiffRow = {
+      type: 'expand',
+      content: '',
+      oldLine: null,
+      newLine: null,
+      expandCount: 5,
+    }
+    render(<DiffRowView row={row} />)
+    expect(screen.getByText('Expand 5 lines')).toBeInTheDocument()
+  })
+
+  it('given an expand row with no known count, when rendered, then shows the open-ended label', () => {
+    const row: DiffRow = { type: 'expand', content: '', oldLine: null, newLine: null, expandCount: null }
+    render(<DiffRowView row={row} />)
+    expect(screen.getByText('Expand down')).toBeInTheDocument()
+  })
+
+  it('given an expand row is clicked, then onExpand fires', async () => {
+    const onExpand = vi.fn()
+    const user = userEvent.setup()
+    const row: DiffRow = { type: 'expand', content: '', oldLine: null, newLine: null, expandCount: 3 }
+    render(<DiffRowView row={row} onExpand={onExpand} />)
+    await user.click(screen.getByRole('button'))
+    expect(onExpand).toHaveBeenCalled()
+  })
+
+  it('given an expand row is loading, then it shows a loading label and is disabled', () => {
+    const row: DiffRow = { type: 'expand', content: '', oldLine: null, newLine: null, expandCount: 3 }
+    render(<DiffRowView row={row} isExpanding />)
+    expect(screen.getByText('Loading…')).toBeInTheDocument()
+    expect(screen.getByRole('button')).toBeDisabled()
+  })
 })

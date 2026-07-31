@@ -172,6 +172,7 @@ export const PR_REVIEW_THREADS_QUERY = /* GraphQL */ `
         updatedAt
         baseRefName
         headRefName
+        headRefOid
         author {
           login
           avatarUrl
@@ -343,6 +344,19 @@ export const VIEWER_TEAMS_QUERY = /* GraphQL */ `
       teams(first: 100, userLogins: [$login]) {
         nodes {
           combinedSlug
+        }
+      }
+    }
+  }
+`
+
+export const PR_FILE_BLOB_QUERY = /* GraphQL */ `
+  query GetFileBlob($owner: String!, $name: String!, $expression: String!) {
+    repository(owner: $owner, name: $name) {
+      object(expression: $expression) {
+        ... on Blob {
+          text
+          isBinary
         }
       }
     }
