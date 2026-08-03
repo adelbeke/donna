@@ -203,10 +203,17 @@ export const usePRStore = create<PRStore>()(
           ...(p.section && validSections.has(p.section) ? { section: p.section } : {}),
           globalFilters: { ...current.globalFilters, ...(p.globalFilters ?? {}) },
           viewFilters: Object.fromEntries(
-            (Object.keys(current.viewFilters) as PRSection[]).map((s) => [
-              s,
-              { ...current.viewFilters[s], ...(p.viewFilters?.[s] ?? {}) },
-            ])
+            (Object.keys(current.viewFilters) as PRSection[]).map((s) => {
+              const persisted = p.viewFilters?.[s] ?? {}
+              return [
+                s,
+                {
+                  repos: persisted.repos ?? current.viewFilters[s].repos ?? [],
+                  showDrafts: persisted.showDrafts ?? current.viewFilters[s].showDrafts ?? false,
+                  search: persisted.search ?? current.viewFilters[s].search ?? '',
+                },
+              ]
+            })
           ) as Record<PRSection, ViewFilters>,
           priorityIds: p.priorityIds ?? current.priorityIds,
           hiddenIds: p.hiddenIds ?? current.hiddenIds,
