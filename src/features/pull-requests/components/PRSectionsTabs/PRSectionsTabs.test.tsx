@@ -30,11 +30,21 @@ beforeEach(() => {
 })
 
 describe('PRSectionsTabs — section tabs', () => {
-  it('renders all three section tabs', () => {
+  it('renders all three section tabs in order: My PRs, Review requested, Reviewed', () => {
     renderWithClient()
-    expect(screen.getByText('Review requested')).toBeInTheDocument()
-    expect(screen.getByText('My PRs')).toBeInTheDocument()
-    expect(screen.getByText('Mentioned')).toBeInTheDocument()
+    const buttons = screen.getAllByRole('button')
+    const myPRsBtn = screen.getByText('My PRs')
+    const reviewRequestedBtn = screen.getByText('Review requested')
+    const reviewedBtn = screen.getByText('Reviewed')
+    expect(myPRsBtn).toBeInTheDocument()
+    expect(reviewRequestedBtn).toBeInTheDocument()
+    expect(reviewedBtn).toBeInTheDocument()
+    // Verify order
+    const myPRsIndex = buttons.indexOf(myPRsBtn as HTMLButtonElement)
+    const reviewRequestedIndex = buttons.indexOf(reviewRequestedBtn as HTMLButtonElement)
+    const reviewedIndex = buttons.indexOf(reviewedBtn as HTMLButtonElement)
+    expect(myPRsIndex).toBeLessThan(reviewRequestedIndex)
+    expect(reviewRequestedIndex).toBeLessThan(reviewedIndex)
   })
 
   it('active section tab has accent styling', () => {

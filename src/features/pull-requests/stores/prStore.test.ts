@@ -8,11 +8,11 @@ beforeEach(() => {
     viewFilters: {
       'review-requested': { repos: [], showDrafts: false, search: '' },
       authored: { repos: [], showDrafts: false, search: '' },
-      mentioned: { repos: [], showDrafts: false, search: '' },
+      reviewed: { repos: [], showDrafts: false, search: '' },
     },
     priorityIds: [],
     hiddenIds: [],
-    knownRepos: { 'review-requested': [], authored: [], mentioned: [] },
+    knownRepos: { 'review-requested': [], authored: [], reviewed: [] },
   })
 })
 
@@ -127,13 +127,13 @@ describe('prStore', () => {
     const { knownRepos } = usePRStore.getState()
     expect(knownRepos['review-requested']).toEqual(['org/repo-a'])
     expect(knownRepos.authored).toEqual([])
-    expect(knownRepos.mentioned).toEqual([])
+    expect(knownRepos.reviewed).toEqual([])
   })
 
   it('persisted merge restores knownRepos', () => {
     const persisted = {
       globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
-      knownRepos: { 'review-requested': ['org/repo-a'], authored: [], mentioned: [] },
+      knownRepos: { 'review-requested': ['org/repo-a'], authored: [], reviewed: [] },
     }
     const { merge } = usePRStore.persist.getOptions()
     const merged = merge!(persisted, usePRStore.getState())
@@ -170,7 +170,7 @@ describe('prStore', () => {
     const { usePRStore: freshStore } = await import('./prStore')
     expect(freshStore.getState().viewFilters.authored.showDrafts).toBe(true)
     expect(freshStore.getState().viewFilters['review-requested'].showDrafts).toBe(false)
-    expect(freshStore.getState().viewFilters.mentioned.showDrafts).toBe(false)
+    expect(freshStore.getState().viewFilters.reviewed.showDrafts).toBe(false)
   })
 
   it('persisted merge restores openPRsInDonna and donnaPRViewHintDismissed', () => {

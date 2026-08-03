@@ -2,9 +2,9 @@ import { ContributeLinks } from '@/shared/components/ContributeLinks/ContributeL
 import { usePRStore, type PRSection } from '../../stores/prStore'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
-  { id: 'review-requested', label: 'Review requested' },
   { id: 'authored', label: 'My PRs' },
-  { id: 'mentioned', label: 'Mentioned' },
+  { id: 'review-requested', label: 'Review requested' },
+  { id: 'reviewed', label: 'Reviewed' },
 ]
 
 export const PRSectionsTabs = () => {
