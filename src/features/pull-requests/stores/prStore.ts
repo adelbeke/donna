@@ -214,7 +214,7 @@ export const usePRStore = create<PRStore>()(
           globalFilters: { ...current.globalFilters, ...(p.globalFilters ?? {}) },
           viewFilters: Object.fromEntries(
             (Object.keys(current.viewFilters) as PRSection[]).map((s) => {
-              const persisted = p.viewFilters?.[s] ?? {}
+              const persisted: Partial<ViewFilters> = p.viewFilters?.[s] ?? {}
               return [
                 s,
                 {
