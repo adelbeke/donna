@@ -140,6 +140,17 @@ describe('prStore', () => {
     expect(merged.knownRepos['review-requested']).toEqual(['org/repo-a'])
   })
 
+  it('given persisted knownRepos predating the reviewed section, when merged, then reviewed defaults to empty instead of undefined', () => {
+    const persisted = {
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+      knownRepos: { 'review-requested': ['org/repo-a'], authored: [] },
+    }
+    const { merge } = usePRStore.persist.getOptions()
+    const merged = merge!(persisted, usePRStore.getState())
+    expect(merged.knownRepos['review-requested']).toEqual(['org/repo-a'])
+    expect(merged.knownRepos.reviewed).toEqual([])
+  })
+
   it('given a stale persisted view key, when merged, then it is dropped without crashing', () => {
     const persisted = {
       view: 'branches',

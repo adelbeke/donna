@@ -67,6 +67,16 @@ const defaultKnownReposAll: Record<PRSection, string[]> = {
   reviewed: [],
 }
 
+// ponytail: persisted knownRepos can predate a section (e.g. `reviewed` added in #183) — merge
+// per-key against defaults instead of trusting the persisted object's shape wholesale.
+const mergeKnownRepos = (
+  current: Record<PRSection, string[]>,
+  persisted: Partial<Record<PRSection, string[]>> | undefined
+): Record<PRSection, string[]> => ({
+  ...current,
+  ...(persisted ?? {}),
+})
+
 export const usePRStore = create<PRStore>()(
   persist(
     (set) => ({
@@ -188,7 +198,7 @@ export const usePRStore = create<PRStore>()(
             },
             priorityIds: p.priorityIds ?? current.priorityIds,
             hiddenIds: p.hiddenIds ?? current.hiddenIds,
-            knownRepos: p.knownRepos ?? current.knownRepos,
+            knownRepos: mergeKnownRepos(current.knownRepos, p.knownRepos),
             notificationHintDismissed:
               p.notificationHintDismissed ?? current.notificationHintDismissed,
             contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,
@@ -217,7 +227,7 @@ export const usePRStore = create<PRStore>()(
           ) as Record<PRSection, ViewFilters>,
           priorityIds: p.priorityIds ?? current.priorityIds,
           hiddenIds: p.hiddenIds ?? current.hiddenIds,
-          knownRepos: p.knownRepos ?? current.knownRepos,
+          knownRepos: mergeKnownRepos(current.knownRepos, p.knownRepos),
           notificationHintDismissed:
             p.notificationHintDismissed ?? current.notificationHintDismissed,
           contextSwitchThreshold: p.contextSwitchThreshold ?? current.contextSwitchThreshold,
