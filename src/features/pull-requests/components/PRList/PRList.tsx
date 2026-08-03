@@ -12,7 +12,7 @@ import { isOverContextSwitchThreshold } from '../../lib/prUtils'
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
   authored: 'My pull requests',
-  mentioned: 'Mentioned',
+  reviewed: 'Reviewed',
 }
 
 export const PRList = () => {

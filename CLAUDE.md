@@ -25,7 +25,7 @@ CI (`.github/workflows/ci.yml`) runs `lint`, `test:run`, then `build` on every P
 ## Main Features
 
 **Pull Requests view** (`prs`) — three sections selected via the `PRSectionsTabs` sidebar tabs, each a different GitHub search (`buildSearchQuery`):
-- **Review requested** / **My PRs** (authored) / **Mentioned**.
+- **Review requested** / **My PRs** (authored) / **Reviewed**.
 - Per-PR actions on each `PRCard`: **star** (top-priority, pinned above the list and persisted), **hide** (dims + filtered out unless "Hidden" toggle is on), **copy PR link**, open externally.
 - **Mute authors**: free-form patterns (e.g. `dependabot`) that filter out their PRs.
 - Filters: by repository/org (checkboxes in the `SettingsModal` gear-icon popover, shown only when >1 repo loaded), title search (above the list), show/hide **drafts**, show/hide **hidden** (`VisibilityToggles` in the list header).
@@ -116,7 +116,7 @@ Two layers, deliberately separated:
 
 `usePullRequests` (`src/features/pull-requests/queries/useGitHubPRs.ts`) is the core read path:
 
-1. `buildSearchQuery(section, login)` turns the active section (`review-requested` / `authored` / `mentioned`) into a GitHub search string.
+1. `buildSearchQuery(section, login)` turns the active section (`review-requested` / `authored` / `reviewed`) into a GitHub search string.
 2. `useInfiniteQuery` pages the GraphQL `search` via `PR_LIST_QUERY` (20/page, capped at `MAX_PAGES = 10`), sorted `sort:updated-desc`. Pages auto-fetch sequentially via a `useEffect`; `PRListHeader` shows a spinner while `isFetchingNextPage`. The list query returns only lightweight fields — `reviews`, `reviewRequests`, `commits`, and `mergeable` are **not** fetched here.
 3. Each node is enriched in-memory with `isTopPriority`, `isHidden`.
 4. `applyFilters` (`src/features/pull-requests/lib/prFilters.ts`) drops drafts/hidden/repo/author/search misses.

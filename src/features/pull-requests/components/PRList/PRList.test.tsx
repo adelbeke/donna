@@ -46,11 +46,11 @@ const mockStoreFilters = () => {
       viewFilters: {
         'review-requested': { repos: [], showDrafts: false, search: '' },
         authored: { repos: [], showDrafts: false, search: '' },
-        mentioned: { repos: [], showDrafts: false, search: '' },
+        reviewed: { repos: [], showDrafts: false, search: '' },
       },
       priorityIds: [],
       hiddenIds: [],
-      knownRepos: { 'review-requested': [], authored: [], mentioned: [] },
+      knownRepos: { 'review-requested': [], authored: [], reviewed: [] },
       setKnownRepos: vi.fn(),
       notificationHintDismissed: true,
       dismissNotificationHint: vi.fn(),
