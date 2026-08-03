@@ -57,7 +57,7 @@ const defaultGlobalFilters: GlobalFilters = {
 
 const defaultViewFiltersAll: Record<PRSection, ViewFilters> = {
   'review-requested': { ...defaultViewFilters },
-  authored: { ...defaultViewFilters },
+  authored: { ...defaultViewFilters, showDrafts: true },
   mentioned: { ...defaultViewFilters },
 }
 

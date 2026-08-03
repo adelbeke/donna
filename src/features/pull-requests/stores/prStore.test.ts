@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { usePRStore } from './prStore'
 
 beforeEach(() => {
@@ -162,6 +162,15 @@ describe('prStore', () => {
   it('dismissDonnaPRViewHint sets the dismissed flag', () => {
     usePRStore.getState().dismissDonnaPRViewHint()
     expect(usePRStore.getState().donnaPRViewHintDismissed).toBe(true)
+  })
+
+  it('authored view defaults showDrafts to true, other sections default to false', async () => {
+    localStorage.clear()
+    vi.resetModules()
+    const { usePRStore: freshStore } = await import('./prStore')
+    expect(freshStore.getState().viewFilters.authored.showDrafts).toBe(true)
+    expect(freshStore.getState().viewFilters['review-requested'].showDrafts).toBe(false)
+    expect(freshStore.getState().viewFilters.mentioned.showDrafts).toBe(false)
   })
 
   it('persisted merge restores openPRsInDonna and donnaPRViewHintDismissed', () => {
