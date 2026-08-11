@@ -19,6 +19,8 @@ type Props = {
   showHideAndStar?: boolean
 }
 
+const NO_LOCAL_REPO_TITLE = 'Add this repo in the Branches tab to run shortcuts'
+
 const reviewBadge: Record<
   ReviewState,
   { label: string; color: string; bg: string; icon: ReactElement }
@@ -221,7 +223,9 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
           prUrl={pr.url}
           prNumber={pr.number}
           showHideAndStar={showHideAndStar}
-          showRunShortcut={isAuthored && !!repoPath}
+          showRunShortcut={isAuthored}
+          runShortcutDisabled={isAuthored && !repoPath}
+          runShortcutTitle={repoPath ? 'Run shortcut' : NO_LOCAL_REPO_TITLE}
           onRunShortcut={() => setShortcutsOpen(true)}
           onOpenExternally={openExternally}
           showReviewInDonna={!openPRsInDonna}

@@ -11,6 +11,8 @@ type Props = {
   prNumber: number
   showHideAndStar: boolean
   showRunShortcut: boolean
+  runShortcutDisabled?: boolean
+  runShortcutTitle?: string
   onRunShortcut: () => void
   onOpenExternally: () => void
   showReviewInDonna: boolean
@@ -26,6 +28,8 @@ export const PRCardActions = ({
   togglePriority,
   showHideAndStar,
   showRunShortcut,
+  runShortcutDisabled = false,
+  runShortcutTitle = 'Run shortcut',
   onRunShortcut,
   onOpenExternally,
   showReviewInDonna,
@@ -65,7 +69,8 @@ export const PRCardActions = ({
       {showRunShortcut && (
         <PRCardAction
           onClick={onRunShortcut}
-          title="Run shortcut"
+          title={runShortcutTitle}
+          disabled={runShortcutDisabled}
           className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
         >
           <Terminal size={14} />
