@@ -5,6 +5,7 @@ type Props = PropsWithChildren & {
   onClick: () => void
   tooltipClassName?: string
   buttonClassName?: string
+  disabled?: boolean
 }
 
 export const ButtonWithTooltip = ({
@@ -13,11 +14,13 @@ export const ButtonWithTooltip = ({
   tooltipClassName,
   onClick,
   buttonClassName,
+  disabled,
 }: Props) => {
   return (
     <div className="relative group/tooltip">
       <button
         onClick={onClick}
+        disabled={disabled}
         aria-label={label}
         className={
           buttonClassName ??

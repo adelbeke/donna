@@ -10,8 +10,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   branches: {
     list: (repoPath: string): Promise<import('../src/features/branches/types').Branch[]> =>
       ipcRenderer.invoke('branches:list', repoPath),
-    delete: (repoPath: string, branch: string): Promise<void> =>
-      ipcRenderer.invoke('branches:delete', repoPath, branch),
+    delete: (repoPath: string, branch: string, force = false): Promise<void> =>
+      ipcRenderer.invoke('branches:delete', repoPath, branch, force),
     switchToDefault: (repoPath: string): Promise<void> =>
       ipcRenderer.invoke('branches:switchToDefault', repoPath),
   },

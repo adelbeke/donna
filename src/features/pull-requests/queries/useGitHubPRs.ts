@@ -98,7 +98,7 @@ export const usePullRequests = () => {
 
   // Auto-select repos newly discovered under an org whose previously-known repos were all selected.
   useEffect(() => {
-    const previouslyKnown = knownRepos[section]
+    const previouslyKnown = knownRepos[section] ?? []
     const newRepos = visibleRepos.filter((r) => !previouslyKnown.includes(r))
     if (newRepos.length === 0) return
 

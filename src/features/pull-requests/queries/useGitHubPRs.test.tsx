@@ -154,11 +154,11 @@ describe('usePullRequests auto-select on new repo discovery', () => {
       viewFilters: {
         'review-requested': { repos: [], showDrafts: false, search: '' },
         authored: { repos: [], showDrafts: false, search: '' },
-        mentioned: { repos: [], showDrafts: false, search: '' },
+        reviewed: { repos: [], showDrafts: false, search: '' },
       },
       priorityIds: [],
       hiddenIds: [],
-      knownRepos: { 'review-requested': [], authored: [], mentioned: [] },
+      knownRepos: { 'review-requested': [], authored: [], reviewed: [] },
     })
     useAuthStore.setState({ token: null, user: null })
   })
@@ -176,7 +176,7 @@ describe('usePullRequests auto-select on new repo discovery', () => {
       knownRepos: {
         'review-requested': ['acme/repo-a', 'acme/repo-b'],
         authored: [],
-        mentioned: [],
+        reviewed: [],
       },
     })
     usePRStore.getState().setViewFilters('review-requested', {
@@ -200,7 +200,7 @@ describe('usePullRequests auto-select on new repo discovery', () => {
       knownRepos: {
         'review-requested': ['acme/repo-a', 'acme/repo-b'],
         authored: [],
-        mentioned: [],
+        reviewed: [],
       },
     })
     usePRStore.getState().setViewFilters('review-requested', { repos: ['acme/repo-a'] })
@@ -231,7 +231,7 @@ describe('usePullRequests auto-select on new repo discovery', () => {
     setupAuth()
     usePRStore.setState({
       globalFilters: { hiddenAuthors: [], hiddenRepos: ['acme/repo-c'], showHidden: false },
-      knownRepos: { 'review-requested': ['acme/repo-a'], authored: [], mentioned: [] },
+      knownRepos: { 'review-requested': ['acme/repo-a'], authored: [], reviewed: [] },
     })
     usePRStore.getState().setViewFilters('review-requested', { repos: ['acme/repo-a'] })
     const graphql = vi.fn().mockResolvedValue(mockSearchResponse(['acme/repo-a', 'acme/repo-c']))

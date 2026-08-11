@@ -12,7 +12,7 @@ interface Window {
     }
     branches: {
       list: (repoPath: string) => Promise<import('../features/branches/types').Branch[]>
-      delete: (repoPath: string, branch: string) => Promise<void>
+      delete: (repoPath: string, branch: string, force?: boolean) => Promise<void>
       switchToDefault: (repoPath: string) => Promise<void>
     }
     worktrees: {

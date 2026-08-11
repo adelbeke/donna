@@ -22,6 +22,12 @@
   --color-overlay: rgba(0, 0, 0, 0.4);
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
   --shadow-card-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.4);
+  --color-syntax-keyword: #ff7b72;
+  --color-syntax-string: #a5d6ff;
+  --color-syntax-number: #79c0ff;
+  --color-syntax-comment: #8b949e;
+  --color-syntax-function: #d2a8ff;
+  --color-syntax-punctuation: #c9d1d9;
 }
 
 html,
@@ -51,4 +57,10 @@ body {
   --color-overlay: rgba(0, 0, 0, 0.25);
   --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   --shadow-card-hover: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+  --color-syntax-keyword: #cf222e;
+  --color-syntax-string: #0a3069;
+  --color-syntax-number: #0550ae;
+  --color-syntax-comment: #6e7781;
+  --color-syntax-function: #8250df;
+  --color-syntax-punctuation: #24292f;
 }

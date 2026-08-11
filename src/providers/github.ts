@@ -156,17 +156,207 @@ export const PR_CHECK_CONTEXTS_QUERY = /* GraphQL */ `
   }
 `
 
-export const VIEWER_TEAMS_QUERY = /* GraphQL */ `
-  query GetViewerTeams {
-    viewer {
-      organizations(first: 20) {
-        nodes {
-          teams(first: 50, userLogins: [$login]) {
-            nodes {
-              name
-              slug
+export const PR_REVIEW_THREADS_QUERY = /* GraphQL */ `
+  query GetPRReviewThreads($owner: String!, $name: String!, $number: Int!, $cursor: String) {
+    repository(owner: $owner, name: $name) {
+      pullRequest(number: $number) {
+        id
+        number
+        title
+        url
+        body
+        isDraft
+        additions
+        deletions
+        createdAt
+        updatedAt
+        baseRefName
+        headRefName
+        headRefOid
+        author {
+          login
+          avatarUrl
+        }
+        repository {
+          name
+          nameWithOwner
+          url
+        }
+        commits(last: 1) {
+          nodes {
+            commit {
+              statusCheckRollup {
+                state
+              }
             }
           }
+        }
+        comments(first: 50) {
+          nodes {
+            id
+            body
+            createdAt
+            url
+            viewerDidAuthor
+            author {
+              login
+              avatarUrl
+            }
+          }
+        }
+        reviews(first: 20) {
+          nodes {
+            id
+            state
+            body
+            submittedAt
+            viewerDidAuthor
+            author {
+              login
+              avatarUrl
+            }
+            comments {
+              totalCount
+            }
+          }
+        }
+        reviewThreads(first: 50, after: $cursor) {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            id
+            path
+            line
+            originalLine
+            startLine
+            originalStartLine
+            diffSide
+            startDiffSide
+            isResolved
+            isOutdated
+            isCollapsed
+            subjectType
+            viewerCanReply
+            viewerCanResolve
+            viewerCanUnresolve
+            resolvedBy {
+              login
+            }
+            comments(first: 50) {
+              nodes {
+                id
+                body
+                createdAt
+                url
+                viewerDidAuthor
+                author {
+                  login
+                  avatarUrl
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`
+
+export const ADD_REVIEW_THREAD_MUTATION = /* GraphQL */ `
+  mutation AddReviewThread($input: AddPullRequestReviewInput!) {
+    addPullRequestReview(input: $input) {
+      clientMutationId
+    }
+  }
+`
+
+export const ADD_THREAD_REPLY_MUTATION = /* GraphQL */ `
+  mutation AddThreadReply($threadId: ID!, $body: String!) {
+    addPullRequestReviewThreadReply(input: { pullRequestReviewThreadId: $threadId, body: $body }) {
+      comment {
+        id
+      }
+    }
+  }
+`
+
+export const RESOLVE_THREAD_MUTATION = /* GraphQL */ `
+  mutation ResolveThread($threadId: ID!) {
+    resolveReviewThread(input: { threadId: $threadId }) {
+      thread {
+        id
+        isResolved
+      }
+    }
+  }
+`
+
+export const UNRESOLVE_THREAD_MUTATION = /* GraphQL */ `
+  mutation UnresolveThread($threadId: ID!) {
+    unresolveReviewThread(input: { threadId: $threadId }) {
+      thread {
+        id
+        isResolved
+      }
+    }
+  }
+`
+
+export const ADD_ISSUE_COMMENT_MUTATION = /* GraphQL */ `
+  mutation AddIssueComment($subjectId: ID!, $body: String!) {
+    addComment(input: { subjectId: $subjectId, body: $body }) {
+      clientMutationId
+    }
+  }
+`
+
+export const ADD_PENDING_REVIEW_THREAD_MUTATION = /* GraphQL */ `
+  mutation AddPendingReviewThread($input: AddPullRequestReviewThreadInput!) {
+    addPullRequestReviewThread(input: $input) {
+      thread {
+        id
+      }
+    }
+  }
+`
+
+export const SUBMIT_REVIEW_MUTATION = /* GraphQL */ `
+  mutation SubmitReview($reviewId: ID!, $event: PullRequestReviewEvent!, $body: String) {
+    submitPullRequestReview(input: { pullRequestReviewId: $reviewId, event: $event, body: $body }) {
+      clientMutationId
+    }
+  }
+`
+
+export const DELETE_REVIEW_MUTATION = /* GraphQL */ `
+  mutation DeleteReview($reviewId: ID!) {
+    deletePullRequestReview(input: { pullRequestReviewId: $reviewId }) {
+      clientMutationId
+    }
+  }
+`
+
+export const VIEWER_TEAMS_QUERY = /* GraphQL */ `
+  query GetViewerTeams($org: String!, $login: String!) {
+    organization(login: $org) {
+      teams(first: 100, userLogins: [$login]) {
+        nodes {
+          combinedSlug
+        }
+      }
+    }
+  }
+`
+
+export const PR_FILE_BLOB_QUERY = /* GraphQL */ `
+  query GetFileBlob($owner: String!, $name: String!, $expression: String!) {
+    repository(owner: $owner, name: $name) {
+      object(expression: $expression) {
+        ... on Blob {
+          text
+          isBinary
         }
       }
     }

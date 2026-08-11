@@ -21,6 +21,8 @@ export const SettingsModal = () => {
   const removeHiddenRepo = usePRStore((s) => s.removeHiddenRepo)
   const contextSwitchThreshold = usePRStore((s) => s.contextSwitchThreshold)
   const setContextSwitchThreshold = usePRStore((s) => s.setContextSwitchThreshold)
+  const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
+  const setOpenPRsInDonna = usePRStore((s) => s.setOpenPRsInDonna)
   const { repos = [] } = usePullRequests()
 
   const currentView = viewFilters[section]
@@ -92,6 +94,23 @@ export const SettingsModal = () => {
       </ButtonWithTooltip>
 
       <Modal isOpen={open} title={'Settings'} onClose={() => setOpen(false)} className="min-w-1/2">
+        <div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={openPRsInDonna}
+              onChange={(e) => setOpenPRsInDonna(e.target.checked)}
+              className="accent-[var(--color-accent)] cursor-pointer"
+            />
+            <span className="text-xs text-[var(--color-text-primary)]">
+              Open pull requests in Donna
+            </span>
+          </label>
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            When off, clicking a PR opens it on github.com.
+          </p>
+        </div>
+
         <div>
           <label
             htmlFor="context-switch-threshold"
