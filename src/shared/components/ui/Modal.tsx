@@ -9,6 +9,11 @@ type Props = PropsWithChildren & {
   className?: string
   actions?: ReactNode
   size?: 'default' | 'full'
+  /**
+   * Opt-in entrance animation. Off by default so existing call sites keep their instant mount —
+   * a CSS-only fade/scale, skipped entirely under `prefers-reduced-motion`.
+   */
+  transition?: boolean
 }
 
 const SIZE_CLASS: Record<'default' | 'full', string> = {
@@ -24,6 +29,7 @@ export const Modal = ({
   className,
   actions,
   size = 'default',
+  transition = false,
 }: Props) => {
   useEffect(() => {
     if (!isOpen) return
@@ -44,7 +50,7 @@ export const Modal = ({
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-40 bg-[var(--color-overlay)]"
+        className={`fixed inset-0 z-40 bg-[var(--color-overlay)] ${transition ? 'motion-safe:animate-overlay-in' : ''}`}
         onClick={(e) => {
           e.stopPropagation()
           onClose()
@@ -53,7 +59,7 @@ export const Modal = ({
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`pointer-events-auto ${SIZE_CLASS[size]} overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-lg p-4 space-y-4 ${className ?? ''}`}
+          className={`pointer-events-auto ${SIZE_CLASS[size]} ${transition ? 'motion-safe:animate-panel-in' : ''} overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-lg p-4 space-y-4 ${className ?? ''}`}
         >
           <div className="flex items-center justify-between gap-4">
             <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate">

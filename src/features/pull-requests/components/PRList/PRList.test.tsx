@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PRList } from './PRList'
+import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
 import type { PullRequest } from '@/types/github'
 
 vi.mock('@/features/pull-requests/queries/useGitHubPRs', () => ({ usePullRequests: vi.fn() }))
@@ -96,6 +97,7 @@ const renderWithClient = (ui: ReactElement) =>
 beforeEach(() => {
   vi.clearAllMocks()
   mockStoreFilters()
+  useOnboardingStore.setState({ spotlight: null })
   queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
 })
 
@@ -227,5 +229,50 @@ describe('PRList', () => {
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['pr-details'] })
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['pr-checks'] })
+  })
+})
+
+describe('PRList — onboarding spotlight', () => {
+  const given_two_prs = () =>
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: [makePR('1', 'First'), makePR('2', 'Second')],
+      priorityPRs: [],
+      totalCount: 2,
+      loadedCount: 2,
+    } as never)
+
+  it('GIVEN no spotlight THEN no card actions are highlighted', () => {
+    given_two_prs()
+    const { container } = renderWithClient(<PRList />)
+    expect(container.querySelectorAll('[data-onboarding-spotlight]')).toHaveLength(0)
+  })
+
+  it('GIVEN the guide spotlights card actions THEN exactly one card is highlighted', () => {
+    useOnboardingStore.setState({ spotlight: 'card-actions' })
+    given_two_prs()
+    const { container } = renderWithClient(<PRList />)
+    expect(container.querySelectorAll('[data-onboarding-spotlight]')).toHaveLength(1)
+  })
+
+  it('GIVEN a priority PR is pinned THEN the spotlight lands on that first card', () => {
+    useOnboardingStore.setState({ spotlight: 'card-actions' })
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: [makePR('2', 'Regular')],
+      priorityPRs: [makePR('1', 'Pinned')],
+      totalCount: 2,
+      loadedCount: 2,
+    } as never)
+    const { container } = renderWithClient(<PRList />)
+    const highlighted = container.querySelector('[data-onboarding-spotlight]')
+    expect(highlighted?.closest('.group')?.textContent).toContain('Pinned')
+  })
+
+  it('GIVEN the guide spotlights the sections tabs THEN no card is highlighted', () => {
+    useOnboardingStore.setState({ spotlight: 'sections' })
+    given_two_prs()
+    const { container } = renderWithClient(<PRList />)
+    expect(container.querySelectorAll('[data-onboarding-spotlight]')).toHaveLength(0)
   })
 })

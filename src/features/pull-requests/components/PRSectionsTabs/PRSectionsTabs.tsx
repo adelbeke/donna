@@ -1,4 +1,5 @@
 import { ContributeLinks } from '@/shared/components/ContributeLinks/ContributeLinks.tsx'
+import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
 import { usePRStore, type PRSection } from '../../stores/prStore'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
@@ -10,6 +11,7 @@ const SECTIONS: { id: PRSection; label: string }[] = [
 export const PRSectionsTabs = () => {
   const section = usePRStore((s) => s.section)
   const setSection = usePRStore((s) => s.setSection)
+  const spotlight = useOnboardingStore((s) => s.spotlight)
 
   return (
     <aside className="w-56 shrink-0">
@@ -23,7 +25,8 @@ export const PRSectionsTabs = () => {
                 section === s.id
                   ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)] font-medium'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
-              }`}
+              }
+              ${section === s.id && spotlight === 'sections' ? 'motion-safe:animate-spotlight-ring' : ''}`}
           >
             {s.label}
           </button>

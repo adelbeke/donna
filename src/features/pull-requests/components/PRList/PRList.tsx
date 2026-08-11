@@ -8,6 +8,7 @@ import { NewPRsBadge } from '../NewPRsBadge/NewPRsBadge'
 import { NotificationHint } from '../NotificationHint/NotificationHint'
 import { ContextSwitchWarningBanner } from '../ContextSwitchWarningBanner/ContextSwitchWarningBanner'
 import { isOverContextSwitchThreshold } from '../../lib/prUtils'
+import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
 
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
@@ -33,6 +34,7 @@ export const PRList = () => {
   const notificationHintDismissed = usePRStore((s) => s.notificationHintDismissed)
   const dismissNotificationHint = usePRStore((s) => s.dismissNotificationHint)
   const contextSwitchThreshold = usePRStore((s) => s.contextSwitchThreshold)
+  const spotlight = useOnboardingStore((s) => s.spotlight)
   const queryClient = useQueryClient()
 
   // Checks/details are fetched per-PR (usePRDetails/useCheckContexts) and won't
@@ -65,6 +67,13 @@ export const PRList = () => {
   // `hiddenIds` in the store is an all-time list that never gets pruned (e.g. once a
   // hidden PR is closed it drops out of allPRs but its id lingers in hiddenIds forever).
   const hiddenCount = allPRs.filter((pr) => pr.isHidden).length
+
+  // The onboarding guide rings a single card's action cluster rather than every one of them —
+  // whichever card is rendered first, priority group included.
+  const spotlitPRId =
+    spotlight === 'card-actions'
+      ? (displayedPriorityPRs[0]?.id ?? displayedPRs[0]?.id ?? null)
+      : null
 
   return (
     <div className="flex-1 min-w-0">
@@ -125,6 +134,7 @@ export const PRList = () => {
                 pr={pr}
                 isAuthored={section === 'authored'}
                 showHideAndStar={section === 'review-requested'}
+                highlightActions={pr.id === spotlitPRId}
               />
             ))}
           </div>
@@ -139,6 +149,7 @@ export const PRList = () => {
               pr={pr}
               isAuthored={section === 'authored'}
               showHideAndStar={section === 'review-requested'}
+              highlightActions={pr.id === spotlitPRId}
             />
           ))}
         </div>

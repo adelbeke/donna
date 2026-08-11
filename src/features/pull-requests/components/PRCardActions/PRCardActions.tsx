@@ -17,6 +17,8 @@ type Props = {
   onOpenExternally: () => void
   showReviewInDonna: boolean
   onReviewInDonna: () => void
+  /** Ringed by the onboarding guide while it explains these actions. */
+  highlight?: boolean
 }
 
 export const PRCardActions = ({
@@ -34,10 +36,14 @@ export const PRCardActions = ({
   onOpenExternally,
   showReviewInDonna,
   onReviewInDonna,
+  highlight = false,
 }: Props) => {
   return (
     <div
-      className="flex items-center gap-1 shrink-0 flex-col lg:flex-row"
+      data-onboarding-spotlight={highlight || undefined}
+      className={`flex items-center gap-1 shrink-0 flex-col lg:flex-row ${
+        highlight ? 'rounded-md motion-safe:animate-spotlight-ring' : ''
+      }`}
       onClick={(e) => e.stopPropagation()}
     >
       {showHideAndStar && (
