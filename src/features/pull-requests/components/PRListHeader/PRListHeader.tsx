@@ -10,6 +10,7 @@ type Props = {
   refetch: () => void
   isFetching: boolean
   isLoadingMore?: boolean
+  hiddenCount: number
 }
 
 export const PRListHeader = ({
@@ -21,6 +22,7 @@ export const PRListHeader = ({
   refetch,
   isFetching,
   isLoadingMore,
+  hiddenCount,
 }: Props) => {
   return (
     <div className="flex flex-wrap items-center justify-between mb-4">
@@ -40,7 +42,7 @@ export const PRListHeader = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <VisibilityToggles />
+        <VisibilityToggles hiddenCount={hiddenCount} />
         <button
           onClick={refetch}
           disabled={isFetching}

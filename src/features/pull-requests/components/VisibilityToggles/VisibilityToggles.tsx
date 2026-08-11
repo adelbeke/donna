@@ -1,12 +1,15 @@
 import { usePRStore } from '@/features/pull-requests/stores/prStore.ts'
 
-export const VisibilityToggles = () => {
+type Props = {
+  hiddenCount: number
+}
+
+export const VisibilityToggles = ({ hiddenCount }: Props) => {
   const section = usePRStore((s) => s.section)
   const globalFilters = usePRStore((s) => s.globalFilters)
   const setGlobalFilters = usePRStore((s) => s.setGlobalFilters)
   const viewFilters = usePRStore((s) => s.viewFilters)
   const setViewFilters = usePRStore((s) => s.setViewFilters)
-  const hiddenIds = usePRStore((s) => s.hiddenIds)
 
   const showDrafts = viewFilters[section].showDrafts
 
@@ -34,7 +37,7 @@ export const VisibilityToggles = () => {
               : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-overlay)]'
           }`}
       >
-        Hidden{hiddenIds.length > 0 && ` (${hiddenIds.length})`}
+        Hidden{hiddenCount > 0 && ` (${hiddenCount})`}
       </button>
     </div>
   )
