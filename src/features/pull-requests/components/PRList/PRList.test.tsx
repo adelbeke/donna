@@ -159,6 +159,58 @@ describe('PRList', () => {
     expect(screen.getByText(/of 500/)).toBeInTheDocument()
   })
 
+  it('GIVEN a hidden PR no longer present in fetched results (e.g. closed) THEN Hidden badge only counts hidden PRs still present', () => {
+    // hiddenIds is the all-time persisted list (2 entries), but only one of those PRs
+    // is still present in the current section's fetched results (allPRs) - the other
+    // was closed and dropped out of the GitHub search entirely.
+    mockUsePRStore.mockImplementation((selector) =>
+      selector({
+        section: 'review-requested',
+        globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: true },
+        viewFilters: {
+          'review-requested': { repos: [], showDrafts: false, search: '' },
+          authored: { repos: [], showDrafts: false, search: '' },
+          reviewed: { repos: [], showDrafts: false, search: '' },
+        },
+        priorityIds: [],
+        hiddenIds: ['1', '2'],
+        knownRepos: { 'review-requested': [], authored: [], reviewed: [] },
+        setKnownRepos: vi.fn(),
+        notificationHintDismissed: true,
+        dismissNotificationHint: vi.fn(),
+        contextSwitchThreshold: 4,
+        setContextSwitchThreshold: vi.fn(),
+        setSection: vi.fn(),
+        setGlobalFilters: vi.fn(),
+        setViewFilters: vi.fn(),
+        resetFilters: vi.fn(),
+        toggleHide: vi.fn(),
+        togglePriority: vi.fn(),
+        addHiddenAuthor: vi.fn(),
+        removeHiddenAuthor: vi.fn(),
+        addHiddenRepo: vi.fn(),
+        removeHiddenRepo: vi.fn(),
+        openPRsInDonna: true,
+        setOpenPRsInDonna: vi.fn(),
+        donnaPRViewHintDismissed: true,
+        dismissDonnaPRViewHint: vi.fn(),
+      })
+    )
+    const stillOpenHiddenPR = { ...makePR('1', 'Still open, hidden'), isHidden: true }
+    mockUsePullRequests.mockReturnValue({
+      ...defaultQuery,
+      data: [stillOpenHiddenPR],
+      priorityPRs: [],
+      allPRs: [stillOpenHiddenPR],
+      totalCount: 1,
+      loadedCount: 1,
+    } as never)
+
+    renderWithClient(<PRList />)
+
+    expect(screen.getByText('Hidden (1)')).toBeInTheDocument()
+  })
+
   it('GIVEN refresh button clicked THEN pr-details and pr-checks queries are invalidated', () => {
     const p = makePR('1', 'PR')
     mockUsePullRequests.mockReturnValue({
