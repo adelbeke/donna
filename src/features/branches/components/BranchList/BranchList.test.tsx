@@ -161,12 +161,12 @@ describe('BranchCard — regular branch', () => {
     expect(screen.getByText('Delete branch')).toBeInTheDocument()
   })
 
-  it('GIVEN user confirms WHEN Delete branch clicked THEN calls branches.delete', async () => {
+  it('GIVEN user confirms WHEN Delete branch clicked THEN calls branches.delete without force', async () => {
     const user = userEvent.setup()
     const { onDeleted } = card()
     await user.click(screen.getByTitle('More actions'))
     await user.click(screen.getByText('Delete branch'))
-    expect(mockDelete).toHaveBeenCalledWith('/repos/my-repo', 'feat/my-feature')
+    expect(mockDelete).toHaveBeenCalledWith('/repos/my-repo', 'feat/my-feature', false)
     await waitFor(() => expect(onDeleted).toHaveBeenCalled())
   })
 
@@ -179,13 +179,48 @@ describe('BranchCard — regular branch', () => {
     expect(mockDelete).not.toHaveBeenCalled()
   })
 
-  it('GIVEN delete fails WHEN Delete branch clicked THEN shows error inline', async () => {
-    mockDelete.mockRejectedValueOnce(new Error('branch not fully merged'))
+  it('GIVEN delete fails with an unrelated error WHEN Delete branch clicked THEN shows error inline and does not retry', async () => {
+    mockDelete.mockRejectedValueOnce(new Error('permission denied'))
     const user = userEvent.setup()
     card()
     await user.click(screen.getByTitle('More actions'))
     await user.click(screen.getByText('Delete branch'))
-    await waitFor(() => expect(screen.getByText('branch not fully merged')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('permission denied')).toBeInTheDocument())
+    expect(mockDelete).toHaveBeenCalledTimes(1)
+  })
+
+  it('GIVEN delete fails because branch is not fully merged WHEN user confirms force-delete THEN retries with force=true and succeeds', async () => {
+    mockDelete.mockRejectedValueOnce(
+      new Error("error: The branch 'feat/my-feature' is not fully merged.")
+    )
+    const user = userEvent.setup()
+    const { onDeleted } = card()
+    await user.click(screen.getByTitle('More actions'))
+    await user.click(screen.getByText('Delete branch'))
+    await waitFor(() => expect(mockDelete).toHaveBeenCalledTimes(2))
+    expect(mockDelete).toHaveBeenNthCalledWith(1, '/repos/my-repo', 'feat/my-feature', false)
+    expect(mockDelete).toHaveBeenNthCalledWith(2, '/repos/my-repo', 'feat/my-feature', true)
+    await waitFor(() => expect(onDeleted).toHaveBeenCalled())
+    expect(screen.queryByText(/is not fully merged/)).not.toBeInTheDocument()
+  })
+
+  it('GIVEN delete fails because branch is not fully merged WHEN user cancels force-delete THEN shows the error inline and does not retry', async () => {
+    mockDelete.mockRejectedValueOnce(
+      new Error("error: The branch 'feat/my-feature' is not fully merged.")
+    )
+    const confirmSpy = vi.spyOn(window, 'confirm')
+    confirmSpy.mockReturnValueOnce(true) // initial "Delete branch?" dialog
+    confirmSpy.mockReturnValueOnce(false) // force-delete warning dialog
+    const user = userEvent.setup()
+    card()
+    await user.click(screen.getByTitle('More actions'))
+    await user.click(screen.getByText('Delete branch'))
+    await waitFor(() =>
+      expect(
+        screen.getByText("error: The branch 'feat/my-feature' is not fully merged.")
+      ).toBeInTheDocument()
+    )
+    expect(mockDelete).toHaveBeenCalledTimes(1)
   })
 })
 
@@ -205,7 +240,7 @@ describe('BranchCard — current branch', () => {
     await user.click(screen.getByTitle('More actions'))
     await user.click(screen.getByText('Delete branch'))
     expect(mockSwitchToDefault).toHaveBeenCalledWith('/repos/my-repo')
-    expect(mockDelete).toHaveBeenCalledWith('/repos/my-repo', 'feat/my-feature')
+    expect(mockDelete).toHaveBeenCalledWith('/repos/my-repo', 'feat/my-feature', false)
     await waitFor(() => expect(onDeleted).toHaveBeenCalled())
   })
 })
