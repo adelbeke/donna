@@ -3,9 +3,12 @@ import { createClient, PR_DETAILS_SINGLE_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import type { PullRequest } from '@/types/github'
 
-type NodeResult = {
-  node: Pick<PullRequest, 'id' | 'mergeable' | 'commits' | 'reviewRequests' | 'reviews'>
-}
+export type PRDetails = Pick<
+  PullRequest,
+  'id' | 'mergeable' | 'commits' | 'reviewRequests' | 'reviews' | 'comments'
+>
+
+type NodeResult = { node: PRDetails }
 
 export const usePRDetails = (prId: string) => {
   const token = useAuthStore((s) => s.token)

@@ -78,46 +78,75 @@ export const PR_LIST_QUERY = /* GraphQL */ `
   }
 `
 
+// ponytail: `reviews`/`comments` use `last:` deliberately — every derivation over them wants the
+// most recent entries (latest state per reviewer, who spoke last). With `first:` a PR with more
+// than 20 reviews would be judged on its oldest ones and show a stale review-state badge.
+const PR_DETAILS_FIELDS = /* GraphQL */ `
+  id
+  mergeable
+  commits(last: 1) {
+    nodes {
+      commit {
+        statusCheckRollup {
+          state
+        }
+      }
+    }
+  }
+  reviewRequests(first: 10) {
+    nodes {
+      requestedReviewer {
+        __typename
+        ... on User {
+          login
+          avatarUrl
+        }
+        ... on Team {
+          name
+          slug
+        }
+      }
+    }
+  }
+  reviews(last: 20) {
+    nodes {
+      state
+      submittedAt
+      author {
+        login
+        avatarUrl
+      }
+    }
+  }
+  comments(last: 20) {
+    nodes {
+      createdAt
+      author {
+        login
+        avatarUrl
+      }
+    }
+  }
+`
+
 export const PR_DETAILS_SINGLE_QUERY = /* GraphQL */ `
   query GetPRDetails($nodeId: ID!) {
     node(id: $nodeId) {
       ... on PullRequest {
-        id
-        mergeable
-        commits(last: 1) {
-          nodes {
-            commit {
-              statusCheckRollup {
-                state
-              }
-            }
-          }
-        }
-        reviewRequests(first: 10) {
-          nodes {
-            requestedReviewer {
-              __typename
-              ... on User {
-                login
-                avatarUrl
-              }
-              ... on Team {
-                name
-                slug
-              }
-            }
-          }
-        }
-        reviews(first: 20) {
-          nodes {
-            state
-            submittedAt
-            author {
-              login
-              avatarUrl
-            }
-          }
-        }
+        ${PR_DETAILS_FIELDS}
+      }
+    }
+  }
+`
+
+// One request covers a whole page of cards instead of one subprocess spawn per card — each
+// `gh api graphql` call shells out from the Electron main process, so batching is the difference
+// between ~6 spawns and ~150 when the Focus view classifies every PR it knows about.
+export const PR_DETAILS_BATCH_QUERY = /* GraphQL */ `
+  query GetPRDetailsBatch($ids: [ID!]!) {
+    nodes(ids: $ids) {
+      ... on PullRequest {
+        ${PR_DETAILS_FIELDS}
       }
     }
   }

@@ -43,6 +43,14 @@ export type Review = {
   submittedAt: string
 }
 
+export type IssueComment = {
+  createdAt: string
+  author: {
+    login: string
+    avatarUrl: string
+  } | null
+}
+
 export type PullRequest = {
   id: string
   number: number
@@ -66,6 +74,9 @@ export type PullRequest = {
   }
   reviews?: {
     nodes: Review[]
+  }
+  comments?: {
+    nodes: IssueComment[]
   }
   additions: number
   deletions: number

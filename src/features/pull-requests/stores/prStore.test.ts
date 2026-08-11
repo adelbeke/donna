@@ -6,13 +6,14 @@ beforeEach(() => {
     section: 'review-requested',
     globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
     viewFilters: {
+      focus: { repos: [], showDrafts: false, search: '' },
       'review-requested': { repos: [], showDrafts: false, search: '' },
       authored: { repos: [], showDrafts: false, search: '' },
       reviewed: { repos: [], showDrafts: false, search: '' },
     },
     priorityIds: [],
     hiddenIds: [],
-    knownRepos: { 'review-requested': [], authored: [], reviewed: [] },
+    knownRepos: { focus: [], 'review-requested': [], authored: [], reviewed: [] },
   })
 })
 

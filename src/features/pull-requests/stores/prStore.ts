@@ -1,7 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type PRSection = 'review-requested' | 'authored' | 'reviewed'
+// Sections backed by a single GitHub search. `focus` is not one of them: it aggregates all three.
+export type SearchSection = 'review-requested' | 'authored' | 'reviewed'
+
+export type PRSection = SearchSection | 'focus'
 
 export type GlobalFilters = {
   hiddenAuthors: string[]
@@ -56,12 +59,14 @@ const defaultGlobalFilters: GlobalFilters = {
 }
 
 const defaultViewFiltersAll: Record<PRSection, ViewFilters> = {
+  focus: { ...defaultViewFilters },
   'review-requested': { ...defaultViewFilters },
   authored: { ...defaultViewFilters, showDrafts: true },
   reviewed: { ...defaultViewFilters },
 }
 
 const defaultKnownReposAll: Record<PRSection, string[]> = {
+  focus: [],
   'review-requested': [],
   authored: [],
   reviewed: [],
@@ -207,7 +212,12 @@ export const usePRStore = create<PRStore>()(
               p.donnaPRViewHintDismissed ?? current.donnaPRViewHintDismissed,
           }
         }
-        const validSections = new Set<string>(['review-requested', 'authored', 'reviewed'])
+        const validSections = new Set<string>([
+          'focus',
+          'review-requested',
+          'authored',
+          'reviewed',
+        ])
         return {
           ...current,
           ...(p.section && validSections.has(p.section) ? { section: p.section } : {}),

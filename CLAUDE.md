@@ -24,8 +24,12 @@ CI (`.github/workflows/ci.yml`) runs `lint`, `test:run`, then `build` on every P
 
 ## Main Features
 
-**Pull Requests view** (`prs`) — three sections selected via the `PRSectionsTabs` sidebar tabs, each a different GitHub search (`buildSearchQuery`):
-- **Review requested** / **My PRs** (authored) / **Reviewed**.
+**Pull Requests view** (`prs`) — four sections selected via the `PRSectionsTabs` sidebar tabs. Three map to a single GitHub search (`buildSearchQuery`); **Focus** aggregates all three:
+- **Focus** / **Review requested** / **My PRs** (authored) / **Reviewed**.
+- **Focus** is the at-a-glance task list (`FocusList` + `useFocusPRs`). It runs all three searches at once (`usePRSearch` with an `enabled` flag, sharing the `['prs', section, login]` cache with the plain sections), takes the `MAX_FOCUS_CANDIDATES` most-recently-updated PRs after the normal filters, batch-loads their details, and sorts each PR into exactly one bucket via `classifyPR` (`lib/focus.ts`), cheapest-to-clear first:
+  - **Ready to merge** — authored by me, not draft, `MERGEABLE`, checks green or absent, ≥1 approval and no outstanding changes-requested.
+  - **Waiting for your review** — in the review-requested search, not draft, not mine, `deriveMyReviewState` still `null`.
+  - **Ball in your court** — I have participated (author, reviewer or commenter) and someone else's latest activity post-dates mine. `reviews` + `comments` are enough to decide this: GitHub wraps every inline thread reply in an auto-created `PullRequestReview`, so no `reviewThreads` traversal is needed.
 - Per-PR actions on each `PRCard`: **star** (top-priority, pinned above the list and persisted), **hide** (dims + filtered out unless "Hidden" toggle is on), **copy PR link**, open externally.
 - **Mute authors**: free-form patterns (e.g. `dependabot`) that filter out their PRs.
 - Filters: by repository/org (checkboxes in the `SettingsModal` gear-icon popover, shown only when >1 repo loaded), title search (above the list), show/hide **drafts**, show/hide **hidden** (`VisibilityToggles` in the list header).
@@ -121,7 +125,8 @@ Two layers, deliberately separated:
 3. Each node is enriched in-memory with `isTopPriority`, `isHidden`.
 4. `applyFilters` (`src/features/pull-requests/lib/prFilters.ts`) drops drafts/hidden/repo/author/search misses.
 5. `sortAndPartition` (`src/features/pull-requests/lib/prUtils.ts`) sorts by `updatedAt` and splits priority PRs (pinned on top) from the rest.
-6. **Per-card detail loading**: `PRCard` calls `usePRDetails(pr.id)` (`src/features/pull-requests/queries/usePRDetails.ts`) which lazily fetches the heavy per-PR fields (`reviews`, `reviewRequests`, `mergeable`, `commits`/`statusCheckRollup`). `myReviewState`, `checkState`, and conflict badge are derived from the merged result — so they appear progressively as details load. `reviews`, `reviewRequests`, `commits`, and `mergeable` are optional on the `PullRequest` type for this reason.
+6. **Per-card detail loading**: `PRCard` calls `usePRDetails(pr.id)` (`src/features/pull-requests/queries/usePRDetails.ts`) which lazily fetches the heavy per-PR fields (`reviews`, `comments`, `reviewRequests`, `mergeable`, `commits`/`statusCheckRollup`). `myReviewState`, `checkState`, and conflict badge are derived from the merged result — so they appear progressively as details load. `reviews`, `comments`, `reviewRequests`, `commits`, and `mergeable` are optional on the `PullRequest` type for this reason.
+7. **Batched detail loading**: `useFocusPRs` fetches the same field set for up to `DETAILS_BATCH_SIZE` PRs per request via `PR_DETAILS_BATCH_QUERY` (`nodes(ids:)`), then seeds each `['pr-details', id]` cache entry with `setQueryData`. Every GraphQL call is a `gh api graphql` subprocess spawn in the Electron main process, so this is what keeps Focus from firing one spawn per card — and it warms the plain sections too. Both queries share the `PR_DETAILS_FIELDS` selection set, which uses `reviews(last: 20)` / `comments(last: 20)` because every derivation over them wants the *most recent* entries.
 
 All GraphQL queries live as exported template strings in `src/providers/github.ts`. The pure derivation helpers in `prUtils.ts` (review summaries, check rollup state) are the most heavily unit-tested part of the app — keep them pure and add cases there rather than testing through components.
 
