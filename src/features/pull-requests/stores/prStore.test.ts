@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { usePRStore } from './prStore'
 
 beforeEach(() => {
@@ -8,11 +8,11 @@ beforeEach(() => {
     viewFilters: {
       'review-requested': { repos: [], showDrafts: false, search: '' },
       authored: { repos: [], showDrafts: false, search: '' },
-      mentioned: { repos: [], showDrafts: false, search: '' },
+      reviewed: { repos: [], showDrafts: false, search: '' },
     },
     priorityIds: [],
     hiddenIds: [],
-    knownRepos: { 'review-requested': [], authored: [], mentioned: [] },
+    knownRepos: { 'review-requested': [], authored: [], reviewed: [] },
   })
 })
 
@@ -127,16 +127,72 @@ describe('prStore', () => {
     const { knownRepos } = usePRStore.getState()
     expect(knownRepos['review-requested']).toEqual(['org/repo-a'])
     expect(knownRepos.authored).toEqual([])
-    expect(knownRepos.mentioned).toEqual([])
+    expect(knownRepos.reviewed).toEqual([])
   })
 
   it('persisted merge restores knownRepos', () => {
     const persisted = {
       globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
-      knownRepos: { 'review-requested': ['org/repo-a'], authored: [], mentioned: [] },
+      knownRepos: { 'review-requested': ['org/repo-a'], authored: [], reviewed: [] },
     }
     const { merge } = usePRStore.persist.getOptions()
     const merged = merge!(persisted, usePRStore.getState())
     expect(merged.knownRepos['review-requested']).toEqual(['org/repo-a'])
+  })
+
+  it('given persisted knownRepos predating the reviewed section, when merged, then reviewed defaults to empty instead of undefined', () => {
+    const persisted = {
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+      knownRepos: { 'review-requested': ['org/repo-a'], authored: [] },
+    }
+    const { merge } = usePRStore.persist.getOptions()
+    const merged = merge!(persisted, usePRStore.getState())
+    expect(merged.knownRepos['review-requested']).toEqual(['org/repo-a'])
+    expect(merged.knownRepos.reviewed).toEqual([])
+  })
+
+  it('given a stale persisted view key, when merged, then it is dropped without crashing', () => {
+    const persisted = {
+      view: 'branches',
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+    }
+    const { merge } = usePRStore.persist.getOptions()
+    const merged = merge!(persisted, usePRStore.getState()) as Record<string, unknown>
+    expect(merged.view).toBeUndefined()
+  })
+
+  it('openPRsInDonna defaults to true', () => {
+    expect(usePRStore.getState().openPRsInDonna).toBe(true)
+  })
+
+  it('setOpenPRsInDonna updates the flag', () => {
+    usePRStore.getState().setOpenPRsInDonna(false)
+    expect(usePRStore.getState().openPRsInDonna).toBe(false)
+  })
+
+  it('dismissDonnaPRViewHint sets the dismissed flag', () => {
+    usePRStore.getState().dismissDonnaPRViewHint()
+    expect(usePRStore.getState().donnaPRViewHintDismissed).toBe(true)
+  })
+
+  it('authored view defaults showDrafts to true, other sections default to false', async () => {
+    localStorage.clear()
+    vi.resetModules()
+    const { usePRStore: freshStore } = await import('./prStore')
+    expect(freshStore.getState().viewFilters.authored.showDrafts).toBe(true)
+    expect(freshStore.getState().viewFilters['review-requested'].showDrafts).toBe(false)
+    expect(freshStore.getState().viewFilters.reviewed.showDrafts).toBe(false)
+  })
+
+  it('persisted merge restores openPRsInDonna and donnaPRViewHintDismissed', () => {
+    const persisted = {
+      globalFilters: { hiddenAuthors: [], hiddenRepos: [], showHidden: false },
+      openPRsInDonna: false,
+      donnaPRViewHintDismissed: true,
+    }
+    const { merge } = usePRStore.persist.getOptions()
+    const merged = merge!(persisted, usePRStore.getState())
+    expect(merged.openPRsInDonna).toBe(false)
+    expect(merged.donnaPRViewHintDismissed).toBe(true)
   })
 })

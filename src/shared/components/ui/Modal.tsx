@@ -8,16 +8,35 @@ type Props = PropsWithChildren & {
   onClose: () => void
   className?: string
   actions?: ReactNode
+  size?: 'default' | 'full'
 }
 
-export const Modal = ({ children, isOpen, title, onClose, className, actions }: Props) => {
+const SIZE_CLASS: Record<'default' | 'full', string> = {
+  default: 'max-w-xl max-h-[80vh]',
+  full: 'w-[92vw] h-[88vh] max-w-none',
+}
+
+export const Modal = ({
+  children,
+  isOpen,
+  title,
+  onClose,
+  className,
+  actions,
+  size = 'default',
+}: Props) => {
   useEffect(() => {
     if (!isOpen) return
     document.body.style.overflow = 'hidden'
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKeyDown)
     return () => {
       document.body.style.overflow = ''
+      document.removeEventListener('keydown', onKeyDown)
     }
-  }, [isOpen])
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
@@ -34,7 +53,7 @@ export const Modal = ({ children, isOpen, title, onClose, className, actions }: 
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`pointer-events-auto max-w-xl max-h-[80vh] overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] shadow-lg p-4 space-y-4 ${className ?? ''}`}
+          className={`pointer-events-auto ${SIZE_CLASS[size]} overflow-y-auto rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-lg p-4 space-y-4 ${className ?? ''}`}
         >
           <div className="flex items-center justify-between gap-4">
             <p className="text-sm font-semibold text-[var(--color-text-primary)] truncate">

@@ -6,16 +6,22 @@ type Props = PropsWithChildren & {
   onClick: () => void
   title: string
   className: string
+  disabled?: boolean
 }
 
-export const PRCardAction = ({ children, title, className, onClick }: Props) => {
+export const PRCardAction = ({ children, title, className, onClick, disabled }: Props) => {
   const computedClassName = twMerge(
-    'p-1.5 rounded transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent] focus-visible:outline-none',
+    'p-1.5 rounded transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent] focus-visible:outline-none disabled:opacity-50 disabled:cursor-not-allowed',
     className
   )
 
   return (
-    <ButtonWithTooltip onClick={onClick} label={title} buttonClassName={computedClassName}>
+    <ButtonWithTooltip
+      onClick={onClick}
+      label={title}
+      buttonClassName={computedClassName}
+      disabled={disabled}
+    >
       {children}
     </ButtonWithTooltip>
   )

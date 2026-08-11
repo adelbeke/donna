@@ -12,7 +12,7 @@ import { isOverContextSwitchThreshold } from '../../lib/prUtils'
 const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
   authored: 'My pull requests',
-  mentioned: 'Mentioned',
+  reviewed: 'Reviewed',
 }
 
 export const PRList = () => {
@@ -61,6 +61,11 @@ export const PRList = () => {
     refetchAll()
   }
 
+  // Only counts hidden PRs still present in the current section's fetched results -
+  // `hiddenIds` in the store is an all-time list that never gets pruned (e.g. once a
+  // hidden PR is closed it drops out of allPRs but its id lingers in hiddenIds forever).
+  const hiddenCount = allPRs.filter((pr) => pr.isHidden).length
+
   return (
     <div className="flex-1 min-w-0">
       <PRListHeader
@@ -72,6 +77,7 @@ export const PRList = () => {
         refetch={handleRefetch}
         isFetching={isFetching}
         isLoadingMore={isFetchingNextPage}
+        hiddenCount={hiddenCount}
       />
 
       {section === 'authored' &&
