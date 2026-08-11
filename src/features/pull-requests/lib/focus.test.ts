@@ -100,7 +100,11 @@ describe('isAwaitingMyReply', () => {
       author: { login: ME, avatarUrl: '' },
       reviews: {
         nodes: [
-          { state: 'PENDING', submittedAt: null as unknown as string, author: { login: 'bob', avatarUrl: '' } },
+          {
+            state: 'PENDING',
+            submittedAt: null as unknown as string,
+            author: { login: 'bob', avatarUrl: '' },
+          },
         ],
       },
     })

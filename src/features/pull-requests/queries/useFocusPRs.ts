@@ -14,7 +14,7 @@ const DETAILS_BATCH_SIZE = 25
 
 type BatchResult = { nodes: (PRDetails | null)[] }
 
-const chunk = <T,>(items: T[], size: number): T[][] => {
+const chunk = <T>(items: T[], size: number): T[][] => {
   const chunks: T[][] = []
   for (let i = 0; i < items.length; i += size) chunks.push(items.slice(i, i + size))
   return chunks
@@ -39,10 +39,7 @@ export const useFocusPRs = () => {
 
   // The filtered set, not `allPRs` — Focus inherits the repo/search/draft/mute filters that the
   // shared SettingsModal and toggles drive, exactly like every other section.
-  const filteredPRs = useMemo(
-    () => [...priorityPRs, ...regularPRs],
-    [priorityPRs, regularPRs]
-  )
+  const filteredPRs = useMemo(() => [...priorityPRs, ...regularPRs], [priorityPRs, regularPRs])
 
   const candidateIds = useMemo(
     () =>

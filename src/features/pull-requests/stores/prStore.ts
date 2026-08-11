@@ -212,12 +212,7 @@ export const usePRStore = create<PRStore>()(
               p.donnaPRViewHintDismissed ?? current.donnaPRViewHintDismissed,
           }
         }
-        const validSections = new Set<string>([
-          'focus',
-          'review-requested',
-          'authored',
-          'reviewed',
-        ])
+        const validSections = new Set<string>(['focus', 'review-requested', 'authored', 'reviewed'])
         return {
           ...current,
           ...(p.section && validSections.has(p.section) ? { section: p.section } : {}),
