@@ -5,6 +5,7 @@ import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures, type Feature } from '@/shared/features'
 import { Footer } from '@/shared/components/Footer/Footer'
 import { useUpdateCheck, UpdateBanner } from '@/features/updates/exports'
+import { OnboardingGuide } from '@/features/onboarding/exports'
 
 const NAV_TABS: { to: string; label: string; feature?: Feature }[] = [
   { to: '/prs', label: 'Pull Requests' },
@@ -51,6 +52,7 @@ export const AppLayout = () => {
             <div className="flex items-center gap-3 shrink-0">
               <img src={user.avatarUrl} alt={user.login} className="w-6 h-6 rounded-full" />
               <span className="text-xs text-[var(--color-text-secondary)]">{user.login}</span>
+              <OnboardingGuide />
               <button
                 onClick={toggle}
                 title="Toggle theme"

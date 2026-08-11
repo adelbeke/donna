@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PRSectionsTabs } from './PRSectionsTabs'
 import { usePRStore } from '../../stores/prStore'
+import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
 import type { PRStore } from '../../stores/prStore'
 
 vi.mock('../../stores/prStore', () => ({ usePRStore: vi.fn() }))
@@ -26,6 +27,7 @@ const renderWithClient = () => {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  useOnboardingStore.setState({ spotlight: null })
   mockStore()
 })
 
@@ -60,5 +62,26 @@ describe('PRSectionsTabs — section tabs', () => {
     renderWithClient()
     fireEvent.click(screen.getByText('My PRs'))
     expect(setSection).toHaveBeenCalledWith('authored')
+  })
+})
+
+describe('PRSectionsTabs — onboarding spotlight', () => {
+  it('given no spotlight, then no tab is ringed', () => {
+    renderWithClient()
+    expect(screen.getByText('Review requested').className).not.toContain('animate-spotlight-ring')
+  })
+
+  it('given the guide is walking the lists, then the active tab is ringed', () => {
+    useOnboardingStore.setState({ spotlight: 'sections' })
+    mockStore('authored')
+    renderWithClient()
+    expect(screen.getByText('My PRs').className).toContain('animate-spotlight-ring')
+    expect(screen.getByText('Reviewed').className).not.toContain('animate-spotlight-ring')
+  })
+
+  it('given the guide is spotlighting card actions, then no tab is ringed', () => {
+    useOnboardingStore.setState({ spotlight: 'card-actions' })
+    renderWithClient()
+    expect(screen.getByText('Review requested').className).not.toContain('animate-spotlight-ring')
   })
 })

@@ -33,4 +33,25 @@ describe('Modal', () => {
     )
     expect(baseElement.querySelector('.pointer-events-auto')?.className).toContain('max-w-xl')
   })
+
+  it('given transition is omitted, then no animation classes are added (existing call sites unchanged)', () => {
+    const { baseElement } = render(
+      <Modal isOpen title="Test" onClose={vi.fn()}>
+        content
+      </Modal>
+    )
+    expect(baseElement.innerHTML).not.toContain('animate-')
+  })
+
+  it('given transition is enabled, then the overlay and panel animate in under motion-safe', () => {
+    const { baseElement } = render(
+      <Modal isOpen title="Test" onClose={vi.fn()} transition>
+        content
+      </Modal>
+    )
+    const overlay = baseElement.querySelector('.fixed.inset-0.z-40')
+    const panel = baseElement.querySelector('.pointer-events-auto')
+    expect(overlay?.className).toContain('motion-safe:animate-overlay-in')
+    expect(panel?.className).toContain('motion-safe:animate-panel-in')
+  })
 })

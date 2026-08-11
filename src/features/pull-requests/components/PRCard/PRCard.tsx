@@ -17,6 +17,7 @@ type Props = {
   pr: PullRequest
   isAuthored?: boolean
   showHideAndStar?: boolean
+  highlightActions?: boolean
 }
 
 const NO_LOCAL_REPO_TITLE = 'Add this repo in the Branches tab to run shortcuts'
@@ -57,7 +58,12 @@ const reviewBadge: Record<
   },
 }
 
-export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props) => {
+export const PRCard = ({
+  pr,
+  isAuthored = false,
+  showHideAndStar = true,
+  highlightActions = false,
+}: Props) => {
   const navigate = useNavigate()
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
@@ -230,6 +236,7 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
           onOpenExternally={openExternally}
           showReviewInDonna={!openPRsInDonna}
           onReviewInDonna={openInDonna}
+          highlight={highlightActions}
         />
       </div>
       {isAuthored && repoPath && (
