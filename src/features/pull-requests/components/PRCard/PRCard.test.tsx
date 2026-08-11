@@ -6,6 +6,7 @@ import userEvent from '@testing-library/user-event'
 import { PRCard } from './PRCard'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
+import { useBranchStore } from '@/features/branches/stores/branchStore'
 import { usePRDetails } from '../../queries/usePRDetails'
 import { useCheckContexts } from '../../queries/useCheckContexts'
 import type { PullRequest, ReviewState } from '@/types/github'
@@ -45,6 +46,7 @@ const pr: PullRequest = {
 beforeEach(() => {
   usePRStore.setState({ priorityIds: [], hiddenIds: [], openPRsInDonna: true })
   useAuthStore.setState({ user: { login: 'viewer', avatarUrl: '', name: 'Viewer' }, token: 'test' })
+  useBranchStore.setState({ localPaths: [] })
   mockUsePRDetails.mockReturnValue({ data: undefined } as never)
   mockUseCheckContexts.mockReturnValue({ checks: [], isLoading: false, refetch: vi.fn() } as never)
 })
@@ -340,6 +342,39 @@ describe('PRCard', () => {
     it('GIVEN mergeable MERGEABLE WHEN rendered THEN no Conflict badge', () => {
       renderCard(<PRCard pr={{ ...pr, mergeable: 'MERGEABLE' }} />)
       expect(screen.queryByText('Conflict')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('run shortcut action', () => {
+    it('GIVEN isAuthored=false THEN run shortcut action is not shown, regardless of local repos', () => {
+      useBranchStore.setState({ localPaths: ['/Users/me/code/repo'] })
+      renderCard(<PRCard pr={pr} isAuthored={false} />)
+      expect(screen.queryByRole('button', { name: /run shortcut/i })).not.toBeInTheDocument()
+    })
+
+    it('GIVEN isAuthored=true and no local repo matches THEN run shortcut action is shown but disabled with an explanatory title', () => {
+      useBranchStore.setState({ localPaths: [] })
+      renderCard(<PRCard pr={pr} isAuthored />)
+      const button = screen.getByRole('button', { name: /add this repo in the branches tab/i })
+      expect(button).toBeDisabled()
+    })
+
+    it('GIVEN isAuthored=true and a local repo matches THEN run shortcut action is shown enabled', () => {
+      useBranchStore.setState({ localPaths: ['/Users/me/code/repo'] })
+      renderCard(<PRCard pr={pr} isAuthored />)
+      const button = screen.getByRole('button', { name: 'Run shortcut' })
+      expect(button).not.toBeDisabled()
+    })
+
+    it('GIVEN isAuthored=true and no local repo matches WHEN the disabled action is clicked THEN the shortcuts modal does not open', async () => {
+      useBranchStore.setState({ localPaths: [] })
+      const user = userEvent.setup()
+      renderCard(<PRCard pr={pr} isAuthored />)
+      const button = screen.getByRole('button', { name: /add this repo in the branches tab/i })
+      await user.click(button)
+      expect(
+        screen.queryByText(`Shortcuts · ${pr.repository.nameWithOwner} #${pr.number}`)
+      ).not.toBeInTheDocument()
     })
   })
 
