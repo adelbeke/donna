@@ -29,18 +29,30 @@ export const BranchCard = ({
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [isRemoving, setIsRemoving] = useState(false)
 
-  const deleteBranch = async () => {
-    const message = isCurrentBranch
-      ? `Delete branch "${branch}"?\n\nYou're currently on this branch — git will switch to main first.`
-      : `Delete branch "${branch}"?\nThe branch must be fully merged.`
-    if (!window.confirm(message)) return
+  const deleteBranch = async (force = false) => {
+    if (!force) {
+      const message = isCurrentBranch
+        ? `Delete branch "${branch}"?\n\nYou're currently on this branch — git will switch to main first.`
+        : `Delete branch "${branch}"?\nThe branch must be fully merged.`
+      if (!window.confirm(message)) return
+    }
     setIsMenuOpen(false)
     try {
       if (isCurrentBranch) await window.electronAPI!.branches.switchToDefault(repoPath)
-      await window.electronAPI!.branches.delete(repoPath, branch)
+      await window.electronAPI!.branches.delete(repoPath, branch, force)
       onDeleted()
     } catch (e) {
-      setDeleteError((e as Error).message)
+      const message = (e as Error).message
+      if (!force && message.includes('not fully merged')) {
+        const confirmForce = window.confirm(
+          `⚠️ "${branch}" is not fully merged.\n\nForce-deleting will permanently discard any commits that only exist on this branch.\n\nAre you sure?`
+        )
+        if (confirmForce) {
+          await deleteBranch(true)
+          return
+        }
+      }
+      setDeleteError(message)
     }
   }
 
@@ -140,7 +152,7 @@ export const BranchCard = ({
                       </button>
                     ) : (
                       <button
-                        onClick={deleteBranch}
+                        onClick={() => deleteBranch()}
                         className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-[var(--color-danger)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer"
                       >
                         <Trash2 size={12} />

@@ -43,9 +43,10 @@ describe('buildSearchQuery', () => {
     expect(actual).toContain('author:alice')
   })
 
-  it('GIVEN mentioned section WHEN called THEN includes mentions filter', () => {
-    const actual = buildSearchQuery('mentioned', 'alice')
-    expect(actual).toContain('mentions:alice')
+  it('GIVEN reviewed section WHEN called THEN includes reviewed-by filter and excludes own PRs', () => {
+    const actual = buildSearchQuery('reviewed', 'alice')
+    expect(actual).toContain('reviewed-by:alice')
+    expect(actual).toContain('-author:alice')
   })
 
   it('GIVEN unknown section WHEN called THEN falls back to review-requested', () => {

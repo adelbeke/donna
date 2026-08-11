@@ -121,9 +121,9 @@ ipcMain.handle('branches:switchToDefault', async (_e, repoPath: string) => {
   }
 })
 
-ipcMain.handle('branches:delete', async (_e, repoPath: string, branch: string) => {
+ipcMain.handle('branches:delete', async (_e, repoPath: string, branch: string, force = false) => {
   try {
-    await execFileAsync('git', ['-C', repoPath, 'branch', '-d', branch])
+    await execFileAsync('git', ['-C', repoPath, 'branch', force ? '-D' : '-d', branch])
   } catch (e) {
     throw gitError(e)
   }

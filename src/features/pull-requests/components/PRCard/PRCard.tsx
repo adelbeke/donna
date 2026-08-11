@@ -1,22 +1,13 @@
 import { useState, type ReactElement } from 'react'
-import {
-  GitMerge,
-  MessageSquare,
-  Check,
-  AlertCircle,
-  FileCode,
-  CheckCircle,
-  XCircle,
-  Clock,
-} from 'lucide-react'
-import type { PullRequest, ReviewState, CheckRollupState } from '@/types/github'
+import { useNavigate } from 'react-router'
+import { GitMerge, MessageSquare, Check, AlertCircle, FileCode } from 'lucide-react'
+import type { PullRequest, ReviewState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { useBranchStore } from '@/features/branches/stores/branchStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
-import { PRChecksModal } from '../PRChecksModal/PRChecksModal.tsx'
+import { PRChecksBadge } from '../PRChecksBadge/PRChecksBadge.tsx'
 import { deriveCheckState, deriveMyReviewState } from '../../lib/prUtils'
-import { useCheckContexts } from '../../queries/useCheckContexts'
 import { usePRDetails } from '../../queries/usePRDetails'
 import { timeAgo } from '../../lib/timeAgo'
 import { PRCardActions } from '@/features/pull-requests/components/PRCardActions/PRCardActions.tsx'
@@ -28,41 +19,7 @@ type Props = {
   showHideAndStar?: boolean
 }
 
-const ciStateBadge: Record<
-  CheckRollupState,
-  { label: string; color: string; bg: string; icon: ReactElement }
-> = {
-  SUCCESS: {
-    label: 'Checks pass',
-    color: 'text-[var(--color-success)]',
-    bg: 'bg-[var(--color-success-subtle)]',
-    icon: <CheckCircle size={11} />,
-  },
-  FAILURE: {
-    label: 'Checks failed',
-    color: 'text-[var(--color-danger)]',
-    bg: 'bg-[var(--color-danger-subtle)]',
-    icon: <XCircle size={11} />,
-  },
-  ERROR: {
-    label: 'Checks error',
-    color: 'text-[var(--color-danger)]',
-    bg: 'bg-[var(--color-danger-subtle)]',
-    icon: <XCircle size={11} />,
-  },
-  PENDING: {
-    label: 'Checks pending',
-    color: 'text-[var(--color-warning)]',
-    bg: 'bg-[var(--color-warning-subtle)]',
-    icon: <Clock size={11} />,
-  },
-  EXPECTED: {
-    label: 'Checks pending',
-    color: 'text-[var(--color-warning)]',
-    bg: 'bg-[var(--color-warning-subtle)]',
-    icon: <Clock size={11} />,
-  },
-}
+const NO_LOCAL_REPO_TITLE = 'Add this repo in the Branches tab to run shortcuts'
 
 const reviewBadge: Record<
   ReviewState,
@@ -101,11 +58,12 @@ const reviewBadge: Record<
 }
 
 export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props) => {
-  const [checksOpen, setChecksOpen] = useState(false)
+  const navigate = useNavigate()
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const togglePriority = usePRStore((s) => s.togglePriority)
   const toggleHide = usePRStore((s) => s.toggleHide)
   const priorityIds = usePRStore((s) => s.priorityIds)
+  const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
   const localPaths = useBranchStore((s) => s.localPaths)
   const repoPath = isAuthored ? resolveLocalRepoPath(localPaths, pr.repository.name) : null
@@ -116,14 +74,7 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
   const myReviewState = deriveMyReviewState(merged, viewerLogin)
   const badge = !isAuthored && myReviewState ? reviewBadge[myReviewState] : null
   const checkState = deriveCheckState(merged)
-  const ciBadge = checkState ? ciStateBadge[checkState] : null
   const showConflict = merged.mergeable === 'CONFLICTING'
-  const {
-    checks,
-    isLoading: checksLoading,
-    isRefetching: checksRefetching,
-    refetch: refetchChecks,
-  } = useCheckContexts(pr.id, checksOpen)
 
   const handleHide = () => {
     toggleHide(pr.id)
@@ -133,7 +84,12 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
     togglePriority(pr.id)
   }
 
-  const openPR = () => window.open(pr.url, '_blank', 'noopener,noreferrer')
+  const openExternally = () => window.open(pr.url, '_blank', 'noopener,noreferrer')
+  const openInDonna = () => {
+    const [owner, repo] = pr.repository.nameWithOwner.split('/')
+    navigate(`/prs/${owner}/${repo}/${pr.number}`)
+  }
+  const openPR = openPRsInDonna ? openInDonna : openExternally
 
   return (
     <div
@@ -144,7 +100,6 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
         shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)]
         transition-all duration-150
         ${isHidden ? 'opacity-50' : ''}
-        ${checksOpen ? 'z-10' : ''}
         border-[var(--color-border)]
       `}
     >
@@ -170,7 +125,13 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
               href={pr.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (openPRsInDonna) {
+                  e.preventDefault()
+                  openInDonna()
+                }
+              }}
               className="text-sm font-medium leading-snug line-clamp-2 transition-colors text-[var(--color-text-primary)] hover:text-[var(--color-accent)]"
             >
               {pr.title}
@@ -233,27 +194,7 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
               )}
 
               {/* CI checks badge */}
-              {ciBadge && (
-                <div className="relative" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => setChecksOpen((o) => !o)}
-                    className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded cursor-pointer ${ciBadge.color} ${ciBadge.bg}`}
-                  >
-                    {ciBadge.icon}
-                    {ciBadge.label}
-                  </button>
-                  <PRChecksModal
-                    isOpen={checksOpen}
-                    prTitle={pr.title}
-                    checks={checks}
-                    isLoading={checksLoading}
-                    isRefreshing={checksRefetching}
-                    rollupState={checkState}
-                    onClose={() => setChecksOpen(false)}
-                    onRefresh={refetchChecks}
-                  />
-                </div>
-              )}
+              <PRChecksBadge prId={pr.id} prTitle={pr.title} rollupState={checkState} />
 
               {/* Conflict badge */}
               {showConflict && (
@@ -282,8 +223,13 @@ export const PRCard = ({ pr, isAuthored = false, showHideAndStar = true }: Props
           prUrl={pr.url}
           prNumber={pr.number}
           showHideAndStar={showHideAndStar}
-          showRunShortcut={isAuthored && !!repoPath}
+          showRunShortcut={isAuthored}
+          runShortcutDisabled={isAuthored && !repoPath}
+          runShortcutTitle={repoPath ? 'Run shortcut' : NO_LOCAL_REPO_TITLE}
           onRunShortcut={() => setShortcutsOpen(true)}
+          onOpenExternally={openExternally}
+          showReviewInDonna={!openPRsInDonna}
+          onReviewInDonna={openInDonna}
         />
       </div>
       {isAuthored && repoPath && (

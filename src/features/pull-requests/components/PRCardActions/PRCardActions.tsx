@@ -1,4 +1,4 @@
-import { Eye, EyeOff, GitBranch, Link2, Star, Terminal } from 'lucide-react'
+import { Eye, EyeOff, ExternalLink, FileDiff, GitBranch, Link2, Star, Terminal } from 'lucide-react'
 import { PRCardAction } from '@/features/pull-requests/components/PRCardActions/PRCardAction.tsx'
 import { CopyWithFeedback } from '@/shared/components/CopyWithFeedback/CopyWithFeedback.tsx'
 
@@ -11,7 +11,12 @@ type Props = {
   prNumber: number
   showHideAndStar: boolean
   showRunShortcut: boolean
+  runShortcutDisabled?: boolean
+  runShortcutTitle?: string
   onRunShortcut: () => void
+  onOpenExternally: () => void
+  showReviewInDonna: boolean
+  onReviewInDonna: () => void
 }
 
 export const PRCardActions = ({
@@ -23,7 +28,12 @@ export const PRCardActions = ({
   togglePriority,
   showHideAndStar,
   showRunShortcut,
+  runShortcutDisabled = false,
+  runShortcutTitle = 'Run shortcut',
   onRunShortcut,
+  onOpenExternally,
+  showReviewInDonna,
+  onReviewInDonna,
 }: Props) => {
   return (
     <div
@@ -59,12 +69,29 @@ export const PRCardActions = ({
       {showRunShortcut && (
         <PRCardAction
           onClick={onRunShortcut}
-          title="Run shortcut"
+          title={runShortcutTitle}
+          disabled={runShortcutDisabled}
           className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
         >
           <Terminal size={14} />
         </PRCardAction>
       )}
+      {showReviewInDonna && (
+        <PRCardAction
+          onClick={onReviewInDonna}
+          title="Review in Donna"
+          className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
+        >
+          <FileDiff size={14} />
+        </PRCardAction>
+      )}
+      <PRCardAction
+        onClick={onOpenExternally}
+        title="Open on GitHub"
+        className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)]"
+      >
+        <ExternalLink size={14} />
+      </PRCardAction>
       <CopyWithFeedback
         text={prUrl}
         label="Copy PR link"

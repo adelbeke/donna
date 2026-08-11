@@ -1,0 +1,104 @@
+import type { DiffRow, DiffSide, PRFile, PRReviewThread } from '../types'
+
+export const anchorId = (filename: string) => `diff-file-${filename}`
+
+const KEY_SEP = '\0' // NUL: the one byte a path/side/number can never contain
+
+export const rowKey = (side: DiffSide, lineNumber: number): string =>
+  `${side}${KEY_SEP}${lineNumber}`
+
+// A context row is unchanged on both sides at once, so it answers to either side's key —
+// GitHub usually records unchanged-line comments as RIGHT, but a comment on the base side
+// of an unchanged line comes back LEFT. Accepting either avoids "comment vanished" bugs.
+export const rowKeys = (row: DiffRow): string[] => {
+  if (row.type === 'add') return row.newLine == null ? [] : [rowKey('RIGHT', row.newLine)]
+  if (row.type === 'del') return row.oldLine == null ? [] : [rowKey('LEFT', row.oldLine)]
+  if (row.type === 'context') {
+    const keys: string[] = []
+    if (row.newLine != null) keys.push(rowKey('RIGHT', row.newLine))
+    if (row.oldLine != null) keys.push(rowKey('LEFT', row.oldLine))
+    return keys
+  }
+  return []
+}
+
+export const commentTargetForRow = (row: DiffRow): { side: DiffSide; line: number } | null => {
+  if (row.type === 'del') return row.oldLine == null ? null : { side: 'LEFT', line: row.oldLine }
+  if (row.type === 'hunk') return null
+  return row.newLine == null ? null : { side: 'RIGHT', line: row.newLine }
+}
+
+export const groupThreadsByPath = (
+  threads: PRReviewThread[],
+  files: PRFile[]
+): Map<string, PRReviewThread[]> => {
+  // an outdated thread on a renamed file carries the OLD path, so map both names to the
+  // current filename before grouping
+  const pathToFilename = new Map<string, string>()
+  for (const file of files) {
+    pathToFilename.set(file.filename, file.filename)
+    if (file.previous_filename) pathToFilename.set(file.previous_filename, file.filename)
+  }
+
+  const byPath = new Map<string, PRReviewThread[]>()
+  for (const thread of threads) {
+    const filename = pathToFilename.get(thread.path) ?? thread.path
+    const existing = byPath.get(filename)
+    if (existing) existing.push(thread)
+    else byPath.set(filename, [thread])
+  }
+  return byPath
+}
+
+export type AnchoredThreads = {
+  byRow: Map<string, PRReviewThread[]> // rowKey -> threads, API order preserved
+  fileLevel: PRReviewThread[] // subjectType === 'FILE'
+  unanchored: PRReviewThread[] // outdated / off-diff
+}
+
+export const anchorThreadsToRows = (
+  threads: PRReviewThread[],
+  rows: DiffRow[]
+): AnchoredThreads => {
+  const validKeys = new Set(rows.flatMap(rowKeys))
+  const byRow = new Map<string, PRReviewThread[]>()
+  const fileLevel: PRReviewThread[] = []
+  const unanchored: PRReviewThread[] = []
+
+  const place = (key: string, thread: PRReviewThread) => {
+    const existing = byRow.get(key)
+    if (existing) existing.push(thread)
+    else byRow.set(key, [thread])
+  }
+
+  for (const thread of threads) {
+    if (thread.subjectType === 'FILE') {
+      fileLevel.push(thread)
+      continue
+    }
+
+    if (thread.line != null) {
+      const key = rowKey(thread.diffSide, thread.line)
+      if (validKeys.has(key)) {
+        place(key, thread)
+        continue
+      }
+    }
+
+    // ponytail: outdated threads are never re-anchored via originalLine — that number is
+    // numbered against the commit the comment was written on, not the current diff, so
+    // mapping it onto today's rows would silently put a review comment on the wrong line.
+    // Only try originalLine for the rare non-outdated case where `line` hasn't materialised.
+    if (thread.line == null && !thread.isOutdated && thread.originalLine != null) {
+      const key = rowKey(thread.diffSide, thread.originalLine)
+      if (validKeys.has(key)) {
+        place(key, thread)
+        continue
+      }
+    }
+
+    unanchored.push(thread)
+  }
+
+  return { byRow, fileLevel, unanchored }
+}
