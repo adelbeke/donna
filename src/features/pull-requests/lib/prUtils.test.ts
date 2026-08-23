@@ -72,9 +72,7 @@ describe('deriveReviewOwnership', () => {
   it('GIVEN only the viewer is requested WHEN called THEN returns solo', () => {
     const pr = makePR({
       reviewRequests: {
-        nodes: [
-          { requestedReviewer: { __typename: 'User', login: 'alice', avatarUrl: '' } },
-        ],
+        nodes: [{ requestedReviewer: { __typename: 'User', login: 'alice', avatarUrl: '' } }],
       },
     })
     expect(deriveReviewOwnership(pr, 'alice')).toBe('solo')
