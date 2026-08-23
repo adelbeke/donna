@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react'
 import { useNavigate } from 'react-router'
-import { GitMerge, MessageSquare, Check, AlertCircle, FileCode } from 'lucide-react'
+import { GitMerge, MessageSquare, Check, AlertCircle, FileCode, ListOrdered } from 'lucide-react'
 import type { PullRequest, ReviewState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
@@ -81,6 +81,7 @@ export const PRCard = ({
   const badge = !isAuthored && myReviewState ? reviewBadge[myReviewState] : null
   const checkState = deriveCheckState(merged)
   const showConflict = merged.mergeable === 'CONFLICTING'
+  const showMergeQueue = merged.isInMergeQueue === true
 
   const handleHide = () => {
     toggleHide(pr.id)
@@ -207,6 +208,14 @@ export const PRCard = ({
                 <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded text-[var(--color-warning)] bg-[var(--color-warning-subtle)]">
                   <AlertCircle size={11} />
                   Conflict
+                </span>
+              )}
+
+              {/* Merge queue badge */}
+              {showMergeQueue && (
+                <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded text-[var(--color-accent)] bg-[var(--color-accent-subtle)]">
+                  <ListOrdered size={11} />
+                  In merge queue
                 </span>
               )}
             </div>

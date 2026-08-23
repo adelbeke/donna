@@ -345,6 +345,23 @@ describe('PRCard', () => {
     })
   })
 
+  describe('merge queue badge', () => {
+    it('GIVEN isInMergeQueue true WHEN rendered THEN shows Merge queue badge', () => {
+      renderCard(<PRCard pr={{ ...pr, isInMergeQueue: true }} />)
+      expect(screen.getByText('In merge queue')).toBeInTheDocument()
+    })
+
+    it('GIVEN isInMergeQueue false WHEN rendered THEN no Merge queue badge', () => {
+      renderCard(<PRCard pr={{ ...pr, isInMergeQueue: false }} />)
+      expect(screen.queryByText('In merge queue')).not.toBeInTheDocument()
+    })
+
+    it('GIVEN isInMergeQueue undefined WHEN rendered THEN no Merge queue badge', () => {
+      renderCard(<PRCard pr={pr} />)
+      expect(screen.queryByText('In merge queue')).not.toBeInTheDocument()
+    })
+  })
+
   describe('run shortcut action', () => {
     it('GIVEN isAuthored=false THEN run shortcut action is not shown, regardless of local repos', () => {
       useBranchStore.setState({ localPaths: ['/Users/me/code/repo'] })
