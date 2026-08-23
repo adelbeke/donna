@@ -75,6 +75,21 @@ export const deriveReviewerSummary = (pr: PullRequest, authorLogin: string): Rev
   return buckets
 }
 
+export type ReviewOwnership = 'solo' | 'team' | 'shared'
+
+export const deriveReviewOwnership = (
+  pr: PullRequest,
+  viewerLogin: string
+): ReviewOwnership | null => {
+  const pending = pr.reviewRequests?.nodes ?? []
+  if (pending.length === 0) return null
+  if (pending.length > 1) return 'shared'
+
+  const reviewer = pending[0].requestedReviewer
+  if (reviewer.__typename === 'Team') return 'team'
+  return reviewer.login === viewerLogin ? 'solo' : 'shared'
+}
+
 export const deriveCheckState = (pr: PullRequest): CheckRollupState | null => {
   return pr.commits?.nodes[0]?.commit?.statusCheckRollup?.state ?? null
 }

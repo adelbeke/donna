@@ -5,6 +5,7 @@ import {
   buildSearchQuery,
   deriveCheckState,
   deriveMyReviewState,
+  deriveReviewOwnership,
   dedupeChecks,
   isOverContextSwitchThreshold,
 } from './prUtils'
@@ -59,6 +60,81 @@ describe('deriveMyReviewState', () => {
   it('GIVEN PR with undefined reviews WHEN called THEN returns null', () => {
     const pr = makePR({ reviews: undefined })
     expect(deriveMyReviewState(pr, 'alice')).toBeNull()
+  })
+})
+
+describe('deriveReviewOwnership', () => {
+  it('GIVEN no pending review requests WHEN called THEN returns null', () => {
+    const pr = makePR({ reviewRequests: { nodes: [] } })
+    expect(deriveReviewOwnership(pr, 'alice')).toBeNull()
+  })
+
+  it('GIVEN only the viewer is requested WHEN called THEN returns solo', () => {
+    const pr = makePR({
+      reviewRequests: {
+        nodes: [{ requestedReviewer: { __typename: 'User', login: 'alice', avatarUrl: '' } }],
+      },
+    })
+    expect(deriveReviewOwnership(pr, 'alice')).toBe('solo')
+  })
+
+  it('GIVEN only a team is requested WHEN called THEN returns team', () => {
+    const pr = makePR({
+      reviewRequests: {
+        nodes: [{ requestedReviewer: { __typename: 'Team', name: 'Platform', slug: 'platform' } }],
+      },
+    })
+    expect(deriveReviewOwnership(pr, 'alice')).toBe('team')
+  })
+
+  it('GIVEN the viewer and a team are both requested WHEN called THEN returns shared', () => {
+    const pr = makePR({
+      reviewRequests: {
+        nodes: [
+          { requestedReviewer: { __typename: 'User', login: 'alice', avatarUrl: '' } },
+          { requestedReviewer: { __typename: 'Team', name: 'Platform', slug: 'platform' } },
+        ],
+      },
+    })
+    expect(deriveReviewOwnership(pr, 'alice')).toBe('shared')
+  })
+
+  it('GIVEN the viewer and another user are both requested WHEN called THEN returns shared', () => {
+    const pr = makePR({
+      reviewRequests: {
+        nodes: [
+          { requestedReviewer: { __typename: 'User', login: 'alice', avatarUrl: '' } },
+          { requestedReviewer: { __typename: 'User', login: 'bob', avatarUrl: '' } },
+        ],
+      },
+    })
+    expect(deriveReviewOwnership(pr, 'alice')).toBe('shared')
+  })
+
+  it('GIVEN two teams are requested and the viewer is not among them WHEN called THEN returns shared', () => {
+    const pr = makePR({
+      reviewRequests: {
+        nodes: [
+          { requestedReviewer: { __typename: 'Team', name: 'Platform', slug: 'platform' } },
+          { requestedReviewer: { __typename: 'Team', name: 'Infra', slug: 'infra' } },
+        ],
+      },
+    })
+    expect(deriveReviewOwnership(pr, 'alice')).toBe('shared')
+  })
+
+  it('GIVEN a single other user is requested (not the viewer) WHEN called THEN returns shared', () => {
+    const pr = makePR({
+      reviewRequests: {
+        nodes: [{ requestedReviewer: { __typename: 'User', login: 'bob', avatarUrl: '' } }],
+      },
+    })
+    expect(deriveReviewOwnership(pr, 'alice')).toBe('shared')
+  })
+
+  it('GIVEN reviewRequests is undefined WHEN called THEN returns null', () => {
+    const pr = makePR({ reviewRequests: undefined })
+    expect(deriveReviewOwnership(pr, 'alice')).toBeNull()
   })
 })
 
