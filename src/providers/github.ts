@@ -84,6 +84,7 @@ export const PR_DETAILS_SINGLE_QUERY = /* GraphQL */ `
       ... on PullRequest {
         id
         mergeable
+        isInMergeQueue
         commits(last: 1) {
           nodes {
             commit {

@@ -70,6 +70,7 @@ export type PullRequest = {
   additions: number
   deletions: number
   mergeable?: MergeableState
+  isInMergeQueue?: boolean
   commits?: {
     nodes: {
       commit: {

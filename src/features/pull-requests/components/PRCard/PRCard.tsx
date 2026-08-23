@@ -1,6 +1,14 @@
 import { useState, type ReactElement } from 'react'
 import { useNavigate } from 'react-router'
-import { GitMerge, MessageSquare, Check, AlertCircle, FileCode, Users } from 'lucide-react'
+import {
+  GitMerge,
+  MessageSquare,
+  Check,
+  AlertCircle,
+  FileCode,
+  Users,
+  ListOrdered,
+} from 'lucide-react'
 import type { PullRequest, ReviewState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
@@ -61,22 +69,25 @@ const reviewBadge: Record<
 
 const ownershipBadge: Record<
   ReviewOwnership,
-  { label: string; color: string; bg: string; icon: ReactElement | null }
+  { label: string; title: string; color: string; bg: string; icon: ReactElement | null }
 > = {
   solo: {
     label: 'Just you',
+    title: 'Only you are requested to review — nobody else can pick this up',
     color: 'text-[var(--color-warning)]',
     bg: 'bg-[var(--color-warning-subtle)]',
     icon: null,
   },
   team: {
     label: 'Team',
+    title: 'A team is requested to review — any member can pick this up',
     color: 'text-[var(--color-text-secondary)]',
     bg: 'bg-[var(--color-surface-overlay)]',
     icon: <Users size={11} />,
   },
   shared: {
     label: 'Shared',
+    title: 'Split across multiple reviewers/teams',
     color: 'text-[var(--color-text-secondary)]',
     bg: 'bg-[var(--color-surface-overlay)]',
     icon: <Users size={11} />,
@@ -108,6 +119,7 @@ export const PRCard = ({
   const ownershipInfo = reviewOwnership ? ownershipBadge[reviewOwnership] : null
   const checkState = deriveCheckState(merged)
   const showConflict = merged.mergeable === 'CONFLICTING'
+  const showMergeQueue = merged.isInMergeQueue === true
 
   const handleHide = () => {
     toggleHide(pr.id)
@@ -229,6 +241,7 @@ export const PRCard = ({
               {/* Review ownership badge */}
               {ownershipInfo && (
                 <span
+                  title={ownershipInfo.title}
                   className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${ownershipInfo.color} ${ownershipInfo.bg}`}
                 >
                   {ownershipInfo.icon}
@@ -244,6 +257,14 @@ export const PRCard = ({
                 <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded text-[var(--color-warning)] bg-[var(--color-warning-subtle)]">
                   <AlertCircle size={11} />
                   Conflict
+                </span>
+              )}
+
+              {/* Merge queue badge */}
+              {showMergeQueue && (
+                <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded text-[var(--color-accent)] bg-[var(--color-accent-subtle)]">
+                  <ListOrdered size={11} />
+                  In merge queue
                 </span>
               )}
             </div>

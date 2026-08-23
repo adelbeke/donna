@@ -4,7 +4,10 @@ import { useAuthStore } from '@/features/auth/stores/authStore'
 import type { PullRequest } from '@/types/github'
 
 type NodeResult = {
-  node: Pick<PullRequest, 'id' | 'mergeable' | 'commits' | 'reviewRequests' | 'reviews'>
+  node: Pick<
+    PullRequest,
+    'id' | 'mergeable' | 'isInMergeQueue' | 'commits' | 'reviewRequests' | 'reviews'
+  >
 }
 
 export const usePRDetails = (prId: string) => {
