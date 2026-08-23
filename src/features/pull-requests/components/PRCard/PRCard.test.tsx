@@ -9,7 +9,7 @@ import { useAuthStore } from '@/features/auth/stores/authStore'
 import { useBranchStore } from '@/features/branches/stores/branchStore'
 import { usePRDetails } from '../../queries/usePRDetails'
 import { useCheckContexts } from '../../queries/useCheckContexts'
-import type { PullRequest, ReviewState } from '@/types/github'
+import type { PullRequest, ReviewRequest, ReviewState } from '@/types/github'
 
 const mockUsePRDetails = vi.mocked(usePRDetails)
 const mockUseCheckContexts = vi.mocked(useCheckContexts)
@@ -292,6 +292,67 @@ describe('PRCard', () => {
       mockUsePRDetails.mockReturnValue(makeDetailsWithReview('APPROVED') as never)
       renderCard(<PRCard pr={pr} isAuthored />)
       expect(screen.queryByText('Approved')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('review ownership badge', () => {
+    const makeDetailsWithReviewRequests = (nodes: ReviewRequest[]) => ({
+      data: {
+        id: pr.id,
+        reviews: { nodes: [] },
+        reviewRequests: { nodes },
+        mergeable: 'MERGEABLE' as const,
+        commits: { nodes: [] },
+      },
+    })
+
+    it('GIVEN only the viewer is requested WHEN rendered THEN shows Just you badge', () => {
+      mockUsePRDetails.mockReturnValue(
+        makeDetailsWithReviewRequests([
+          { requestedReviewer: { __typename: 'User', login: 'viewer', avatarUrl: '' } },
+        ]) as never
+      )
+      renderCard(<PRCard pr={pr} />)
+      expect(screen.getByText('Just you')).toBeInTheDocument()
+    })
+
+    it('GIVEN only a team is requested WHEN rendered THEN shows Team badge', () => {
+      mockUsePRDetails.mockReturnValue(
+        makeDetailsWithReviewRequests([
+          { requestedReviewer: { __typename: 'Team', name: 'Platform', slug: 'platform' } },
+        ]) as never
+      )
+      renderCard(<PRCard pr={pr} />)
+      expect(screen.getByText('Team')).toBeInTheDocument()
+    })
+
+    it('GIVEN the viewer and another user are both requested WHEN rendered THEN shows Shared badge', () => {
+      mockUsePRDetails.mockReturnValue(
+        makeDetailsWithReviewRequests([
+          { requestedReviewer: { __typename: 'User', login: 'viewer', avatarUrl: '' } },
+          { requestedReviewer: { __typename: 'User', login: 'bob', avatarUrl: '' } },
+        ]) as never
+      )
+      renderCard(<PRCard pr={pr} />)
+      expect(screen.getByText('Shared')).toBeInTheDocument()
+    })
+
+    it('GIVEN no pending review requests WHEN rendered THEN no ownership badge', () => {
+      mockUsePRDetails.mockReturnValue(makeDetailsWithReviewRequests([]) as never)
+      renderCard(<PRCard pr={pr} />)
+      expect(screen.queryByText('Just you')).not.toBeInTheDocument()
+      expect(screen.queryByText('Team')).not.toBeInTheDocument()
+      expect(screen.queryByText('Shared')).not.toBeInTheDocument()
+    })
+
+    it('GIVEN isAuthored=true WHEN rendered THEN no ownership badge shown', () => {
+      mockUsePRDetails.mockReturnValue(
+        makeDetailsWithReviewRequests([
+          { requestedReviewer: { __typename: 'User', login: 'viewer', avatarUrl: '' } },
+        ]) as never
+      )
+      renderCard(<PRCard pr={pr} isAuthored />)
+      expect(screen.queryByText('Just you')).not.toBeInTheDocument()
     })
   })
 

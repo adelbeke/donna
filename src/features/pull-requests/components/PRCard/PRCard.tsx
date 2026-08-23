@@ -1,13 +1,14 @@
 import { useState, type ReactElement } from 'react'
 import { useNavigate } from 'react-router'
-import { GitMerge, MessageSquare, Check, AlertCircle, FileCode } from 'lucide-react'
+import { GitMerge, MessageSquare, Check, AlertCircle, FileCode, Users } from 'lucide-react'
 import type { PullRequest, ReviewState } from '@/types/github'
 import { usePRStore } from '../../stores/prStore'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { useBranchStore } from '@/features/branches/stores/branchStore'
 import { ReviewerAvatars } from './ReviewerAvatars'
 import { PRChecksBadge } from '../PRChecksBadge/PRChecksBadge.tsx'
-import { deriveCheckState, deriveMyReviewState } from '../../lib/prUtils'
+import { deriveCheckState, deriveMyReviewState, deriveReviewOwnership } from '../../lib/prUtils'
+import type { ReviewOwnership } from '../../lib/prUtils'
 import { usePRDetails } from '../../queries/usePRDetails'
 import { timeAgo } from '../../lib/timeAgo'
 import { PRCardActions } from '@/features/pull-requests/components/PRCardActions/PRCardActions.tsx'
@@ -58,6 +59,30 @@ const reviewBadge: Record<
   },
 }
 
+const ownershipBadge: Record<
+  ReviewOwnership,
+  { label: string; color: string; bg: string; icon: ReactElement | null }
+> = {
+  solo: {
+    label: 'Just you',
+    color: 'text-[var(--color-warning)]',
+    bg: 'bg-[var(--color-warning-subtle)]',
+    icon: null,
+  },
+  team: {
+    label: 'Team',
+    color: 'text-[var(--color-text-secondary)]',
+    bg: 'bg-[var(--color-surface-overlay)]',
+    icon: <Users size={11} />,
+  },
+  shared: {
+    label: 'Shared',
+    color: 'text-[var(--color-text-secondary)]',
+    bg: 'bg-[var(--color-surface-overlay)]',
+    icon: <Users size={11} />,
+  },
+}
+
 export const PRCard = ({
   pr,
   isAuthored = false,
@@ -79,6 +104,8 @@ export const PRCard = ({
   const merged = details ? { ...pr, ...details } : pr
   const myReviewState = deriveMyReviewState(merged, viewerLogin)
   const badge = !isAuthored && myReviewState ? reviewBadge[myReviewState] : null
+  const reviewOwnership = isAuthored ? null : deriveReviewOwnership(merged, viewerLogin)
+  const ownershipInfo = reviewOwnership ? ownershipBadge[reviewOwnership] : null
   const checkState = deriveCheckState(merged)
   const showConflict = merged.mergeable === 'CONFLICTING'
 
@@ -196,6 +223,16 @@ export const PRCard = ({
                 >
                   {badge.icon}
                   {badge.label}
+                </span>
+              )}
+
+              {/* Review ownership badge */}
+              {ownershipInfo && (
+                <span
+                  className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${ownershipInfo.color} ${ownershipInfo.bg}`}
+                >
+                  {ownershipInfo.icon}
+                  {ownershipInfo.label}
                 </span>
               )}
 
