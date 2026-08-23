@@ -348,17 +348,17 @@ describe('PRCard', () => {
   describe('merge queue badge', () => {
     it('GIVEN isInMergeQueue true WHEN rendered THEN shows Merge queue badge', () => {
       renderCard(<PRCard pr={{ ...pr, isInMergeQueue: true }} />)
-      expect(screen.getByText('Merge queue')).toBeInTheDocument()
+      expect(screen.getByText('In merge queue')).toBeInTheDocument()
     })
 
     it('GIVEN isInMergeQueue false WHEN rendered THEN no Merge queue badge', () => {
       renderCard(<PRCard pr={{ ...pr, isInMergeQueue: false }} />)
-      expect(screen.queryByText('Merge queue')).not.toBeInTheDocument()
+      expect(screen.queryByText('In merge queue')).not.toBeInTheDocument()
     })
 
     it('GIVEN isInMergeQueue undefined WHEN rendered THEN no Merge queue badge', () => {
       renderCard(<PRCard pr={pr} />)
-      expect(screen.queryByText('Merge queue')).not.toBeInTheDocument()
+      expect(screen.queryByText('In merge queue')).not.toBeInTheDocument()
     })
   })
 

@@ -215,7 +215,7 @@ export const PRCard = ({
               {showMergeQueue && (
                 <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded text-[var(--color-accent)] bg-[var(--color-accent-subtle)]">
                   <ListOrdered size={11} />
-                  Merge queue
+                  In merge queue
                 </span>
               )}
             </div>
