@@ -241,11 +241,14 @@ export const PRCard = ({
               {/* Review ownership badge */}
               {ownershipInfo && (
                 <span
-                  title={ownershipInfo.title}
-                  className={`flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${ownershipInfo.color} ${ownershipInfo.bg}`}
+                  className={`relative group/tooltip flex items-center gap-1 text-xs px-1.5 py-0.5 rounded ${ownershipInfo.color} ${ownershipInfo.bg}`}
                 >
                   {ownershipInfo.icon}
                   {ownershipInfo.label}
+                  {/* ponytail: native title tooltips get suppressed here since the whole card shifts on hover (hover:-translate-y-px), so use the app's CSS-driven tooltip pattern instead */}
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 rounded bg-[var(--color-surface-overlay)] text-[var(--color-text-primary)] font-normal whitespace-nowrap pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-opacity z-10">
+                    {ownershipInfo.title}
+                  </span>
                 </span>
               )}
 
