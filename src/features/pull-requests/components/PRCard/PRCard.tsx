@@ -25,6 +25,7 @@ import { PRShortcutsModal, resolveLocalRepoPath } from '@/features/shortcuts/exp
 type Props = {
   pr: PullRequest
   isAuthored?: boolean
+  showShortcut?: boolean
   showHideAndStar?: boolean
   highlightActions?: boolean
 }
@@ -97,6 +98,7 @@ const ownershipBadge: Record<
 export const PRCard = ({
   pr,
   isAuthored = false,
+  showShortcut = false,
   showHideAndStar = true,
   highlightActions = false,
 }: Props) => {
@@ -108,7 +110,7 @@ export const PRCard = ({
   const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
   const viewerLogin = useAuthStore((s) => s.user?.login ?? '')
   const localPaths = useBranchStore((s) => s.localPaths)
-  const repoPath = isAuthored ? resolveLocalRepoPath(localPaths, pr.repository.name) : null
+  const repoPath = showShortcut ? resolveLocalRepoPath(localPaths, pr.repository.name) : null
   const isPriority = priorityIds.includes(pr.id)
   const isHidden = pr.isHidden ?? false
   const { data: details, isPending: isDetailsPending } = usePRDetails(pr.id)
@@ -290,8 +292,8 @@ export const PRCard = ({
           prUrl={pr.url}
           prNumber={pr.number}
           showHideAndStar={showHideAndStar}
-          showRunShortcut={isAuthored}
-          runShortcutDisabled={isAuthored && !repoPath}
+          showRunShortcut={showShortcut}
+          runShortcutDisabled={showShortcut && !repoPath}
           runShortcutTitle={repoPath ? 'Run shortcut' : NO_LOCAL_REPO_TITLE}
           onRunShortcut={() => setShortcutsOpen(true)}
           onOpenExternally={openExternally}
@@ -300,7 +302,7 @@ export const PRCard = ({
           highlight={highlightActions}
         />
       </div>
-      {isAuthored && repoPath && (
+      {showShortcut && repoPath && (
         <PRShortcutsModal
           key={shortcutsOpen ? '1' : '0'}
           isOpen={shortcutsOpen}

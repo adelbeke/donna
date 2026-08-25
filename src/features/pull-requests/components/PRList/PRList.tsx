@@ -133,6 +133,7 @@ export const PRList = () => {
                 key={pr.id}
                 pr={pr}
                 isAuthored={section === 'authored'}
+                showShortcut={section === 'authored' || section === 'assigned'}
                 showHideAndStar={section === 'review-requested'}
                 highlightActions={pr.id === spotlitPRId}
               />
@@ -148,6 +149,7 @@ export const PRList = () => {
               key={pr.id}
               pr={pr}
               isAuthored={section === 'authored'}
+              showShortcut={section === 'authored' || section === 'assigned'}
               showHideAndStar={section === 'review-requested'}
               highlightActions={pr.id === spotlitPRId}
             />
