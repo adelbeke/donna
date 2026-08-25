@@ -5,6 +5,7 @@ import { usePRStore, type PRSection } from '../../stores/prStore'
 const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'authored', label: 'My PRs' },
   { id: 'review-requested', label: 'Review requested' },
+  { id: 'assigned', label: 'Assigned' },
   { id: 'reviewed', label: 'Reviewed' },
 ]
 

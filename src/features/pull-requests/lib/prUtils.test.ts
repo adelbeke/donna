@@ -50,6 +50,12 @@ describe('buildSearchQuery', () => {
     expect(actual).toContain('-author:alice')
   })
 
+  it('GIVEN assigned section WHEN called THEN includes assignee filter and excludes own PRs', () => {
+    const actual = buildSearchQuery('assigned', 'alice')
+    expect(actual).toContain('assignee:alice')
+    expect(actual).toContain('-author:alice')
+  })
+
   it('GIVEN unknown section WHEN called THEN falls back to review-requested', () => {
     const actual = buildSearchQuery('unknown', 'alice')
     expect(actual).toContain('review-requested:alice')

@@ -9,10 +9,11 @@ beforeEach(() => {
       'review-requested': { repos: [], showDrafts: false, search: '' },
       authored: { repos: [], showDrafts: false, search: '' },
       reviewed: { repos: [], showDrafts: false, search: '' },
+      assigned: { repos: [], showDrafts: false, search: '' },
     },
     priorityIds: [],
     hiddenIds: [],
-    knownRepos: { 'review-requested': [], authored: [], reviewed: [] },
+    knownRepos: { 'review-requested': [], authored: [], reviewed: [], assigned: [] },
   })
 })
 
