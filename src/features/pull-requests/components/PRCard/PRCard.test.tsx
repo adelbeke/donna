@@ -432,14 +432,14 @@ describe('PRCard', () => {
 
     it('GIVEN isAuthored=true and no local repo matches THEN run shortcut action is shown but disabled with an explanatory title', () => {
       useBranchStore.setState({ localPaths: [] })
-      renderCard(<PRCard pr={pr} isAuthored />)
+      renderCard(<PRCard pr={pr} isAuthored showShortcut />)
       const button = screen.getByRole('button', { name: /add this repo in the branches tab/i })
       expect(button).toBeDisabled()
     })
 
     it('GIVEN isAuthored=true and a local repo matches THEN run shortcut action is shown enabled', () => {
       useBranchStore.setState({ localPaths: ['/Users/me/code/repo'] })
-      renderCard(<PRCard pr={pr} isAuthored />)
+      renderCard(<PRCard pr={pr} isAuthored showShortcut />)
       const button = screen.getByRole('button', { name: 'Run shortcut' })
       expect(button).not.toBeDisabled()
     })
@@ -447,12 +447,26 @@ describe('PRCard', () => {
     it('GIVEN isAuthored=true and no local repo matches WHEN the disabled action is clicked THEN the shortcuts modal does not open', async () => {
       useBranchStore.setState({ localPaths: [] })
       const user = userEvent.setup()
-      renderCard(<PRCard pr={pr} isAuthored />)
+      renderCard(<PRCard pr={pr} isAuthored showShortcut />)
       const button = screen.getByRole('button', { name: /add this repo in the branches tab/i })
       await user.click(button)
       expect(
         screen.queryByText(`Shortcuts · ${pr.repository.nameWithOwner} #${pr.number}`)
       ).not.toBeInTheDocument()
+    })
+
+    it('GIVEN showShortcut=true and no local repo matches THEN run shortcut action is shown but disabled', () => {
+      useBranchStore.setState({ localPaths: [] })
+      renderCard(<PRCard pr={pr} showShortcut />)
+      const button = screen.getByRole('button', { name: /add this repo in the branches tab/i })
+      expect(button).toBeDisabled()
+    })
+
+    it('GIVEN showShortcut=true and a local repo matches THEN run shortcut action is shown enabled', () => {
+      useBranchStore.setState({ localPaths: ['/Users/me/code/repo'] })
+      renderCard(<PRCard pr={pr} showShortcut />)
+      const button = screen.getByRole('button', { name: 'Run shortcut' })
+      expect(button).not.toBeDisabled()
     })
   })
 
