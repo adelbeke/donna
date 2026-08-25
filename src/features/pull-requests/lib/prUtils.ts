@@ -27,6 +27,8 @@ export const buildSearchQuery = (section: string, login: string): string => {
       return `${base} author:${login}`
     case 'reviewed':
       return `${base} reviewed-by:${login} -author:${login}`
+    case 'assigned':
+      return `${base} assignee:${login} -author:${login}`
     default:
       return `${base} review-requested:${login}`
   }
