@@ -132,7 +132,8 @@ export const PRList = () => {
               <PRCard
                 key={pr.id}
                 pr={pr}
-                isAuthored={section === 'authored' || section === 'assigned'}
+                isAuthored={section === 'authored'}
+                showReviewerAvatars={section === 'authored' || section === 'assigned'}
                 showShortcut={section === 'authored' || section === 'assigned'}
                 showHideAndStar={section === 'review-requested'}
                 highlightActions={pr.id === spotlitPRId}
@@ -148,7 +149,8 @@ export const PRList = () => {
             <PRCard
               key={pr.id}
               pr={pr}
-              isAuthored={section === 'authored' || section === 'assigned'}
+              isAuthored={section === 'authored'}
+              showReviewerAvatars={section === 'authored' || section === 'assigned'}
               showShortcut={section === 'authored' || section === 'assigned'}
               showHideAndStar={section === 'review-requested'}
               highlightActions={pr.id === spotlitPRId}

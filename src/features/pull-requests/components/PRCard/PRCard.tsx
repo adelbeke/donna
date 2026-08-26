@@ -25,6 +25,7 @@ import { PRShortcutsModal, resolveLocalRepoPath } from '@/features/shortcuts/exp
 type Props = {
   pr: PullRequest
   isAuthored?: boolean
+  showReviewerAvatars?: boolean
   showShortcut?: boolean
   showHideAndStar?: boolean
   highlightActions?: boolean
@@ -98,6 +99,7 @@ const ownershipBadge: Record<
 export const PRCard = ({
   pr,
   isAuthored = false,
+  showReviewerAvatars = false,
   showShortcut = false,
   showHideAndStar = true,
   highlightActions = false,
@@ -274,8 +276,8 @@ export const PRCard = ({
               )}
             </div>
 
-            {/* Reviewer avatars (authored section only) */}
-            {isAuthored && (
+            {/* Reviewer avatars (authored and assigned sections) */}
+            {showReviewerAvatars && (
               <div className="mt-2">
                 <ReviewerAvatars pr={merged} authorLogin={viewerLogin} />
               </div>
