@@ -4,6 +4,7 @@ import { spawn, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import path from 'node:path'
 import fs from 'node:fs'
+import { initNotifications } from './notifications'
 
 const execFileAsync = promisify(execFile)
 
@@ -261,6 +262,7 @@ ipcMain.handle('update:is-downloaded', () => updateDownloaded)
 
 app.whenReady().then(() => {
   createWindow()
+  initNotifications()
   if (app.isPackaged) {
     // ponytail: error listener required — Node throws on unhandled 'error' events
     autoUpdater.on('error', (err) => console.error('[updater]', err.message))

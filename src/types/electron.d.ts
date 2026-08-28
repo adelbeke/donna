@@ -37,5 +37,19 @@ interface Window {
       installUpdate: () => Promise<void>
       isUpdateDownloaded: () => Promise<boolean>
     }
+    notifications: {
+      updateSettings: (partial: Partial<NotificationSettings>) => Promise<void>
+      onNavigate: (cb: (payload: NotificationNavigatePayload) => void) => void
+    }
   }
 }
+
+type NotificationCategory = 'review-requested' | 'assigned' | 'reviewed'
+
+type NotificationSettings = {
+  enabledCategories: NotificationCategory[]
+  pollIntervalMs: number
+  openPRsInDonna: boolean
+}
+
+type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
