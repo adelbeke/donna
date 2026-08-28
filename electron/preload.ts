@@ -1,8 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type {
-  NotificationSettings,
-  NotificationNavigatePayload,
-} from './notifications'
+import type { NotificationSettings, NotificationNavigatePayload } from './notifications'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   gh: {
