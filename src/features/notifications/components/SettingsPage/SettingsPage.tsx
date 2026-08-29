@@ -1,12 +1,5 @@
 import { useNotificationStore } from '../../stores/notificationStore'
 
-const CATEGORY_LABELS: Record<'review-requested' | 'assigned', string> = {
-  'review-requested': 'New review requests',
-  assigned: 'New PRs assigned to me',
-}
-
-const CATEGORIES = Object.keys(CATEGORY_LABELS) as (keyof typeof CATEGORY_LABELS)[]
-
 const INTERVAL_OPTIONS: { label: string; value: number }[] = [
   { label: '1 minute', value: 60_000 },
   { label: '5 minutes', value: 5 * 60_000 },
@@ -14,9 +7,31 @@ const INTERVAL_OPTIONS: { label: string; value: number }[] = [
   { label: '30 minutes', value: 30 * 60_000 },
 ]
 
+const Checkbox = ({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string
+  checked: boolean
+  onChange: () => void
+}) => (
+  <label className="flex items-center gap-2 cursor-pointer">
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      className="accent-[var(--color-accent)] cursor-pointer"
+    />
+    <span className="text-xs text-[var(--color-text-primary)]">{label}</span>
+  </label>
+)
+
 export const SettingsPage = () => {
   const enabledCategories = useNotificationStore((s) => s.enabledCategories)
   const toggleCategory = useNotificationStore((s) => s.toggleCategory)
+  const checksEnabled = useNotificationStore((s) => s.checksEnabled)
+  const toggleChecksEnabled = useNotificationStore((s) => s.toggleChecksEnabled)
   const pollIntervalMs = useNotificationStore((s) => s.pollIntervalMs)
   const setPollIntervalMs = useNotificationStore((s) => s.setPollIntervalMs)
 
@@ -29,23 +44,45 @@ export const SettingsPage = () => {
           Notifications
         </h3>
 
-        <div className="space-y-2">
-          {CATEGORIES.map((category) => (
-            <label key={category} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={enabledCategories.includes(category)}
-                onChange={() => toggleCategory(category)}
-                className="accent-[var(--color-accent)] cursor-pointer"
-              />
-              <span className="text-xs text-[var(--color-text-primary)]">
-                {CATEGORY_LABELS[category]}
-              </span>
-            </label>
-          ))}
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+              Review requested
+            </p>
+            <Checkbox
+              label="Notify me on new review requests"
+              checked={enabledCategories.includes('review-requested')}
+              onChange={() => toggleCategory('review-requested')}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-[var(--color-text-secondary)]">Assigned to me</p>
+            <Checkbox
+              label="Notify me when assigned"
+              checked={enabledCategories.includes('assigned')}
+              onChange={() => toggleCategory('assigned')}
+            />
+            <Checkbox
+              label="Notify me when CI passes or fails"
+              checked={checksEnabled.assigned}
+              onChange={() => toggleChecksEnabled('assigned')}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-[var(--color-text-secondary)]">
+              My pull requests
+            </p>
+            <Checkbox
+              label="Notify me when CI passes or fails"
+              checked={checksEnabled.authored}
+              onChange={() => toggleChecksEnabled('authored')}
+            />
+          </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-5">
           <label
             htmlFor="poll-interval"
             className="block text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2"

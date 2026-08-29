@@ -8,9 +8,16 @@ import {
   diffNewIds,
   filterDrafts,
   filterMuted,
+  formatCheckStateNotification,
   formatNewPRNotification,
+  isTerminalCheckState,
 } from './notificationCopy'
-import type { NotificationCategory } from './notificationCopy'
+import type {
+  ChecksSection,
+  CheckRollupState,
+  NotificationCategory,
+  NotificationSection,
+} from './notificationCopy'
 
 export type { NotificationCategory }
 
@@ -20,7 +27,8 @@ export type NotificationSettings = {
   openPRsInDonna: boolean
   hiddenAuthors: string[]
   hiddenRepos: string[]
-  showDraftsByCategory: Record<NotificationCategory, boolean>
+  showDraftsByCategory: Record<NotificationSection, boolean>
+  checksEnabled: Record<ChecksSection, boolean>
 }
 
 export type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
@@ -31,6 +39,7 @@ type NotificationPR = {
   title: string
   url: string
   isDraft: boolean
+  checkState: CheckRollupState | null
   author: { login: string } | null
   repository: { nameWithOwner: string }
 }
@@ -41,15 +50,28 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   openPRsInDonna: true,
   hiddenAuthors: [],
   hiddenRepos: [],
-  showDraftsByCategory: { 'review-requested': false, assigned: false, reviewed: false },
+  showDraftsByCategory: {
+    'review-requested': false,
+    assigned: false,
+    reviewed: false,
+    authored: true,
+  },
+  // opt-in: unlike new-PR notifications, per-check-state notifications can fire often on an
+  // active PR (every re-run), so we don't turn this on until the user asks for it in Settings
+  checksEnabled: { authored: false, assigned: false },
 }
 
 type PersistedState = {
   settings: NotificationSettings
   seenIds: Partial<Record<NotificationCategory, string[]>>
+  lastCheckState: Partial<Record<ChecksSection, Record<string, CheckRollupState | null>>>
 }
 
-const DEFAULT_STATE: PersistedState = { settings: DEFAULT_SETTINGS, seenIds: {} }
+const DEFAULT_STATE: PersistedState = {
+  settings: DEFAULT_SETTINGS,
+  seenIds: {},
+  lastCheckState: {},
+}
 
 const storePath = () => path.join(app.getPath('userData'), 'notifications.json')
 
@@ -65,8 +87,13 @@ const loadState = (): PersistedState => {
           ...DEFAULT_SETTINGS.showDraftsByCategory,
           ...parsed.settings?.showDraftsByCategory,
         },
+        checksEnabled: {
+          ...DEFAULT_SETTINGS.checksEnabled,
+          ...parsed.settings?.checksEnabled,
+        },
       },
       seenIds: parsed.seenIds ?? {},
+      lastCheckState: parsed.lastCheckState ?? {},
     }
   } catch {
     return DEFAULT_STATE
@@ -98,11 +125,35 @@ const SEARCH_QUERY = `
           isDraft
           author { login }
           repository { nameWithOwner }
+          commits(last: 1) {
+            nodes {
+              commit {
+                statusCheckRollup {
+                  state
+                }
+              }
+            }
+          }
         }
       }
     }
   }
 `
+
+type RawSearchNode = Omit<NotificationPR, 'checkState'> & {
+  commits: { nodes: { commit: { statusCheckRollup: { state: CheckRollupState } | null } | null }[] }
+}
+
+const toNotificationPR = (raw: RawSearchNode): NotificationPR => ({
+  id: raw.id,
+  number: raw.number,
+  title: raw.title,
+  url: raw.url,
+  isDraft: raw.isDraft,
+  author: raw.author,
+  repository: raw.repository,
+  checkState: raw.commits.nodes[0]?.commit?.statusCheckRollup?.state ?? null,
+})
 
 const ensureViewerLogin = async (): Promise<string | null> => {
   if (viewerLogin) return viewerLogin
@@ -170,20 +221,32 @@ const notifyNewPRs = (category: NotificationCategory, nodes: NotificationPR[]) =
   fireNotification(title, body, onClick)
 }
 
-const checkCategory = async (category: NotificationCategory) => {
-  if (!viewerLogin) return
-  let nodes: NotificationPR[]
+const notifyCheckStateChange = (pr: NotificationPR) => {
+  const { title, body } = formatCheckStateNotification(pr, pr.checkState!)
+  fireNotification(title, body, () => handleSinglePRClick(pr))
+}
+
+// shared by both the new-PR diff (group a) and the check-state diff (group b) — each section can
+// be polled for either or both independently, so the fetch+filter step is the only thing in common
+const fetchSection = async (section: NotificationSection): Promise<NotificationPR[] | null> => {
+  if (!viewerLogin) return null
   try {
-    const res = await graphql<{ data: { search: { nodes: NotificationPR[] } } }>(SEARCH_QUERY, {
-      searchQuery: buildSearchQuery(category, viewerLogin),
+    const res = await graphql<{ data: { search: { nodes: RawSearchNode[] } } }>(SEARCH_QUERY, {
+      searchQuery: buildSearchQuery(section, viewerLogin),
     })
-    nodes = filterDrafts(
-      filterMuted(res.data.search.nodes, state.settings.hiddenAuthors, state.settings.hiddenRepos),
-      state.settings.showDraftsByCategory[category]
+    const nodes = res.data.search.nodes.map(toNotificationPR)
+    return filterDrafts(
+      filterMuted(nodes, state.settings.hiddenAuthors, state.settings.hiddenRepos),
+      state.settings.showDraftsByCategory[section]
     )
   } catch {
-    return
+    return null
   }
+}
+
+const checkNewPRs = async (category: NotificationCategory) => {
+  const nodes = await fetchSection(category)
+  if (!nodes) return
 
   const fetchedIds = nodes.map((n) => n.id)
   const seenIds = state.seenIds[category]
@@ -201,12 +264,36 @@ const checkCategory = async (category: NotificationCategory) => {
   )
 }
 
+// self-pruning like seenIds: nextMap only keeps ids still open, so closed/merged PRs drop out
+const checkChecks = async (section: ChecksSection) => {
+  const nodes = await fetchSection(section)
+  if (!nodes) return
+
+  const prevMap = state.lastCheckState[section] ?? {}
+  const nextMap: Record<string, CheckRollupState | null> = {}
+  for (const pr of nodes) {
+    const prevState = prevMap[pr.id]
+    nextMap[pr.id] = pr.checkState
+    // seed only on first sight of this PR — otherwise every already-green PR would notify once
+    if (
+      prevState !== undefined &&
+      pr.checkState !== prevState &&
+      isTerminalCheckState(pr.checkState)
+    )
+      notifyCheckStateChange(pr)
+  }
+  state.lastCheckState[section] = nextMap
+  saveState()
+}
+
 const tick = async () => {
   const login = await ensureViewerLogin()
   if (!login) return
   for (const category of state.settings.enabledCategories) {
-    await checkCategory(category)
+    await checkNewPRs(category)
   }
+  if (state.settings.checksEnabled.assigned) await checkChecks('assigned')
+  if (state.settings.checksEnabled.authored) await checkChecks('authored')
 }
 
 const startPolling = () => {

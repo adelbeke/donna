@@ -26,9 +26,11 @@ export const AppLayout = () => {
   const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
   const enabledCategories = useNotificationStore((s) => s.enabledCategories)
   const pollIntervalMs = useNotificationStore((s) => s.pollIntervalMs)
+  const checksEnabled = useNotificationStore((s) => s.checksEnabled)
   const showDraftsReviewRequested = usePRStore((s) => s.viewFilters['review-requested'].showDrafts)
   const showDraftsAssigned = usePRStore((s) => s.viewFilters.assigned.showDrafts)
   const showDraftsReviewed = usePRStore((s) => s.viewFilters.reviewed.showDrafts)
+  const showDraftsAuthored = usePRStore((s) => s.viewFilters.authored.showDrafts)
 
   useEffect(() => {
     window.electronAPI?.notifications.onNavigate((payload) => {
@@ -45,10 +47,12 @@ export const AppLayout = () => {
       openPRsInDonna,
       enabledCategories,
       pollIntervalMs,
+      checksEnabled,
       showDraftsByCategory: {
         'review-requested': showDraftsReviewRequested,
         assigned: showDraftsAssigned,
         reviewed: showDraftsReviewed,
+        authored: showDraftsAuthored,
       },
     })
   }, [
@@ -57,9 +61,11 @@ export const AppLayout = () => {
     openPRsInDonna,
     enabledCategories,
     pollIntervalMs,
+    checksEnabled,
     showDraftsReviewRequested,
     showDraftsAssigned,
     showDraftsReviewed,
+    showDraftsAuthored,
   ])
 
   return (
