@@ -52,6 +52,7 @@ type NotificationSettings = {
   openPRsInDonna: boolean
   hiddenAuthors: string[]
   hiddenRepos: string[]
+  showDraftsByCategory: Record<NotificationCategory, boolean>
 }
 
 type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }

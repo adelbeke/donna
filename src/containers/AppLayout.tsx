@@ -26,6 +26,9 @@ export const AppLayout = () => {
   const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
   const enabledCategories = useNotificationStore((s) => s.enabledCategories)
   const pollIntervalMs = useNotificationStore((s) => s.pollIntervalMs)
+  const showDraftsReviewRequested = usePRStore((s) => s.viewFilters['review-requested'].showDrafts)
+  const showDraftsAssigned = usePRStore((s) => s.viewFilters.assigned.showDrafts)
+  const showDraftsReviewed = usePRStore((s) => s.viewFilters.reviewed.showDrafts)
 
   useEffect(() => {
     window.electronAPI?.notifications.onNavigate((payload) => {
@@ -42,8 +45,22 @@ export const AppLayout = () => {
       openPRsInDonna,
       enabledCategories,
       pollIntervalMs,
+      showDraftsByCategory: {
+        'review-requested': showDraftsReviewRequested,
+        assigned: showDraftsAssigned,
+        reviewed: showDraftsReviewed,
+      },
     })
-  }, [hiddenAuthors, hiddenRepos, openPRsInDonna, enabledCategories, pollIntervalMs])
+  }, [
+    hiddenAuthors,
+    hiddenRepos,
+    openPRsInDonna,
+    enabledCategories,
+    pollIntervalMs,
+    showDraftsReviewRequested,
+    showDraftsAssigned,
+    showDraftsReviewed,
+  ])
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">

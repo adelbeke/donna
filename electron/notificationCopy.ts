@@ -25,6 +25,11 @@ export const filterMuted = <T extends NewPRNode>(
     return true
   })
 
+export const filterDrafts = <T extends { isDraft: boolean }>(
+  nodes: T[],
+  showDrafts: boolean
+): T[] => (showDrafts ? nodes : nodes.filter((n) => !n.isDraft))
+
 const SINGLE_TITLE: Record<NotificationCategory, string> = {
   'review-requested': 'New review request',
   assigned: 'You were assigned',

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   buildSearchQuery,
   diffNewIds,
+  filterDrafts,
   filterMuted,
   formatNewPRNotification,
   isRepoMatchedBy,
@@ -110,5 +111,17 @@ describe('filterMuted', () => {
   it('keeps PRs with no author untouched by author muting', () => {
     const nodes = [givenPR({ author: null })]
     expect(filterMuted(nodes, ['dependabot'], [])).toEqual(nodes)
+  })
+})
+
+describe('filterDrafts', () => {
+  it('drops draft PRs when showDrafts is off', () => {
+    const nodes = [{ isDraft: true }, { isDraft: false }]
+    expect(filterDrafts(nodes, false)).toEqual([{ isDraft: false }])
+  })
+
+  it('keeps draft PRs when showDrafts is on', () => {
+    const nodes = [{ isDraft: true }, { isDraft: false }]
+    expect(filterDrafts(nodes, true)).toEqual(nodes)
   })
 })

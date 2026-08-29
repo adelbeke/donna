@@ -6,6 +6,7 @@ import { createWindow } from './main'
 import {
   buildSearchQuery,
   diffNewIds,
+  filterDrafts,
   filterMuted,
   formatNewPRNotification,
 } from './notificationCopy'
@@ -19,6 +20,7 @@ export type NotificationSettings = {
   openPRsInDonna: boolean
   hiddenAuthors: string[]
   hiddenRepos: string[]
+  showDraftsByCategory: Record<NotificationCategory, boolean>
 }
 
 export type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
@@ -28,6 +30,7 @@ type NotificationPR = {
   number: number
   title: string
   url: string
+  isDraft: boolean
   author: { login: string } | null
   repository: { nameWithOwner: string }
 }
@@ -38,6 +41,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   openPRsInDonna: true,
   hiddenAuthors: [],
   hiddenRepos: [],
+  showDraftsByCategory: { 'review-requested': false, assigned: false, reviewed: false },
 }
 
 type PersistedState = {
@@ -54,7 +58,14 @@ const loadState = (): PersistedState => {
     const raw = fs.readFileSync(storePath(), 'utf-8')
     const parsed = JSON.parse(raw)
     return {
-      settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+      settings: {
+        ...DEFAULT_SETTINGS,
+        ...parsed.settings,
+        showDraftsByCategory: {
+          ...DEFAULT_SETTINGS.showDraftsByCategory,
+          ...parsed.settings?.showDraftsByCategory,
+        },
+      },
       seenIds: parsed.seenIds ?? {},
     }
   } catch {
@@ -84,6 +95,7 @@ const SEARCH_QUERY = `
           number
           title
           url
+          isDraft
           author { login }
           repository { nameWithOwner }
         }
@@ -165,10 +177,9 @@ const checkCategory = async (category: NotificationCategory) => {
     const res = await graphql<{ data: { search: { nodes: NotificationPR[] } } }>(SEARCH_QUERY, {
       searchQuery: buildSearchQuery(category, viewerLogin),
     })
-    nodes = filterMuted(
-      res.data.search.nodes,
-      state.settings.hiddenAuthors,
-      state.settings.hiddenRepos
+    nodes = filterDrafts(
+      filterMuted(res.data.search.nodes, state.settings.hiddenAuthors, state.settings.hiddenRepos),
+      state.settings.showDraftsByCategory[category]
     )
   } catch {
     return
