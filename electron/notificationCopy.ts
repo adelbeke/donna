@@ -7,6 +7,24 @@ export type NewPRNode = {
   repository: { nameWithOwner: string }
 }
 
+// supports "owner/repo" (exact) or "owner" (org-wide) — mirrors prFilters.ts's isRepoMatchedBy
+export const isRepoMatchedBy = (repoNameWithOwner: string, pattern: string): boolean => {
+  const repo = repoNameWithOwner.toLowerCase()
+  return pattern.includes('/') ? repo === pattern : repo.split('/')[0] === pattern
+}
+
+export const filterMuted = <T extends NewPRNode>(
+  nodes: T[],
+  hiddenAuthors: string[],
+  hiddenRepos: string[]
+): T[] =>
+  nodes.filter((n) => {
+    if (n.author && hiddenAuthors.some((a) => n.author!.login.toLowerCase() === a.toLowerCase()))
+      return false
+    if (hiddenRepos.some((r) => isRepoMatchedBy(n.repository.nameWithOwner, r))) return false
+    return true
+  })
+
 const SINGLE_TITLE: Record<NotificationCategory, string> = {
   'review-requested': 'New review request',
   assigned: 'You were assigned',

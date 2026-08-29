@@ -20,6 +20,9 @@ export const AppLayout = () => {
   const { theme, toggle } = useTheme()
   const features = useFeatures()
   const navigate = useNavigate()
+  const hiddenAuthors = usePRStore((s) => s.globalFilters.hiddenAuthors)
+  const hiddenRepos = usePRStore((s) => s.globalFilters.hiddenRepos)
+  const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
 
   useEffect(() => {
     window.electronAPI?.notifications.onNavigate((payload) => {
@@ -27,6 +30,12 @@ export const AppLayout = () => {
       else usePRStore.getState().setSection(payload.section)
     })
   }, [navigate])
+
+  // ponytail: pushes only the fields the main-process poll needs to filter/deep-link;
+  // enabledCategories/pollIntervalMs get pushed from notificationStore once that lands.
+  useEffect(() => {
+    window.electronAPI?.notifications.updateSettings({ hiddenAuthors, hiddenRepos, openPRsInDonna })
+  }, [hiddenAuthors, hiddenRepos, openPRsInDonna])
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">

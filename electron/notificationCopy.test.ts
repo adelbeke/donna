@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { buildSearchQuery, diffNewIds, formatNewPRNotification } from './notificationCopy'
+import {
+  buildSearchQuery,
+  diffNewIds,
+  filterMuted,
+  formatNewPRNotification,
+  isRepoMatchedBy,
+} from './notificationCopy'
 import type { NewPRNode } from './notificationCopy'
 
 const givenPR = (overrides: Partial<NewPRNode> = {}): NewPRNode => ({
@@ -69,5 +75,40 @@ describe('formatNewPRNotification', () => {
     ]
     const result = formatNewPRNotification('assigned', nodes)
     expect(result).toEqual({ title: '2 new assignments', body: 'donna, api' })
+  })
+})
+
+describe('isRepoMatchedBy', () => {
+  it('matches an exact owner/repo pattern', () => {
+    expect(isRepoMatchedBy('acme/donna', 'acme/donna')).toBe(true)
+    expect(isRepoMatchedBy('acme/donna', 'acme/other')).toBe(false)
+  })
+
+  it('matches org-wide when the pattern has no slash', () => {
+    expect(isRepoMatchedBy('acme/donna', 'acme')).toBe(true)
+    expect(isRepoMatchedBy('other/donna', 'acme')).toBe(false)
+  })
+})
+
+describe('filterMuted', () => {
+  it('drops PRs from a muted author, case-insensitively', () => {
+    const nodes = [
+      givenPR({ author: { login: 'Dependabot' } }),
+      givenPR({ author: { login: 'octocat' } }),
+    ]
+    expect(filterMuted(nodes, ['dependabot'], [])).toEqual([nodes[1]])
+  })
+
+  it('drops PRs from a muted repo (org-wide pattern)', () => {
+    const nodes = [
+      givenPR({ repository: { nameWithOwner: 'acme/donna' } }),
+      givenPR({ repository: { nameWithOwner: 'other/donna' } }),
+    ]
+    expect(filterMuted(nodes, [], ['acme'])).toEqual([nodes[1]])
+  })
+
+  it('keeps PRs with no author untouched by author muting', () => {
+    const nodes = [givenPR({ author: null })]
+    expect(filterMuted(nodes, ['dependabot'], [])).toEqual(nodes)
   })
 })

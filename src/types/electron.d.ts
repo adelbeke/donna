@@ -50,6 +50,8 @@ type NotificationSettings = {
   enabledCategories: NotificationCategory[]
   pollIntervalMs: number
   openPRsInDonna: boolean
+  hiddenAuthors: string[]
+  hiddenRepos: string[]
 }
 
 type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }

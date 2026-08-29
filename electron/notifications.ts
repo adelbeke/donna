@@ -3,7 +3,12 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { runGh } from './gh'
 import { createWindow } from './main'
-import { buildSearchQuery, diffNewIds, formatNewPRNotification } from './notificationCopy'
+import {
+  buildSearchQuery,
+  diffNewIds,
+  filterMuted,
+  formatNewPRNotification,
+} from './notificationCopy'
 import type { NotificationCategory } from './notificationCopy'
 
 export type { NotificationCategory }
@@ -12,6 +17,8 @@ export type NotificationSettings = {
   enabledCategories: NotificationCategory[]
   pollIntervalMs: number
   openPRsInDonna: boolean
+  hiddenAuthors: string[]
+  hiddenRepos: string[]
 }
 
 export type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
@@ -29,6 +36,8 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   enabledCategories: ['review-requested', 'assigned'],
   pollIntervalMs: 5 * 60_000,
   openPRsInDonna: true,
+  hiddenAuthors: [],
+  hiddenRepos: [],
 }
 
 type PersistedState = {
@@ -140,7 +149,11 @@ const checkCategory = async (category: NotificationCategory) => {
     const res = await graphql<{ data: { search: { nodes: NotificationPR[] } } }>(SEARCH_QUERY, {
       searchQuery: buildSearchQuery(category, viewerLogin),
     })
-    nodes = res.data.search.nodes
+    nodes = filterMuted(
+      res.data.search.nodes,
+      state.settings.hiddenAuthors,
+      state.settings.hiddenRepos
+    )
   } catch {
     return
   }
