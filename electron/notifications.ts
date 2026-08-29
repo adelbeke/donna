@@ -97,7 +97,8 @@ const ensureViewerLogin = async (): Promise<string | null> => {
   try {
     const res = await graphql<{ data: { viewer: { login: string } } }>(VIEWER_QUERY, {})
     viewerLogin = res.data.viewer.login
-  } catch {
+  } catch (e) {
+    console.error('[notifications] viewer lookup failed', e)
     return null
   }
   return viewerLogin
@@ -126,6 +127,9 @@ const handleSinglePRClick = (pr: NotificationPR) => {
 
 const fireNotification = (title: string, body: string, onClick: () => void) => {
   const notification = new Notification({ title, body })
+  // ponytail: UNUserNotificationCenter can silently refuse an unsigned dev-mode Electron
+  // bundle (UNErrorDomain error 1) — this only surfaces the failure, packaging is the fix.
+  notification.on('failed', (_e, error) => console.error('[notifications] failed', error))
   notification.on('click', () => {
     focusWindow()
     onClick()
