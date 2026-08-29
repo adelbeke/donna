@@ -1,34 +1,13 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { autoUpdater } from 'electron-updater'
-import { spawn, execFile } from 'node:child_process'
+import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import path from 'node:path'
 import fs from 'node:fs'
+import { runGh, GH_PATH } from './gh'
 import { initNotifications } from './notifications'
 
 const execFileAsync = promisify(execFile)
-
-// ponytail: augment PATH so macOS .app bundles find gh via Homebrew/nix paths
-const GH_PATH = ['/opt/homebrew/bin', '/usr/local/bin', '/usr/bin', process.env.PATH]
-  .filter(Boolean)
-  .join(':')
-
-const runGh = (args: string[], stdinData?: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const proc = spawn('gh', args, { env: { ...process.env, PATH: GH_PATH } })
-    let stdout = ''
-    let stderr = ''
-    proc.stdout.on('data', (d: Buffer) => (stdout += d.toString()))
-    proc.stderr.on('data', (d: Buffer) => (stderr += d.toString()))
-    proc.on('close', (code: number | null) => {
-      if (code === 0) resolve(stdout)
-      else reject(new Error(stderr || `gh exited with code ${code}`))
-    })
-    proc.on('error', reject)
-    if (stdinData) proc.stdin.write(stdinData)
-    proc.stdin.end()
-  })
-}
 
 ipcMain.handle('gh:installed', async () => {
   try {
@@ -210,7 +189,7 @@ const parseWorktrees = (output: string) => {
   }))
 }
 
-const createWindow = () => {
+export const createWindow = () => {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -240,6 +219,8 @@ const createWindow = () => {
   } else {
     win.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
+
+  return win
 }
 
 ipcMain.handle('dirs:filter-existing', async (_e, paths: string[]) => {
