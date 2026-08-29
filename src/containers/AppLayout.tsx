@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { LogOut, Moon, Sun } from 'lucide-react'
-import { NavLink, Outlet } from 'react-router'
+import { NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuthStore } from '@/features/auth/exports'
+import { usePRStore } from '@/features/pull-requests/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures, type Feature } from '@/shared/features'
 import { Footer } from '@/shared/components/Footer/Footer'
@@ -17,6 +19,23 @@ export const AppLayout = () => {
   const { data: latestVersion } = useUpdateCheck()
   const { theme, toggle } = useTheme()
   const features = useFeatures()
+  const navigate = useNavigate()
+  const hiddenAuthors = usePRStore((s) => s.globalFilters.hiddenAuthors)
+  const hiddenRepos = usePRStore((s) => s.globalFilters.hiddenRepos)
+  const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
+
+  useEffect(() => {
+    window.electronAPI?.notifications.onNavigate((payload) => {
+      if ('route' in payload) navigate(payload.route)
+      else usePRStore.getState().setSection(payload.section)
+    })
+  }, [navigate])
+
+  // ponytail: pushes only the fields the main-process poll needs to filter/deep-link;
+  // enabledCategories/pollIntervalMs get pushed from notificationStore once that lands.
+  useEffect(() => {
+    window.electronAPI?.notifications.updateSettings({ hiddenAuthors, hiddenRepos, openPRsInDonna })
+  }, [hiddenAuthors, hiddenRepos, openPRsInDonna])
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">
