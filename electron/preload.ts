@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
+import type { NotificationSettings, NotificationNavigatePayload } from './notifications'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   gh: {
@@ -39,5 +40,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onUpdateDownloaded: (cb: () => void) => ipcRenderer.on('update:downloaded', cb),
     installUpdate: (): Promise<void> => ipcRenderer.invoke('update:install'),
     isUpdateDownloaded: (): Promise<boolean> => ipcRenderer.invoke('update:is-downloaded'),
+  },
+  notifications: {
+    updateSettings: (partial: Partial<NotificationSettings>): Promise<void> =>
+      ipcRenderer.invoke('notifications:updateSettings', partial),
+    onNavigate: (cb: (payload: NotificationNavigatePayload) => void) =>
+      ipcRenderer.on('notifications:navigate', (_e, payload) => cb(payload)),
   },
 })
