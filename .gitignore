@@ -12,6 +12,7 @@ dist
 dist-ssr
 build
 out
+release
 *.local
 .env
 .env*.local

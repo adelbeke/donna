@@ -125,14 +125,26 @@ const handleSinglePRClick = (pr: NotificationPR) => {
   }
 }
 
+// ponytail: Electron GCs a Notification with no surviving reference, silently killing its
+// 'click' handler — hold one until it's dismissed/clicked so the click-through actually fires.
+const liveNotifications = new Set<Notification>()
+
 const fireNotification = (title: string, body: string, onClick: () => void) => {
   const notification = new Notification({ title, body })
+  liveNotifications.add(notification)
+  const release = () => liveNotifications.delete(notification)
+
   // ponytail: UNUserNotificationCenter can silently refuse an unsigned dev-mode Electron
   // bundle (UNErrorDomain error 1) — this only surfaces the failure, packaging is the fix.
-  notification.on('failed', (_e, error) => console.error('[notifications] failed', error))
+  notification.on('failed', (_e, error) => {
+    console.error('[notifications] failed', error)
+    release()
+  })
+  notification.on('close', release)
   notification.on('click', () => {
     focusWindow()
     onClick()
+    release()
   })
   notification.show()
 }
