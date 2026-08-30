@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
-import { LogOut, Moon, Sun } from 'lucide-react'
+import { LogOut, Moon, Settings, Sun } from 'lucide-react'
 import { NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuthStore } from '@/features/auth/exports'
 import { usePRStore } from '@/features/pull-requests/exports'
+import { useNotificationStore } from '@/features/notifications/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures, type Feature } from '@/shared/features'
 import { Footer } from '@/shared/components/Footer/Footer'
 import { useUpdateCheck, UpdateBanner } from '@/features/updates/exports'
-import { OnboardingGuide } from '@/features/onboarding/exports'
 
 const NAV_TABS: { to: string; label: string; feature?: Feature }[] = [
   { to: '/prs', label: 'Pull Requests' },
@@ -23,6 +23,13 @@ export const AppLayout = () => {
   const hiddenAuthors = usePRStore((s) => s.globalFilters.hiddenAuthors)
   const hiddenRepos = usePRStore((s) => s.globalFilters.hiddenRepos)
   const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
+  const enabledCategories = useNotificationStore((s) => s.enabledCategories)
+  const pollIntervalMs = useNotificationStore((s) => s.pollIntervalMs)
+  const checksEnabled = useNotificationStore((s) => s.checksEnabled)
+  const showDraftsReviewRequested = usePRStore((s) => s.viewFilters['review-requested'].showDrafts)
+  const showDraftsAssigned = usePRStore((s) => s.viewFilters.assigned.showDrafts)
+  const showDraftsReviewed = usePRStore((s) => s.viewFilters.reviewed.showDrafts)
+  const showDraftsAuthored = usePRStore((s) => s.viewFilters.authored.showDrafts)
 
   useEffect(() => {
     window.electronAPI?.notifications.onNavigate((payload) => {
@@ -31,11 +38,34 @@ export const AppLayout = () => {
     })
   }, [navigate])
 
-  // ponytail: pushes only the fields the main-process poll needs to filter/deep-link;
-  // enabledCategories/pollIntervalMs get pushed from notificationStore once that lands.
+  // one push carries the full settings blob main needs — avoids a second sync path to keep in step
   useEffect(() => {
-    window.electronAPI?.notifications.updateSettings({ hiddenAuthors, hiddenRepos, openPRsInDonna })
-  }, [hiddenAuthors, hiddenRepos, openPRsInDonna])
+    window.electronAPI?.notifications.updateSettings({
+      hiddenAuthors,
+      hiddenRepos,
+      openPRsInDonna,
+      enabledCategories,
+      pollIntervalMs,
+      checksEnabled,
+      showDraftsByCategory: {
+        'review-requested': showDraftsReviewRequested,
+        assigned: showDraftsAssigned,
+        reviewed: showDraftsReviewed,
+        authored: showDraftsAuthored,
+      },
+    })
+  }, [
+    hiddenAuthors,
+    hiddenRepos,
+    openPRsInDonna,
+    enabledCategories,
+    pollIntervalMs,
+    checksEnabled,
+    showDraftsReviewRequested,
+    showDraftsAssigned,
+    showDraftsReviewed,
+    showDraftsAuthored,
+  ])
 
   return (
     <div className="min-h-screen bg-[var(--color-surface)] text-[var(--color-text-primary)] flex flex-col">
@@ -71,7 +101,20 @@ export const AppLayout = () => {
             <div className="flex items-center gap-3 shrink-0">
               <img src={user.avatarUrl} alt={user.login} className="w-6 h-6 rounded-full" />
               <span className="text-xs text-[var(--color-text-secondary)]">{user.login}</span>
-              <OnboardingGuide />
+              <NavLink
+                to="/settings"
+                title="Settings"
+                className={({ isActive }) =>
+                  `p-1.5 rounded transition-colors cursor-pointer
+                  ${
+                    isActive
+                      ? 'bg-[var(--color-accent-subtle)] text-[var(--color-accent)]'
+                      : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)]'
+                  }`
+                }
+              >
+                <Settings size={14} />
+              </NavLink>
               <button
                 onClick={toggle}
                 title="Toggle theme"

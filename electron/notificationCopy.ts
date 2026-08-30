@@ -1,9 +1,22 @@
 export type NotificationCategory = 'review-requested' | 'assigned' | 'reviewed'
 
+// the per-PR-state-diff sections (checks) — 'authored' has no new-PR notification (group a),
+// only check-state tracking, so it's not part of NotificationCategory
+export type ChecksSection = 'authored' | 'assigned'
+export type NotificationSection = NotificationCategory | 'authored'
+
+export type CheckRollupState = 'SUCCESS' | 'FAILURE' | 'PENDING' | 'ERROR' | 'EXPECTED'
+
 export type NewPRNode = {
   number: number
   title: string
   author: { login: string } | null
+  repository: { nameWithOwner: string }
+}
+
+export type CheckedPRNode = {
+  number: number
+  title: string
   repository: { nameWithOwner: string }
 }
 
@@ -25,6 +38,11 @@ export const filterMuted = <T extends NewPRNode>(
     return true
   })
 
+export const filterDrafts = <T extends { isDraft: boolean }>(
+  nodes: T[],
+  showDrafts: boolean
+): T[] => (showDrafts ? nodes : nodes.filter((n) => !n.isDraft))
+
 const SINGLE_TITLE: Record<NotificationCategory, string> = {
   'review-requested': 'New review request',
   assigned: 'You were assigned',
@@ -39,17 +57,31 @@ const PLURAL_LABEL: Record<NotificationCategory, string> = {
 
 const MAX_REPOS_IN_BODY = 3
 
-export const buildSearchQuery = (category: NotificationCategory, login: string): string => {
+export const buildSearchQuery = (section: NotificationSection, login: string): string => {
   const base = 'is:open is:pr archived:false sort:updated-desc'
-  switch (category) {
+  switch (section) {
     case 'review-requested':
       return `${base} review-requested:${login}`
     case 'assigned':
       return `${base} assignee:${login} -author:${login}`
     case 'reviewed':
       return `${base} reviewed-by:${login} -author:${login}`
+    case 'authored':
+      return `${base} author:${login}`
   }
 }
+
+// terminal = worth notifying about; PENDING/EXPECTED are still in flight
+export const isTerminalCheckState = (state: CheckRollupState | null): boolean =>
+  state === 'SUCCESS' || state === 'FAILURE'
+
+export const formatCheckStateNotification = (
+  pr: CheckedPRNode,
+  checkState: CheckRollupState
+): { title: string; body: string } => ({
+  title: checkState === 'FAILURE' ? 'CI failed' : 'CI passed',
+  body: `${pr.repository.nameWithOwner}#${pr.number} · ${pr.title}`,
+})
 
 export const diffNewIds = (fetchedIds: string[], seenIds: string[]): string[] => {
   const seen = new Set(seenIds)

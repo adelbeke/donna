@@ -3,6 +3,7 @@ import { AppLayout } from '@/containers/AppLayout'
 import { PRDashboard } from '@/features/pull-requests/exports'
 import { BranchDashboard } from '@/features/branches/exports'
 import { PRDetailPage } from '@/features/pr-review/exports'
+import { SettingsPage } from '@/features/notifications/exports'
 import { RequireFeature } from '@/shared/components/RequireFeature/RequireFeature'
 
 // HashRouter is mandatory: the packaged app loads renderer/index.html via file://, which
@@ -14,6 +15,7 @@ export const AppRouter = () => (
         <Route index element={<Navigate to="/prs" replace />} />
         <Route path="prs" element={<PRDashboard />} />
         <Route path="prs/:owner/:repo/:number" element={<PRDetailPage />} />
+        <Route path="settings" element={<SettingsPage />} />
         <Route
           path="branches"
           element={

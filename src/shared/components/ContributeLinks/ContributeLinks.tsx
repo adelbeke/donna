@@ -1,5 +1,6 @@
 import { Bug, Lightbulb } from 'lucide-react'
 import { ChangelogButton } from '@/features/updates/exports.ts'
+import { OnboardingGuide } from '@/features/onboarding/exports'
 
 const LINK_CLASSES =
   'flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors'
@@ -8,6 +9,7 @@ export const ContributeLinks = () => {
   return (
     <>
       <p className="text-xs text-[var(--color-text-muted)]">Donna is open source. Make it yours.</p>
+      <OnboardingGuide />
       <a
         href="https://github.com/adelbeke/donna/issues/new?template=feature_request.md"
         target="_blank"

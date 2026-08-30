@@ -2,9 +2,12 @@ import { describe, it, expect } from 'vitest'
 import {
   buildSearchQuery,
   diffNewIds,
+  filterDrafts,
   filterMuted,
+  formatCheckStateNotification,
   formatNewPRNotification,
   isRepoMatchedBy,
+  isTerminalCheckState,
 } from './notificationCopy'
 import type { NewPRNode } from './notificationCopy'
 
@@ -26,6 +29,12 @@ describe('buildSearchQuery', () => {
   it('builds an assigned search excluding PRs authored by the login', () => {
     expect(buildSearchQuery('assigned', 'octocat')).toBe(
       'is:open is:pr archived:false sort:updated-desc assignee:octocat -author:octocat'
+    )
+  })
+
+  it('builds an authored search for the given login', () => {
+    expect(buildSearchQuery('authored', 'octocat')).toBe(
+      'is:open is:pr archived:false sort:updated-desc author:octocat'
     )
   })
 })
@@ -110,5 +119,49 @@ describe('filterMuted', () => {
   it('keeps PRs with no author untouched by author muting', () => {
     const nodes = [givenPR({ author: null })]
     expect(filterMuted(nodes, ['dependabot'], [])).toEqual(nodes)
+  })
+})
+
+describe('filterDrafts', () => {
+  it('drops draft PRs when showDrafts is off', () => {
+    const nodes = [{ isDraft: true }, { isDraft: false }]
+    expect(filterDrafts(nodes, false)).toEqual([{ isDraft: false }])
+  })
+
+  it('keeps draft PRs when showDrafts is on', () => {
+    const nodes = [{ isDraft: true }, { isDraft: false }]
+    expect(filterDrafts(nodes, true)).toEqual(nodes)
+  })
+})
+
+describe('isTerminalCheckState', () => {
+  it('treats SUCCESS and FAILURE as terminal', () => {
+    expect(isTerminalCheckState('SUCCESS')).toBe(true)
+    expect(isTerminalCheckState('FAILURE')).toBe(true)
+  })
+
+  it('treats PENDING, EXPECTED, ERROR and null as non-terminal', () => {
+    expect(isTerminalCheckState('PENDING')).toBe(false)
+    expect(isTerminalCheckState('EXPECTED')).toBe(false)
+    expect(isTerminalCheckState('ERROR')).toBe(false)
+    expect(isTerminalCheckState(null)).toBe(false)
+  })
+})
+
+describe('formatCheckStateNotification', () => {
+  const pr = { number: 42, title: 'Fix the thing', repository: { nameWithOwner: 'acme/donna' } }
+
+  it('formats a CI failure', () => {
+    expect(formatCheckStateNotification(pr, 'FAILURE')).toEqual({
+      title: 'CI failed',
+      body: 'acme/donna#42 · Fix the thing',
+    })
+  })
+
+  it('formats a CI pass', () => {
+    expect(formatCheckStateNotification(pr, 'SUCCESS')).toEqual({
+      title: 'CI passed',
+      body: 'acme/donna#42 · Fix the thing',
+    })
   })
 })

@@ -45,6 +45,8 @@ interface Window {
 }
 
 type NotificationCategory = 'review-requested' | 'assigned' | 'reviewed'
+type ChecksSection = 'authored' | 'assigned'
+type NotificationSection = NotificationCategory | 'authored'
 
 type NotificationSettings = {
   enabledCategories: NotificationCategory[]
@@ -52,6 +54,8 @@ type NotificationSettings = {
   openPRsInDonna: boolean
   hiddenAuthors: string[]
   hiddenRepos: string[]
+  showDraftsByCategory: Record<NotificationSection, boolean>
+  checksEnabled: Record<ChecksSection, boolean>
 }
 
 type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
