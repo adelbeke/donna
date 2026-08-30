@@ -16,6 +16,7 @@ beforeEach(() => {
     enabledCategories: ['review-requested', 'assigned'],
     pollIntervalMs: 5 * 60_000,
     checksEnabled: { authored: false, assigned: false },
+    reviewLeftEnabled: false,
   })
 })
 
@@ -71,5 +72,13 @@ describe('SettingsPage', () => {
       assigned: false,
       authored: true,
     })
+  })
+
+  it('GIVEN review-left disabled WHEN the checkbox is checked THEN it is enabled in the store', () => {
+    renderSettingsPage()
+
+    fireEvent.click(screen.getByLabelText('Notify me when someone reviews my PR'))
+
+    expect(useNotificationStore.getState().reviewLeftEnabled).toBe(true)
   })
 })

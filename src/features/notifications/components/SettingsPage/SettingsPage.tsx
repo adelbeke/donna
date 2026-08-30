@@ -35,6 +35,8 @@ export const SettingsPage = () => {
   const toggleCategory = useNotificationStore((s) => s.toggleCategory)
   const checksEnabled = useNotificationStore((s) => s.checksEnabled)
   const toggleChecksEnabled = useNotificationStore((s) => s.toggleChecksEnabled)
+  const reviewLeftEnabled = useNotificationStore((s) => s.reviewLeftEnabled)
+  const toggleReviewLeftEnabled = useNotificationStore((s) => s.toggleReviewLeftEnabled)
   const pollIntervalMs = useNotificationStore((s) => s.pollIntervalMs)
   const setPollIntervalMs = useNotificationStore((s) => s.setPollIntervalMs)
 
@@ -92,6 +94,11 @@ export const SettingsPage = () => {
               label="Notify me when CI passes or fails"
               checked={checksEnabled.authored}
               onChange={() => toggleChecksEnabled('authored')}
+            />
+            <Checkbox
+              label="Notify me when someone reviews my PR"
+              checked={reviewLeftEnabled}
+              onChange={toggleReviewLeftEnabled}
             />
           </div>
         </div>

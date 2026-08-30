@@ -5,9 +5,11 @@ export type NotificationStore = {
   enabledCategories: NotificationCategory[]
   pollIntervalMs: number
   checksEnabled: Record<ChecksSection, boolean>
+  reviewLeftEnabled: boolean
   toggleCategory: (category: NotificationCategory) => void
   setPollIntervalMs: (ms: number) => void
   toggleChecksEnabled: (section: ChecksSection) => void
+  toggleReviewLeftEnabled: () => void
 }
 
 const defaultEnabledCategories: NotificationCategory[] = ['review-requested', 'assigned']
@@ -18,6 +20,7 @@ export const useNotificationStore = create<NotificationStore>()(
       enabledCategories: defaultEnabledCategories,
       pollIntervalMs: 5 * 60_000,
       checksEnabled: { authored: false, assigned: false },
+      reviewLeftEnabled: false,
       toggleCategory: (category) =>
         set((state) => ({
           enabledCategories: state.enabledCategories.includes(category)
@@ -29,6 +32,8 @@ export const useNotificationStore = create<NotificationStore>()(
         set((state) => ({
           checksEnabled: { ...state.checksEnabled, [section]: !state.checksEnabled[section] },
         })),
+      toggleReviewLeftEnabled: () =>
+        set((state) => ({ reviewLeftEnabled: !state.reviewLeftEnabled })),
     }),
     { name: 'notification-preferences' }
   )
