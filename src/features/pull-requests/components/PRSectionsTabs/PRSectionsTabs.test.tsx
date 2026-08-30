@@ -7,7 +7,9 @@ import { usePRStore } from '../../stores/prStore'
 import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
 import type { PRStore } from '../../stores/prStore'
 
-vi.mock('../../stores/prStore', () => ({ usePRStore: Object.assign(vi.fn(), { getState: vi.fn() }) }))
+vi.mock('../../stores/prStore', () => ({
+  usePRStore: Object.assign(vi.fn(), { getState: vi.fn() }),
+}))
 const mockUsePRStore = vi.mocked(usePRStore)
 
 const mockStore = (section = 'review-requested', setSection = vi.fn()) => {
