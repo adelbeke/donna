@@ -154,3 +154,6 @@ export const STEP_CONTENT: Record<string, StepContent> = {
 
 export const BRANCHES_TIP =
   'The Branches tab does the same for your local checkouts: every branch across the repos you add, with worktree and dirty-state detection.'
+
+export const NOTIFICATIONS_TIP =
+  'Want a nudge without keeping Donna open? Notifications (beta) live in Settings — new review requests, CI results, reviews left on your PRs.'

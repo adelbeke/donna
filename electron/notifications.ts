@@ -10,6 +10,8 @@ import {
   filterMuted,
   formatCheckStateNotification,
   formatNewPRNotification,
+  formatReviewNotification,
+  isNotifiableReviewState,
   isTerminalCheckState,
 } from './notificationCopy'
 import type {
@@ -17,6 +19,7 @@ import type {
   CheckRollupState,
   NotificationCategory,
   NotificationSection,
+  ReviewState,
 } from './notificationCopy'
 
 export type { NotificationCategory }
@@ -29,9 +32,12 @@ export type NotificationSettings = {
   hiddenRepos: string[]
   showDraftsByCategory: Record<NotificationSection, boolean>
   checksEnabled: Record<ChecksSection, boolean>
+  reviewLeftEnabled: boolean
 }
 
 export type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
+
+type Review = { id: string; state: ReviewState; author: { login: string } | null }
 
 type NotificationPR = {
   id: string
@@ -40,6 +46,7 @@ type NotificationPR = {
   url: string
   isDraft: boolean
   checkState: CheckRollupState | null
+  reviews: Review[]
   author: { login: string } | null
   repository: { nameWithOwner: string }
 }
@@ -59,18 +66,22 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   // opt-in: unlike new-PR notifications, per-check-state notifications can fire often on an
   // active PR (every re-run), so we don't turn this on until the user asks for it in Settings
   checksEnabled: { authored: false, assigned: false },
+  reviewLeftEnabled: false,
 }
 
 type PersistedState = {
   settings: NotificationSettings
   seenIds: Partial<Record<NotificationCategory, string[]>>
   lastCheckState: Partial<Record<ChecksSection, Record<string, CheckRollupState | null>>>
+  // PR id -> review ids already notified about (or seeded on first sighting of that PR)
+  seenReviewIds: Record<string, string[]>
 }
 
 const DEFAULT_STATE: PersistedState = {
   settings: DEFAULT_SETTINGS,
   seenIds: {},
   lastCheckState: {},
+  seenReviewIds: {},
 }
 
 const storePath = () => path.join(app.getPath('userData'), 'notifications.json')
@@ -94,6 +105,7 @@ const loadState = (): PersistedState => {
       },
       seenIds: parsed.seenIds ?? {},
       lastCheckState: parsed.lastCheckState ?? {},
+      seenReviewIds: parsed.seenReviewIds ?? {},
     }
   } catch {
     return DEFAULT_STATE
@@ -134,14 +146,22 @@ const SEARCH_QUERY = `
               }
             }
           }
+          reviews(last: 10) {
+            nodes {
+              id
+              state
+              author { login }
+            }
+          }
         }
       }
     }
   }
 `
 
-type RawSearchNode = Omit<NotificationPR, 'checkState'> & {
+type RawSearchNode = Omit<NotificationPR, 'checkState' | 'reviews'> & {
   commits: { nodes: { commit: { statusCheckRollup: { state: CheckRollupState } | null } | null }[] }
+  reviews: { nodes: Review[] }
 }
 
 const toNotificationPR = (raw: RawSearchNode): NotificationPR => ({
@@ -150,6 +170,7 @@ const toNotificationPR = (raw: RawSearchNode): NotificationPR => ({
   title: raw.title,
   url: raw.url,
   isDraft: raw.isDraft,
+  reviews: raw.reviews.nodes,
   author: raw.author,
   repository: raw.repository,
   checkState: raw.commits.nodes[0]?.commit?.statusCheckRollup?.state ?? null,
@@ -226,6 +247,12 @@ const notifyCheckStateChange = (pr: NotificationPR) => {
   fireNotification(title, body, () => handleSinglePRClick(pr))
 }
 
+const notifyReviewLeft = (pr: NotificationPR, review: Review) => {
+  if (!review.author || !isNotifiableReviewState(review.state)) return
+  const { title, body } = formatReviewNotification(pr, review.author.login, review.state)
+  fireNotification(title, body, () => handleSinglePRClick(pr))
+}
+
 // shared by both the new-PR diff (group a) and the check-state diff (group b) — each section can
 // be polled for either or both independently, so the fetch+filter step is the only thing in common
 const fetchSection = async (section: NotificationSection): Promise<NotificationPR[] | null> => {
@@ -286,6 +313,28 @@ const checkChecks = async (section: ChecksSection) => {
   saveState()
 }
 
+// self-pruning like lastCheckState/seenIds: nextMap only keeps ids for PRs still open
+const checkReviews = async () => {
+  const nodes = await fetchSection('authored')
+  if (!nodes) return
+
+  const prevMap = state.seenReviewIds
+  const nextMap: Record<string, string[]> = {}
+  for (const pr of nodes) {
+    const reviewIds = pr.reviews.map((r) => r.id)
+    nextMap[pr.id] = reviewIds
+    const prevIds = prevMap[pr.id]
+    // seed only on first sight of this PR — otherwise every existing review would notify once
+    if (prevIds === undefined) continue
+    const newIds = diffNewIds(reviewIds, prevIds)
+    for (const review of pr.reviews.filter((r) => newIds.includes(r.id))) {
+      if (review.author?.login !== viewerLogin) notifyReviewLeft(pr, review)
+    }
+  }
+  state.seenReviewIds = nextMap
+  saveState()
+}
+
 const tick = async () => {
   const login = await ensureViewerLogin()
   if (!login) return
@@ -294,6 +343,7 @@ const tick = async () => {
   }
   if (state.settings.checksEnabled.assigned) await checkChecks('assigned')
   if (state.settings.checksEnabled.authored) await checkChecks('authored')
+  if (state.settings.reviewLeftEnabled) await checkReviews()
 }
 
 const startPolling = () => {

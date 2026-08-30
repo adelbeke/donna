@@ -6,6 +6,8 @@ import {
   filterMuted,
   formatCheckStateNotification,
   formatNewPRNotification,
+  formatReviewNotification,
+  isNotifiableReviewState,
   isRepoMatchedBy,
   isTerminalCheckState,
 } from './notificationCopy'
@@ -161,6 +163,44 @@ describe('formatCheckStateNotification', () => {
   it('formats a CI pass', () => {
     expect(formatCheckStateNotification(pr, 'SUCCESS')).toEqual({
       title: 'CI passed',
+      body: 'acme/donna#42 · Fix the thing',
+    })
+  })
+})
+
+describe('isNotifiableReviewState', () => {
+  it('treats APPROVED, CHANGES_REQUESTED and COMMENTED as notifiable', () => {
+    expect(isNotifiableReviewState('APPROVED')).toBe(true)
+    expect(isNotifiableReviewState('CHANGES_REQUESTED')).toBe(true)
+    expect(isNotifiableReviewState('COMMENTED')).toBe(true)
+  })
+
+  it('treats PENDING and DISMISSED as not notifiable', () => {
+    expect(isNotifiableReviewState('PENDING')).toBe(false)
+    expect(isNotifiableReviewState('DISMISSED')).toBe(false)
+  })
+})
+
+describe('formatReviewNotification', () => {
+  const pr = { number: 42, title: 'Fix the thing', repository: { nameWithOwner: 'acme/donna' } }
+
+  it('formats an approval', () => {
+    expect(formatReviewNotification(pr, 'octocat', 'APPROVED')).toEqual({
+      title: 'octocat approved your PR',
+      body: 'acme/donna#42 · Fix the thing',
+    })
+  })
+
+  it('formats requested changes', () => {
+    expect(formatReviewNotification(pr, 'octocat', 'CHANGES_REQUESTED')).toEqual({
+      title: 'octocat requested changes on your PR',
+      body: 'acme/donna#42 · Fix the thing',
+    })
+  })
+
+  it('formats a comment', () => {
+    expect(formatReviewNotification(pr, 'octocat', 'COMMENTED')).toEqual({
+      title: 'octocat commented on your PR',
       body: 'acme/donna#42 · Fix the thing',
     })
   })

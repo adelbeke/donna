@@ -6,6 +6,7 @@ beforeEach(() => {
     enabledCategories: ['review-requested', 'assigned'],
     pollIntervalMs: 5 * 60_000,
     checksEnabled: { authored: false, assigned: false },
+    reviewLeftEnabled: false,
   })
 })
 
@@ -46,5 +47,18 @@ describe('notificationStore', () => {
     useNotificationStore.getState().toggleChecksEnabled('assigned')
 
     expect(useNotificationStore.getState().checksEnabled.assigned).toBe(false)
+  })
+
+  it('GIVEN review-left disabled WHEN toggled THEN it is enabled', () => {
+    useNotificationStore.getState().toggleReviewLeftEnabled()
+
+    expect(useNotificationStore.getState().reviewLeftEnabled).toBe(true)
+  })
+
+  it('GIVEN review-left enabled WHEN toggled twice THEN it is back to disabled', () => {
+    useNotificationStore.getState().toggleReviewLeftEnabled()
+    useNotificationStore.getState().toggleReviewLeftEnabled()
+
+    expect(useNotificationStore.getState().reviewLeftEnabled).toBe(false)
   })
 })

@@ -7,6 +7,9 @@ export type NotificationSection = NotificationCategory | 'authored'
 
 export type CheckRollupState = 'SUCCESS' | 'FAILURE' | 'PENDING' | 'ERROR' | 'EXPECTED'
 
+export type ReviewState = 'PENDING' | 'COMMENTED' | 'APPROVED' | 'CHANGES_REQUESTED' | 'DISMISSED'
+type NotifiableReviewState = 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED'
+
 export type NewPRNode = {
   number: number
   title: string
@@ -80,6 +83,24 @@ export const formatCheckStateNotification = (
   checkState: CheckRollupState
 ): { title: string; body: string } => ({
   title: checkState === 'FAILURE' ? 'CI failed' : 'CI passed',
+  body: `${pr.repository.nameWithOwner}#${pr.number} · ${pr.title}`,
+})
+
+export const isNotifiableReviewState = (state: ReviewState): state is NotifiableReviewState =>
+  state === 'APPROVED' || state === 'CHANGES_REQUESTED' || state === 'COMMENTED'
+
+const REVIEW_VERB: Record<NotifiableReviewState, string> = {
+  APPROVED: 'approved',
+  CHANGES_REQUESTED: 'requested changes on',
+  COMMENTED: 'commented on',
+}
+
+export const formatReviewNotification = (
+  pr: CheckedPRNode,
+  reviewerLogin: string,
+  state: NotifiableReviewState
+): { title: string; body: string } => ({
+  title: `${reviewerLogin} ${REVIEW_VERB[state]} your PR`,
   body: `${pr.repository.nameWithOwner}#${pr.number} · ${pr.title}`,
 })
 
