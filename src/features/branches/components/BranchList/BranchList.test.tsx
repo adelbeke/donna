@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BranchCard } from './BranchCard/BranchCard'
 import { BranchList } from './BranchList'
@@ -20,9 +21,11 @@ import { usePullRequests } from '@/features/pull-requests/exports'
 const renderBranchList = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <QueryClientProvider client={client}>
-      <BranchList />
-    </QueryClientProvider>
+    <MemoryRouter>
+      <QueryClientProvider client={client}>
+        <BranchList />
+      </QueryClientProvider>
+    </MemoryRouter>
   )
 }
 

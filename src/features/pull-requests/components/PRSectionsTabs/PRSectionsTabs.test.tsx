@@ -1,33 +1,39 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PRSectionsTabs } from './PRSectionsTabs'
 import { usePRStore } from '../../stores/prStore'
 import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
 import type { PRStore } from '../../stores/prStore'
 
-vi.mock('../../stores/prStore', () => ({ usePRStore: vi.fn() }))
+vi.mock('../../stores/prStore', () => ({ usePRStore: Object.assign(vi.fn(), { getState: vi.fn() }) }))
 const mockUsePRStore = vi.mocked(usePRStore)
 
 const mockStore = (section = 'review-requested', setSection = vi.fn()) => {
-  mockUsePRStore.mockImplementation((selector: (s: PRStore) => unknown) => {
-    const state = { section, setSection }
-    return selector(state as unknown as PRStore)
-  })
+  const state = { section, setSection }
+  mockUsePRStore.mockImplementation((selector: (s: PRStore) => unknown) =>
+    selector(state as unknown as PRStore)
+  )
+  vi.mocked(mockUsePRStore.getState).mockReturnValue(state as unknown as PRStore)
 }
 
 const renderWithClient = () => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
-    <QueryClientProvider client={client}>
-      <PRSectionsTabs />
-    </QueryClientProvider>
+    <MemoryRouter>
+      <QueryClientProvider client={client}>
+        <PRSectionsTabs />
+      </QueryClientProvider>
+    </MemoryRouter>
   )
 }
 
 beforeEach(() => {
   vi.clearAllMocks()
-  useOnboardingStore.setState({ spotlight: null })
+  // hasSeenGuide: true keeps the onboarding guide's own modal (rendered via ContributeLinks) closed,
+  // so its content doesn't collide with these tests' section-label queries.
+  useOnboardingStore.setState({ spotlight: null, hasSeenGuide: true })
   mockStore()
 })
 

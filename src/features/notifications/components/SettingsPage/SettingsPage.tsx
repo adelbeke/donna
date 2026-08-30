@@ -1,3 +1,5 @@
+import { ArrowLeft } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { useNotificationStore } from '../../stores/notificationStore'
 
 const INTERVAL_OPTIONS: { label: string; value: number }[] = [
@@ -28,6 +30,7 @@ const Checkbox = ({
 )
 
 export const SettingsPage = () => {
+  const navigate = useNavigate()
   const enabledCategories = useNotificationStore((s) => s.enabledCategories)
   const toggleCategory = useNotificationStore((s) => s.toggleCategory)
   const checksEnabled = useNotificationStore((s) => s.checksEnabled)
@@ -37,11 +40,22 @@ export const SettingsPage = () => {
 
   return (
     <div className="max-w-lg space-y-6">
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none rounded"
+      >
+        <ArrowLeft size={13} />
+        Back
+      </button>
+
       <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Settings</h2>
 
       <section>
-        <h3 className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+        <h3 className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
           Notifications
+          <span className="normal-case tracking-normal text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)]">
+            Beta
+          </span>
         </h3>
 
         <div className="space-y-5">

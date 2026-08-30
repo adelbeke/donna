@@ -85,9 +85,10 @@ export const OnboardingGuide = () => {
         onClick={open}
         aria-label={GUIDE_TITLE}
         title={GUIDE_TITLE}
-        className="p-1.5 rounded text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-overlay)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
+        className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none"
       >
-        <Compass size={14} />
+        <Compass size={13} />
+        Guide
       </button>
 
       <Modal isOpen={isOpen} title={GUIDE_TITLE} onClose={close} transition className="min-w-1/2">
