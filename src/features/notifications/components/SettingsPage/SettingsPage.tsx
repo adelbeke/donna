@@ -53,12 +53,24 @@ export const SettingsPage = () => {
       <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Settings</h2>
 
       <section>
-        <h3 className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-3">
+        <h3 className="flex items-center gap-2 text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
           Notifications
           <span className="normal-case tracking-normal text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--color-accent)]/15 text-[var(--color-accent)]">
             Beta
           </span>
         </h3>
+        <p className="text-xs text-[var(--color-text-muted)] mb-4">
+          Notifications are new and still settling in — found a bug or have feedback?{' '}
+          <a
+            href="https://github.com/adelbeke/donna/issues/new?template=bug_report.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--color-accent)] hover:underline"
+          >
+            Let me know
+          </a>
+          .
+        </p>
 
         <div className="space-y-5">
           <div className="space-y-2">

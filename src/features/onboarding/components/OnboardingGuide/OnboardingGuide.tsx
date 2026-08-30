@@ -14,7 +14,7 @@ import {
   isLastStep,
   type ChapterId,
 } from '../../lib/steps'
-import { BRANCHES_TIP, STEP_CONTENT } from './guideContent'
+import { BRANCHES_TIP, NOTIFICATIONS_TIP, STEP_CONTENT } from './guideContent'
 
 const GUIDE_TITLE = 'How Donna works'
 const PR_LIST_PATH = '/prs'
@@ -127,6 +127,11 @@ export const OnboardingGuide = () => {
             {onLastStep && features.has('branches') && (
               <p className="pt-1 border-t border-[var(--color-border-subtle)] text-[var(--color-text-muted)]">
                 {BRANCHES_TIP}
+              </p>
+            )}
+            {onLastStep && (
+              <p className="pt-1 border-t border-[var(--color-border-subtle)] text-[var(--color-text-muted)]">
+                {NOTIFICATIONS_TIP}
               </p>
             )}
           </div>
