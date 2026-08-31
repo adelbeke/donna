@@ -292,14 +292,24 @@ const notifyNewPRs = (category: NotificationCategory, nodes: NotificationPR[]) =
 
 const notifyCheckStateChange = (pr: NotificationPR, section: ChecksSection) => {
   const { title, body } = formatCheckStateNotification(pr, pr.checkState!)
-  fireNotification(title, body, () => handleSinglePRClick(pr, section), () => clearSectionUnread(section))
+  fireNotification(
+    title,
+    body,
+    () => handleSinglePRClick(pr, section),
+    () => clearSectionUnread(section)
+  )
   markSectionUnread(section)
 }
 
 const notifyReviewLeft = (pr: NotificationPR, section: ChecksSection, review: Review) => {
   if (!review.author || !isNotifiableReviewState(review.state)) return
   const { title, body } = formatReviewNotification(pr, section, review.author.login, review.state)
-  fireNotification(title, body, () => handleSinglePRClick(pr, section), () => clearSectionUnread(section))
+  fireNotification(
+    title,
+    body,
+    () => handleSinglePRClick(pr, section),
+    () => clearSectionUnread(section)
+  )
   markSectionUnread(section)
 }
 

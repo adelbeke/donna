@@ -47,9 +47,7 @@ export const AppLayout = () => {
 
   useEffect(() => {
     const activeSection: NotificationSection | null =
-      location.pathname === '/prs' || location.pathname.startsWith('/prs/')
-        ? section
-        : null
+      location.pathname === '/prs' || location.pathname.startsWith('/prs/') ? section : null
     void window.electronAPI?.notifications.setActiveSection(activeSection)
   }, [location.pathname, section])
 
