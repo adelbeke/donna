@@ -46,6 +46,9 @@ export const filterDrafts = <T extends { isDraft: boolean }>(
   showDrafts: boolean
 ): T[] => (showDrafts ? nodes : nodes.filter((n) => !n.isDraft))
 
+export const filterSelectedRepos = <T extends NewPRNode>(nodes: T[], repos: string[]): T[] =>
+  repos.length === 0 ? nodes : nodes.filter((n) => repos.includes(n.repository.nameWithOwner))
+
 const SINGLE_TITLE: Record<NotificationCategory, string> = {
   'review-requested': 'New review request',
   assigned: 'You were assigned',

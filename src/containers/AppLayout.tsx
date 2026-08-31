@@ -31,6 +31,10 @@ export const AppLayout = () => {
   const showDraftsAssigned = usePRStore((s) => s.viewFilters.assigned.showDrafts)
   const showDraftsReviewed = usePRStore((s) => s.viewFilters.reviewed.showDrafts)
   const showDraftsAuthored = usePRStore((s) => s.viewFilters.authored.showDrafts)
+  const selectedReposReviewRequested = usePRStore((s) => s.viewFilters['review-requested'].repos)
+  const selectedReposAssigned = usePRStore((s) => s.viewFilters.assigned.repos)
+  const selectedReposReviewed = usePRStore((s) => s.viewFilters.reviewed.repos)
+  const selectedReposAuthored = usePRStore((s) => s.viewFilters.authored.repos)
 
   useEffect(() => {
     window.electronAPI?.notifications.onNavigate((payload) => {
@@ -44,6 +48,12 @@ export const AppLayout = () => {
     window.electronAPI?.notifications.updateSettings({
       hiddenAuthors,
       hiddenRepos,
+      selectedReposByCategory: {
+        'review-requested': selectedReposReviewRequested,
+        assigned: selectedReposAssigned,
+        reviewed: selectedReposReviewed,
+        authored: selectedReposAuthored,
+      },
       openPRsInDonna,
       enabledCategories,
       pollIntervalMs,
@@ -59,6 +69,10 @@ export const AppLayout = () => {
   }, [
     hiddenAuthors,
     hiddenRepos,
+    selectedReposReviewRequested,
+    selectedReposAssigned,
+    selectedReposReviewed,
+    selectedReposAuthored,
     openPRsInDonna,
     enabledCategories,
     pollIntervalMs,

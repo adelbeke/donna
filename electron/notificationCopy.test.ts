@@ -4,6 +4,7 @@ import {
   diffNewIds,
   filterDrafts,
   filterMuted,
+  filterSelectedRepos,
   formatCheckStateNotification,
   formatNewPRNotification,
   formatReviewNotification,
@@ -121,6 +122,25 @@ describe('filterMuted', () => {
   it('keeps PRs with no author untouched by author muting', () => {
     const nodes = [givenPR({ author: null })]
     expect(filterMuted(nodes, ['dependabot'], [])).toEqual(nodes)
+  })
+})
+
+describe('filterSelectedRepos', () => {
+  it('keeps all PRs when no repo is selected', () => {
+    const nodes = [
+      givenPR({ repository: { nameWithOwner: 'acme/donna' } }),
+      givenPR({ repository: { nameWithOwner: 'acme/api' } }),
+    ]
+    expect(filterSelectedRepos(nodes, [])).toEqual(nodes)
+  })
+
+  it('keeps only PRs from selected repos', () => {
+    const nodes = [
+      givenPR({ repository: { nameWithOwner: 'acme/donna' } }),
+      givenPR({ repository: { nameWithOwner: 'acme/api' } }),
+      givenPR({ repository: { nameWithOwner: 'acme/web' } }),
+    ]
+    expect(filterSelectedRepos(nodes, ['acme/api', 'acme/web'])).toEqual([nodes[1], nodes[2]])
   })
 })
 
