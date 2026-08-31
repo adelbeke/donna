@@ -117,7 +117,7 @@ describe('PRSectionsTabs — section tabs', () => {
     mockNotifications(['authored'], clearSectionUnread)
     renderWithClient()
 
-    fireEvent.click(screen.getByText('My PRs'))
+    fireEvent.click(screen.getByRole('button', { name: /My PRs/ }))
 
     expect(clearSectionUnread).toHaveBeenCalledWith('authored')
   })
