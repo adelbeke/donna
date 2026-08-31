@@ -4,6 +4,7 @@ import path from 'node:path'
 import { runGh } from './gh'
 import { createWindow } from './main'
 import { syncUnreadAppBadge } from './notificationBadge'
+import { createNotificationLifecycleHandlers } from './notificationLifecycle'
 import {
   buildSearchQuery,
   diffNewIds,
@@ -251,10 +252,16 @@ const handleSinglePRClick = (pr: NotificationPR, section?: NotificationSection) 
 // 'click' handler — hold one until it's dismissed/clicked so the click-through actually fires.
 const liveNotifications = new Set<Notification>()
 
-const fireNotification = (title: string, body: string, onClick: () => void) => {
+const fireNotification = (
+  title: string,
+  body: string,
+  onClick: () => void,
+  onDismiss: () => void = () => {}
+) => {
   const notification = new Notification({ title, body })
   liveNotifications.add(notification)
   const release = () => liveNotifications.delete(notification)
+  const handlers = createNotificationLifecycleHandlers({ onClick, onDismiss, release })
 
   // ponytail: UNUserNotificationCenter can silently refuse an unsigned dev-mode Electron
   // bundle (UNErrorDomain error 1) — this only surfaces the failure, packaging is the fix.
@@ -262,11 +269,10 @@ const fireNotification = (title: string, body: string, onClick: () => void) => {
     console.error('[notifications] failed', error)
     release()
   })
-  notification.on('close', release)
+  notification.on('close', handlers.onClose)
   notification.on('click', () => {
     focusWindow()
-    onClick()
-    release()
+    handlers.onClick()
   })
   notification.show()
 }
@@ -280,20 +286,20 @@ const notifyNewPRs = (category: NotificationCategory, nodes: NotificationPR[]) =
           setActiveSection(category)
           sendNavigate({ section: category })
         }
-  fireNotification(title, body, onClick)
+  fireNotification(title, body, onClick, () => clearSectionUnread(category))
   markSectionUnread(category)
 }
 
 const notifyCheckStateChange = (pr: NotificationPR, section: ChecksSection) => {
   const { title, body } = formatCheckStateNotification(pr, pr.checkState!)
-  fireNotification(title, body, () => handleSinglePRClick(pr, section))
+  fireNotification(title, body, () => handleSinglePRClick(pr, section), () => clearSectionUnread(section))
   markSectionUnread(section)
 }
 
 const notifyReviewLeft = (pr: NotificationPR, section: ChecksSection, review: Review) => {
   if (!review.author || !isNotifiableReviewState(review.state)) return
   const { title, body } = formatReviewNotification(pr, section, review.author.login, review.state)
-  fireNotification(title, body, () => handleSinglePRClick(pr, section))
+  fireNotification(title, body, () => handleSinglePRClick(pr, section), () => clearSectionUnread(section))
   markSectionUnread(section)
 }
 
