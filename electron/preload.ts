@@ -48,9 +48,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   notifications: {
     updateSettings: (partial: Partial<NotificationSettings>): Promise<void> =>
       ipcRenderer.invoke('notifications:updateSettings', partial),
-    onNavigate: (cb: (payload: NotificationNavigatePayload) => void) =>
-      ipcRenderer.on('notifications:navigate', (_e, payload) => cb(payload)),
-    onUnread: (cb: (section: NotificationSection) => void) =>
-      ipcRenderer.on('notifications:unread', (_e, section) => cb(section)),
+    onNavigate: (cb: (payload: NotificationNavigatePayload) => void) => {
+      const listener = (_e: Electron.IpcRendererEvent, payload: NotificationNavigatePayload) =>
+        cb(payload)
+      ipcRenderer.on('notifications:navigate', listener)
+      return () => ipcRenderer.removeListener('notifications:navigate', listener)
+    },
+    onUnread: (cb: (section: NotificationSection) => void) => {
+      const listener = (_e: Electron.IpcRendererEvent, section: NotificationSection) => cb(section)
+      ipcRenderer.on('notifications:unread', listener)
+      return () => ipcRenderer.removeListener('notifications:unread', listener)
+    },
   },
 })
