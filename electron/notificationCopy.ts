@@ -95,12 +95,18 @@ const REVIEW_VERB: Record<NotifiableReviewState, string> = {
   COMMENTED: 'commented on',
 }
 
+const REVIEW_TARGET_LABEL: Record<ChecksSection, string> = {
+  authored: 'your PR',
+  assigned: "a PR you're assigned to",
+}
+
 export const formatReviewNotification = (
   pr: CheckedPRNode,
+  section: ChecksSection,
   reviewerLogin: string,
   state: NotifiableReviewState
 ): { title: string; body: string } => ({
-  title: `${reviewerLogin} ${REVIEW_VERB[state]} your PR`,
+  title: `${reviewerLogin} ${REVIEW_VERB[state]} ${REVIEW_TARGET_LABEL[section]}`,
   body: `${pr.repository.nameWithOwner}#${pr.number} · ${pr.title}`,
 })
 

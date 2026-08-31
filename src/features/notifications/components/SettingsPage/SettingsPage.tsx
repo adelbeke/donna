@@ -96,6 +96,11 @@ export const SettingsPage = () => {
               checked={checksEnabled.assigned}
               onChange={() => toggleChecksEnabled('assigned')}
             />
+            <Checkbox
+              label="Notify me when someone reviews"
+              checked={reviewLeftEnabled.assigned}
+              onChange={() => toggleReviewLeftEnabled('assigned')}
+            />
           </div>
 
           <div className="space-y-2">
@@ -109,8 +114,8 @@ export const SettingsPage = () => {
             />
             <Checkbox
               label="Notify me when someone reviews my PR"
-              checked={reviewLeftEnabled}
-              onChange={toggleReviewLeftEnabled}
+              checked={reviewLeftEnabled.authored}
+              onChange={() => toggleReviewLeftEnabled('authored')}
             />
           </div>
         </div>
