@@ -3,6 +3,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { runGh } from './gh'
 import { createWindow } from './main'
+import { syncUnreadAppBadge } from './notificationBadge'
+import { createNotificationLifecycleHandlers } from './notificationLifecycle'
 import {
   buildSearchQuery,
   diffNewIds,
@@ -23,7 +25,7 @@ import type {
   ReviewState,
 } from './notificationCopy'
 
-export type { NotificationCategory }
+export type { NotificationCategory, NotificationSection }
 
 export type NotificationSettings = {
   enabledCategories: NotificationCategory[]
@@ -133,6 +135,8 @@ const saveState = () => fs.writeFileSync(storePath(), JSON.stringify(state, null
 let state: PersistedState = DEFAULT_STATE
 let viewerLogin: string | null = null
 let pollTimer: NodeJS.Timeout | null = null
+const unreadSections = new Set<NotificationSection>()
+let activeSection: NotificationSection | null = null
 
 const graphql = async <T>(query: string, variables: Record<string, unknown>): Promise<T> => {
   const out = await runGh(['api', 'graphql', '--input', '-'], JSON.stringify({ query, variables }))
@@ -216,7 +220,26 @@ const sendNavigate = (payload: NotificationNavigatePayload) => {
   )
 }
 
-const handleSinglePRClick = (pr: NotificationPR) => {
+const updateAppBadge = () => syncUnreadAppBadge(app, unreadSections.size)
+
+const clearSectionUnread = (section: NotificationSection) => {
+  unreadSections.delete(section)
+  updateAppBadge()
+}
+
+const setActiveSection = (section: NotificationSection | null) => {
+  activeSection = section
+  if (section) clearSectionUnread(section)
+}
+
+const markSectionUnread = (section: NotificationSection) => {
+  if (activeSection === section) return
+  unreadSections.add(section)
+  updateAppBadge()
+}
+
+const handleSinglePRClick = (pr: NotificationPR, section?: NotificationSection) => {
+  if (section) clearSectionUnread(section)
   if (state.settings.openPRsInDonna) {
     const [owner, repo] = pr.repository.nameWithOwner.split('/')
     sendNavigate({ route: `/prs/${owner}/${repo}/${pr.number}` })
@@ -229,10 +252,16 @@ const handleSinglePRClick = (pr: NotificationPR) => {
 // 'click' handler — hold one until it's dismissed/clicked so the click-through actually fires.
 const liveNotifications = new Set<Notification>()
 
-const fireNotification = (title: string, body: string, onClick: () => void) => {
+const fireNotification = (
+  title: string,
+  body: string,
+  onClick: () => void,
+  onDismiss: () => void = () => {}
+) => {
   const notification = new Notification({ title, body })
   liveNotifications.add(notification)
   const release = () => liveNotifications.delete(notification)
+  const handlers = createNotificationLifecycleHandlers({ onClick, onDismiss, release })
 
   // ponytail: UNUserNotificationCenter can silently refuse an unsigned dev-mode Electron
   // bundle (UNErrorDomain error 1) — this only surfaces the failure, packaging is the fix.
@@ -240,11 +269,10 @@ const fireNotification = (title: string, body: string, onClick: () => void) => {
     console.error('[notifications] failed', error)
     release()
   })
-  notification.on('close', release)
+  notification.on('close', handlers.onClose)
   notification.on('click', () => {
     focusWindow()
-    onClick()
-    release()
+    handlers.onClick()
   })
   notification.show()
 }
@@ -253,20 +281,36 @@ const notifyNewPRs = (category: NotificationCategory, nodes: NotificationPR[]) =
   const { title, body } = formatNewPRNotification(category, nodes)
   const onClick =
     nodes.length === 1
-      ? () => handleSinglePRClick(nodes[0])
-      : () => sendNavigate({ section: category })
-  fireNotification(title, body, onClick)
+      ? () => handleSinglePRClick(nodes[0], category)
+      : () => {
+          setActiveSection(category)
+          sendNavigate({ section: category })
+        }
+  fireNotification(title, body, onClick, () => clearSectionUnread(category))
+  markSectionUnread(category)
 }
 
-const notifyCheckStateChange = (pr: NotificationPR) => {
+const notifyCheckStateChange = (pr: NotificationPR, section: ChecksSection) => {
   const { title, body } = formatCheckStateNotification(pr, pr.checkState!)
-  fireNotification(title, body, () => handleSinglePRClick(pr))
+  fireNotification(
+    title,
+    body,
+    () => handleSinglePRClick(pr, section),
+    () => clearSectionUnread(section)
+  )
+  markSectionUnread(section)
 }
 
 const notifyReviewLeft = (pr: NotificationPR, section: ChecksSection, review: Review) => {
   if (!review.author || !isNotifiableReviewState(review.state)) return
   const { title, body } = formatReviewNotification(pr, section, review.author.login, review.state)
-  fireNotification(title, body, () => handleSinglePRClick(pr))
+  fireNotification(
+    title,
+    body,
+    () => handleSinglePRClick(pr, section),
+    () => clearSectionUnread(section)
+  )
+  markSectionUnread(section)
 }
 
 // shared by both the new-PR diff (group a) and the check-state diff (group b) — each section can
@@ -328,7 +372,7 @@ const checkChecks = async (section: ChecksSection) => {
       pr.checkState !== prevState &&
       isTerminalCheckState(pr.checkState)
     )
-      notifyCheckStateChange(pr)
+      notifyCheckStateChange(pr, section)
   }
   state.lastCheckState[section] = nextMap
   saveState()
@@ -375,11 +419,16 @@ const startPolling = () => {
 
 export const initNotifications = () => {
   state = loadState()
+  unreadSections.clear()
+  setActiveSection(null)
   startPolling()
 
   ipcMain.handle('notifications:updateSettings', (_e, partial: Partial<NotificationSettings>) => {
     state.settings = { ...state.settings, ...partial }
     saveState()
     startPolling()
+  })
+  ipcMain.handle('notifications:setActiveSection', (_e, section: NotificationSection | null) => {
+    setActiveSection(section)
   })
 }
