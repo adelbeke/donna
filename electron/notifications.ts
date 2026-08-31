@@ -23,7 +23,7 @@ import type {
   ReviewState,
 } from './notificationCopy'
 
-export type { NotificationCategory }
+export type { NotificationCategory, NotificationSection }
 
 export type NotificationSettings = {
   enabledCategories: NotificationCategory[]
@@ -216,6 +216,10 @@ const sendNavigate = (payload: NotificationNavigatePayload) => {
   )
 }
 
+const sendUnread = (section: NotificationSection) => {
+  BrowserWindow.getAllWindows().forEach((w) => w.webContents.send('notifications:unread', section))
+}
+
 const handleSinglePRClick = (pr: NotificationPR) => {
   if (state.settings.openPRsInDonna) {
     const [owner, repo] = pr.repository.nameWithOwner.split('/')
@@ -256,17 +260,20 @@ const notifyNewPRs = (category: NotificationCategory, nodes: NotificationPR[]) =
       ? () => handleSinglePRClick(nodes[0])
       : () => sendNavigate({ section: category })
   fireNotification(title, body, onClick)
+  sendUnread(category)
 }
 
-const notifyCheckStateChange = (pr: NotificationPR) => {
+const notifyCheckStateChange = (pr: NotificationPR, section: ChecksSection) => {
   const { title, body } = formatCheckStateNotification(pr, pr.checkState!)
   fireNotification(title, body, () => handleSinglePRClick(pr))
+  sendUnread(section)
 }
 
 const notifyReviewLeft = (pr: NotificationPR, section: ChecksSection, review: Review) => {
   if (!review.author || !isNotifiableReviewState(review.state)) return
   const { title, body } = formatReviewNotification(pr, section, review.author.login, review.state)
   fireNotification(title, body, () => handleSinglePRClick(pr))
+  sendUnread(section)
 }
 
 // shared by both the new-PR diff (group a) and the check-state diff (group b) — each section can
@@ -328,7 +335,7 @@ const checkChecks = async (section: ChecksSection) => {
       pr.checkState !== prevState &&
       isTerminalCheckState(pr.checkState)
     )
-      notifyCheckStateChange(pr)
+      notifyCheckStateChange(pr, section)
   }
   state.lastCheckState[section] = nextMap
   saveState()

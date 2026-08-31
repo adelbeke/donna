@@ -40,6 +40,7 @@ interface Window {
     notifications: {
       updateSettings: (partial: Partial<NotificationSettings>) => Promise<void>
       onNavigate: (cb: (payload: NotificationNavigatePayload) => void) => void
+      onUnread: (cb: (section: NotificationSection) => void) => void
     }
   }
 }

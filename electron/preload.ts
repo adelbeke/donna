@@ -1,5 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import type { NotificationSettings, NotificationNavigatePayload } from './notifications'
+import type {
+  NotificationSettings,
+  NotificationNavigatePayload,
+  NotificationSection,
+} from './notifications'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   gh: {
@@ -46,5 +50,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('notifications:updateSettings', partial),
     onNavigate: (cb: (payload: NotificationNavigatePayload) => void) =>
       ipcRenderer.on('notifications:navigate', (_e, payload) => cb(payload)),
+    onUnread: (cb: (section: NotificationSection) => void) =>
+      ipcRenderer.on('notifications:unread', (_e, section) => cb(section)),
   },
 })

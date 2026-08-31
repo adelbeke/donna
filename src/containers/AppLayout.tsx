@@ -39,9 +39,18 @@ export const AppLayout = () => {
   useEffect(() => {
     window.electronAPI?.notifications.onNavigate((payload) => {
       if ('route' in payload) navigate(payload.route)
-      else usePRStore.getState().setSection(payload.section)
+      else {
+        useNotificationStore.getState().clearSectionUnread(payload.section)
+        usePRStore.getState().setSection(payload.section)
+      }
     })
   }, [navigate])
+
+  useEffect(() => {
+    window.electronAPI?.notifications.onUnread((section) => {
+      useNotificationStore.getState().markSectionUnread(section)
+    })
+  }, [])
 
   // one push carries the full settings blob main needs — avoids a second sync path to keep in step
   useEffect(() => {
