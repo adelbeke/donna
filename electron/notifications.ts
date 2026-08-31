@@ -32,7 +32,7 @@ export type NotificationSettings = {
   hiddenRepos: string[]
   showDraftsByCategory: Record<NotificationSection, boolean>
   checksEnabled: Record<ChecksSection, boolean>
-  reviewLeftEnabled: boolean
+  reviewLeftEnabled: Record<ChecksSection, boolean>
 }
 
 export type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
@@ -66,15 +66,15 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   // opt-in: unlike new-PR notifications, per-check-state notifications can fire often on an
   // active PR (every re-run), so we don't turn this on until the user asks for it in Settings
   checksEnabled: { authored: false, assigned: false },
-  reviewLeftEnabled: false,
+  reviewLeftEnabled: { authored: false, assigned: false },
 }
 
 type PersistedState = {
   settings: NotificationSettings
   seenIds: Partial<Record<NotificationCategory, string[]>>
   lastCheckState: Partial<Record<ChecksSection, Record<string, CheckRollupState | null>>>
-  // PR id -> review ids already notified about (or seeded on first sighting of that PR)
-  seenReviewIds: Record<string, string[]>
+  // section -> PR id -> review ids already notified about (or seeded on first sighting of that PR)
+  seenReviewIds: Partial<Record<ChecksSection, Record<string, string[]>>>
 }
 
 const DEFAULT_STATE: PersistedState = {
@@ -101,6 +101,10 @@ const loadState = (): PersistedState => {
         checksEnabled: {
           ...DEFAULT_SETTINGS.checksEnabled,
           ...parsed.settings?.checksEnabled,
+        },
+        reviewLeftEnabled: {
+          ...DEFAULT_SETTINGS.reviewLeftEnabled,
+          ...parsed.settings?.reviewLeftEnabled,
         },
       },
       seenIds: parsed.seenIds ?? {},
@@ -247,9 +251,9 @@ const notifyCheckStateChange = (pr: NotificationPR) => {
   fireNotification(title, body, () => handleSinglePRClick(pr))
 }
 
-const notifyReviewLeft = (pr: NotificationPR, review: Review) => {
+const notifyReviewLeft = (pr: NotificationPR, section: ChecksSection, review: Review) => {
   if (!review.author || !isNotifiableReviewState(review.state)) return
-  const { title, body } = formatReviewNotification(pr, review.author.login, review.state)
+  const { title, body } = formatReviewNotification(pr, section, review.author.login, review.state)
   fireNotification(title, body, () => handleSinglePRClick(pr))
 }
 
@@ -314,11 +318,11 @@ const checkChecks = async (section: ChecksSection) => {
 }
 
 // self-pruning like lastCheckState/seenIds: nextMap only keeps ids for PRs still open
-const checkReviews = async () => {
-  const nodes = await fetchSection('authored')
+const checkReviews = async (section: ChecksSection) => {
+  const nodes = await fetchSection(section)
   if (!nodes) return
 
-  const prevMap = state.seenReviewIds
+  const prevMap = state.seenReviewIds[section] ?? {}
   const nextMap: Record<string, string[]> = {}
   for (const pr of nodes) {
     const reviewIds = pr.reviews.map((r) => r.id)
@@ -328,10 +332,10 @@ const checkReviews = async () => {
     if (prevIds === undefined) continue
     const newIds = diffNewIds(reviewIds, prevIds)
     for (const review of pr.reviews.filter((r) => newIds.includes(r.id))) {
-      if (review.author?.login !== viewerLogin) notifyReviewLeft(pr, review)
+      if (review.author?.login !== viewerLogin) notifyReviewLeft(pr, section, review)
     }
   }
-  state.seenReviewIds = nextMap
+  state.seenReviewIds[section] = nextMap
   saveState()
 }
 
@@ -343,7 +347,8 @@ const tick = async () => {
   }
   if (state.settings.checksEnabled.assigned) await checkChecks('assigned')
   if (state.settings.checksEnabled.authored) await checkChecks('authored')
-  if (state.settings.reviewLeftEnabled) await checkReviews()
+  if (state.settings.reviewLeftEnabled.assigned) await checkReviews('assigned')
+  if (state.settings.reviewLeftEnabled.authored) await checkReviews('authored')
 }
 
 const startPolling = () => {

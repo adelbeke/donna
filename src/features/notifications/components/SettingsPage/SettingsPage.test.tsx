@@ -16,7 +16,7 @@ beforeEach(() => {
     enabledCategories: ['review-requested', 'assigned'],
     pollIntervalMs: 5 * 60_000,
     checksEnabled: { authored: false, assigned: false },
-    reviewLeftEnabled: false,
+    reviewLeftEnabled: { authored: false, assigned: false },
   })
 })
 
@@ -74,11 +74,25 @@ describe('SettingsPage', () => {
     })
   })
 
-  it('GIVEN review-left disabled WHEN the checkbox is checked THEN it is enabled in the store', () => {
+  it('GIVEN review-left disabled for authored WHEN the checkbox is checked THEN only authored is enabled', () => {
     renderSettingsPage()
 
     fireEvent.click(screen.getByLabelText('Notify me when someone reviews my PR'))
 
-    expect(useNotificationStore.getState().reviewLeftEnabled).toBe(true)
+    expect(useNotificationStore.getState().reviewLeftEnabled).toEqual({
+      authored: true,
+      assigned: false,
+    })
+  })
+
+  it('GIVEN review-left disabled for assigned WHEN the checkbox is checked THEN only assigned is enabled', () => {
+    renderSettingsPage()
+
+    fireEvent.click(screen.getByLabelText('Notify me when someone reviews'))
+
+    expect(useNotificationStore.getState().reviewLeftEnabled).toEqual({
+      authored: false,
+      assigned: true,
+    })
   })
 })

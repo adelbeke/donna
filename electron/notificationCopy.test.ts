@@ -184,23 +184,30 @@ describe('isNotifiableReviewState', () => {
 describe('formatReviewNotification', () => {
   const pr = { number: 42, title: 'Fix the thing', repository: { nameWithOwner: 'acme/donna' } }
 
-  it('formats an approval', () => {
-    expect(formatReviewNotification(pr, 'octocat', 'APPROVED')).toEqual({
+  it('formats an approval on an authored PR', () => {
+    expect(formatReviewNotification(pr, 'authored', 'octocat', 'APPROVED')).toEqual({
       title: 'octocat approved your PR',
       body: 'acme/donna#42 · Fix the thing',
     })
   })
 
-  it('formats requested changes', () => {
-    expect(formatReviewNotification(pr, 'octocat', 'CHANGES_REQUESTED')).toEqual({
+  it('formats requested changes on an authored PR', () => {
+    expect(formatReviewNotification(pr, 'authored', 'octocat', 'CHANGES_REQUESTED')).toEqual({
       title: 'octocat requested changes on your PR',
       body: 'acme/donna#42 · Fix the thing',
     })
   })
 
-  it('formats a comment', () => {
-    expect(formatReviewNotification(pr, 'octocat', 'COMMENTED')).toEqual({
+  it('formats a comment on an authored PR', () => {
+    expect(formatReviewNotification(pr, 'authored', 'octocat', 'COMMENTED')).toEqual({
       title: 'octocat commented on your PR',
+      body: 'acme/donna#42 · Fix the thing',
+    })
+  })
+
+  it('formats an approval on an assigned PR', () => {
+    expect(formatReviewNotification(pr, 'assigned', 'octocat', 'APPROVED')).toEqual({
+      title: "octocat approved a PR you're assigned to",
       body: 'acme/donna#42 · Fix the thing',
     })
   })

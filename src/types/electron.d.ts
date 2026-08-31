@@ -56,7 +56,7 @@ type NotificationSettings = {
   hiddenRepos: string[]
   showDraftsByCategory: Record<NotificationSection, boolean>
   checksEnabled: Record<ChecksSection, boolean>
-  reviewLeftEnabled: boolean
+  reviewLeftEnabled: Record<ChecksSection, boolean>
 }
 
 type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
