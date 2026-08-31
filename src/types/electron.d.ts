@@ -54,6 +54,7 @@ type NotificationSettings = {
   openPRsInDonna: boolean
   hiddenAuthors: string[]
   hiddenRepos: string[]
+  selectedReposByCategory: Record<NotificationSection, string[]>
   showDraftsByCategory: Record<NotificationSection, boolean>
   checksEnabled: Record<ChecksSection, boolean>
   reviewLeftEnabled: Record<ChecksSection, boolean>

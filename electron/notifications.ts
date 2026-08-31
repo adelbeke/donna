@@ -8,6 +8,7 @@ import {
   diffNewIds,
   filterDrafts,
   filterMuted,
+  filterSelectedRepos,
   formatCheckStateNotification,
   formatNewPRNotification,
   formatReviewNotification,
@@ -30,6 +31,7 @@ export type NotificationSettings = {
   openPRsInDonna: boolean
   hiddenAuthors: string[]
   hiddenRepos: string[]
+  selectedReposByCategory: Record<NotificationSection, string[]>
   showDraftsByCategory: Record<NotificationSection, boolean>
   checksEnabled: Record<ChecksSection, boolean>
   reviewLeftEnabled: Record<ChecksSection, boolean>
@@ -57,6 +59,12 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   openPRsInDonna: true,
   hiddenAuthors: [],
   hiddenRepos: [],
+  selectedReposByCategory: {
+    'review-requested': [],
+    assigned: [],
+    reviewed: [],
+    authored: [],
+  },
   showDraftsByCategory: {
     'review-requested': false,
     assigned: false,
@@ -94,6 +102,10 @@ const loadState = (): PersistedState => {
       settings: {
         ...DEFAULT_SETTINGS,
         ...parsed.settings,
+        selectedReposByCategory: {
+          ...DEFAULT_SETTINGS.selectedReposByCategory,
+          ...parsed.settings?.selectedReposByCategory,
+        },
         showDraftsByCategory: {
           ...DEFAULT_SETTINGS.showDraftsByCategory,
           ...parsed.settings?.showDraftsByCategory,
@@ -267,7 +279,12 @@ const fetchSection = async (section: NotificationSection): Promise<NotificationP
     })
     const nodes = res.data.search.nodes.map(toNotificationPR)
     return filterDrafts(
-      filterMuted(nodes, state.settings.hiddenAuthors, state.settings.hiddenRepos),
+      section === 'review-requested'
+        ? filterSelectedRepos(
+            filterMuted(nodes, state.settings.hiddenAuthors, state.settings.hiddenRepos),
+            state.settings.selectedReposByCategory[section]
+          )
+        : filterMuted(nodes, state.settings.hiddenAuthors, state.settings.hiddenRepos),
       state.settings.showDraftsByCategory[section]
     )
   } catch {
