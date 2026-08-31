@@ -5,18 +5,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PRSectionsTabs } from './PRSectionsTabs'
 import { usePRStore } from '../../stores/prStore'
 import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
-import { useNotificationStore } from '@/features/notifications/exports'
 import type { PRStore } from '../../stores/prStore'
-import type { NotificationStore } from '@/features/notifications/stores/notificationStore'
 
 vi.mock('../../stores/prStore', () => ({
   usePRStore: Object.assign(vi.fn(), { getState: vi.fn() }),
 }))
-vi.mock('@/features/notifications/exports', () => ({
-  useNotificationStore: vi.fn(),
-}))
 const mockUsePRStore = vi.mocked(usePRStore)
-const mockUseNotificationStore = vi.mocked(useNotificationStore)
 
 const mockStore = (section = 'review-requested', setSection = vi.fn()) => {
   const state = { section, setSection }
@@ -24,25 +18,6 @@ const mockStore = (section = 'review-requested', setSection = vi.fn()) => {
     selector(state as unknown as PRStore)
   )
   vi.mocked(mockUsePRStore.getState).mockReturnValue(state as unknown as PRStore)
-}
-
-const mockNotifications = (unreadSections: NotificationSection[] = [], clearSectionUnread = vi.fn()) => {
-  const state = {
-    enabledCategories: ['review-requested', 'assigned'],
-    pollIntervalMs: 5 * 60_000,
-    checksEnabled: { authored: false, assigned: false },
-    reviewLeftEnabled: { authored: false, assigned: false },
-    unreadSections,
-    toggleCategory: vi.fn(),
-    setPollIntervalMs: vi.fn(),
-    toggleChecksEnabled: vi.fn(),
-    toggleReviewLeftEnabled: vi.fn(),
-    markSectionUnread: vi.fn(),
-    clearSectionUnread,
-  } satisfies NotificationStore
-  mockUseNotificationStore.mockImplementation(
-    (selector: (s: NotificationStore) => unknown) => selector(state)
-  )
 }
 
 const renderWithClient = () => {
@@ -62,19 +37,16 @@ beforeEach(() => {
   // so its content doesn't collide with these tests' section-label queries.
   useOnboardingStore.setState({ spotlight: null, hasSeenGuide: true })
   mockStore()
-  mockNotifications()
 })
 
 describe('PRSectionsTabs — section tabs', () => {
   it('renders all four section tabs in order: My PRs, Review requested, Assigned, Reviewed', () => {
     renderWithClient()
-    const buttons = screen.getAllByRole('button').filter((button) =>
-      ['My PRs', 'Review requested', 'Assigned', 'Reviewed'].includes(button.textContent ?? '')
-    )
-    const myPRsBtn = screen.getByRole('button', { name: 'My PRs' })
-    const reviewRequestedBtn = screen.getByRole('button', { name: 'Review requested' })
-    const assignedBtn = screen.getByRole('button', { name: 'Assigned' })
-    const reviewedBtn = screen.getByRole('button', { name: 'Reviewed' })
+    const buttons = screen.getAllByRole('button')
+    const myPRsBtn = screen.getByText('My PRs')
+    const reviewRequestedBtn = screen.getByText('Review requested')
+    const assignedBtn = screen.getByText('Assigned')
+    const reviewedBtn = screen.getByText('Reviewed')
     expect(myPRsBtn).toBeInTheDocument()
     expect(reviewRequestedBtn).toBeInTheDocument()
     expect(assignedBtn).toBeInTheDocument()
@@ -92,7 +64,7 @@ describe('PRSectionsTabs — section tabs', () => {
   it('active section tab has accent styling', () => {
     mockStore('authored')
     renderWithClient()
-    const activeBtn = screen.getByRole('button', { name: 'My PRs' })
+    const activeBtn = screen.getByText('My PRs')
     expect(activeBtn.className).toContain('text-[var(--color-accent)]')
   })
 
@@ -102,24 +74,6 @@ describe('PRSectionsTabs — section tabs', () => {
     renderWithClient()
     fireEvent.click(screen.getByText('My PRs'))
     expect(setSection).toHaveBeenCalledWith('authored')
-  })
-
-  it('given another section has unread notifications, then it shows a red dot', () => {
-    mockNotifications(['assigned'])
-    renderWithClient()
-
-    expect(screen.getByLabelText('Assigned has unread notifications')).toBeInTheDocument()
-    expect(screen.queryByLabelText('Review requested has unread notifications')).not.toBeInTheDocument()
-  })
-
-  it('given an unread section tab is clicked, then its unread state is cleared', () => {
-    const clearSectionUnread = vi.fn()
-    mockNotifications(['authored'], clearSectionUnread)
-    renderWithClient()
-
-    fireEvent.click(screen.getByRole('button', { name: /My PRs/ }))
-
-    expect(clearSectionUnread).toHaveBeenCalledWith('authored')
   })
 })
 
@@ -133,12 +87,8 @@ describe('PRSectionsTabs — onboarding spotlight', () => {
     useOnboardingStore.setState({ spotlight: 'sections' })
     mockStore('authored')
     renderWithClient()
-    expect(screen.getByRole('button', { name: 'My PRs' }).className).toContain(
-      'animate-spotlight-ring'
-    )
-    expect(screen.getByRole('button', { name: 'Reviewed' }).className).not.toContain(
-      'animate-spotlight-ring'
-    )
+    expect(screen.getByText('My PRs').className).toContain('animate-spotlight-ring')
+    expect(screen.getByText('Reviewed').className).not.toContain('animate-spotlight-ring')
   })
 
   it('given the guide is spotlighting card actions, then no tab is ringed', () => {

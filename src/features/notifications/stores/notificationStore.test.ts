@@ -7,7 +7,6 @@ beforeEach(() => {
     pollIntervalMs: 5 * 60_000,
     checksEnabled: { authored: false, assigned: false },
     reviewLeftEnabled: { authored: false, assigned: false },
-    unreadSections: [],
   })
 })
 
@@ -64,20 +63,5 @@ describe('notificationStore', () => {
     useNotificationStore.getState().toggleReviewLeftEnabled('assigned')
 
     expect(useNotificationStore.getState().reviewLeftEnabled.assigned).toBe(false)
-  })
-
-  it('GIVEN a notification section WHEN marked unread twice THEN it is only stored once', () => {
-    useNotificationStore.getState().markSectionUnread('assigned')
-    useNotificationStore.getState().markSectionUnread('assigned')
-
-    expect(useNotificationStore.getState().unreadSections).toEqual(['assigned'])
-  })
-
-  it('GIVEN an unread section WHEN cleared THEN it is removed', () => {
-    useNotificationStore.setState({ unreadSections: ['authored', 'assigned'] })
-
-    useNotificationStore.getState().clearSectionUnread('assigned')
-
-    expect(useNotificationStore.getState().unreadSections).toEqual(['authored'])
   })
 })

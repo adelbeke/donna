@@ -1,6 +1,5 @@
 import { ContributeLinks } from '@/shared/components/ContributeLinks/ContributeLinks.tsx'
 import { useOnboardingStore } from '@/features/onboarding/stores/onboardingStore'
-import { useNotificationStore } from '@/features/notifications/exports'
 import { usePRStore, type PRSection } from '../../stores/prStore'
 
 const SECTIONS: { id: PRSection; label: string }[] = [
@@ -14,8 +13,6 @@ export const PRSectionsTabs = () => {
   const section = usePRStore((s) => s.section)
   const setSection = usePRStore((s) => s.setSection)
   const spotlight = useOnboardingStore((s) => s.spotlight)
-  const unreadSections = useNotificationStore((s) => s.unreadSections)
-  const clearSectionUnread = useNotificationStore((s) => s.clearSectionUnread)
 
   return (
     <aside className="w-56 shrink-0">
@@ -23,10 +20,7 @@ export const PRSectionsTabs = () => {
         {SECTIONS.map((s) => (
           <button
             key={s.id}
-            onClick={() => {
-              clearSectionUnread(s.id)
-              setSection(s.id)
-            }}
+            onClick={() => setSection(s.id)}
             className={`w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:outline-none
               ${
                 section === s.id
@@ -35,15 +29,7 @@ export const PRSectionsTabs = () => {
               }
               ${section === s.id && spotlight === 'sections' ? 'motion-safe:animate-spotlight-ring' : ''}`}
           >
-            <span className="flex items-center gap-2">
-              <span>{s.label}</span>
-              {s.id !== section && unreadSections.includes(s.id) && (
-                <span
-                  aria-label={`${s.label} has unread notifications`}
-                  className="h-2 w-2 rounded-full bg-[var(--color-danger)]"
-                />
-              )}
-            </span>
+            {s.label}
           </button>
         ))}
       </nav>

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { LogOut, Moon, Settings, Sun } from 'lucide-react'
-import { NavLink, Outlet, useNavigate } from 'react-router'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useAuthStore } from '@/features/auth/exports'
 import { usePRStore } from '@/features/pull-requests/exports'
 import { useNotificationStore } from '@/features/notifications/exports'
@@ -20,6 +20,8 @@ export const AppLayout = () => {
   const { theme, toggle } = useTheme()
   const features = useFeatures()
   const navigate = useNavigate()
+  const location = useLocation()
+  const section = usePRStore((s) => s.section)
   const hiddenAuthors = usePRStore((s) => s.globalFilters.hiddenAuthors)
   const hiddenRepos = usePRStore((s) => s.globalFilters.hiddenRepos)
   const openPRsInDonna = usePRStore((s) => s.openPRsInDonna)
@@ -37,20 +39,19 @@ export const AppLayout = () => {
   const selectedReposAuthored = usePRStore((s) => s.viewFilters.authored.repos)
 
   useEffect(() => {
-    return window.electronAPI?.notifications.onNavigate((payload) => {
+    window.electronAPI?.notifications.onNavigate((payload) => {
       if ('route' in payload) navigate(payload.route)
-      else {
-        useNotificationStore.getState().clearSectionUnread(payload.section)
-        usePRStore.getState().setSection(payload.section)
-      }
+      else usePRStore.getState().setSection(payload.section)
     })
   }, [navigate])
 
   useEffect(() => {
-    return window.electronAPI?.notifications.onUnread((section) => {
-      useNotificationStore.getState().markSectionUnread(section)
-    })
-  }, [])
+    const activeSection: NotificationSection | null =
+      location.pathname === '/prs' || location.pathname.startsWith('/prs/')
+        ? section
+        : null
+    void window.electronAPI?.notifications.setActiveSection(activeSection)
+  }, [location.pathname, section])
 
   // one push carries the full settings blob main needs — avoids a second sync path to keep in step
   useEffect(() => {
