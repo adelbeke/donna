@@ -40,7 +40,7 @@ interface Window {
     notifications: {
       updateSettings: (partial: Partial<NotificationSettings>) => Promise<void>
       setActiveSection: (section: NotificationSection | null) => Promise<void>
-      onNavigate: (cb: (payload: NotificationNavigatePayload) => void) => void
+      onNavigate: (cb: (payload: NotificationNavigatePayload) => void) => () => void
     }
   }
 }

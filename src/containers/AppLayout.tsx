@@ -39,7 +39,7 @@ export const AppLayout = () => {
   const selectedReposAuthored = usePRStore((s) => s.viewFilters.authored.repos)
 
   useEffect(() => {
-    window.electronAPI?.notifications.onNavigate((payload) => {
+    return window.electronAPI?.notifications.onNavigate((payload) => {
       if ('route' in payload) navigate(payload.route)
       else usePRStore.getState().setSection(payload.section)
     })

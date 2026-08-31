@@ -40,6 +40,14 @@ export const useNotificationStore = create<NotificationStore>()(
           },
         })),
     }),
-    { name: 'notification-preferences' }
+    {
+      name: 'notification-preferences',
+      partialize: (state) => ({
+        enabledCategories: state.enabledCategories,
+        pollIntervalMs: state.pollIntervalMs,
+        checksEnabled: state.checksEnabled,
+        reviewLeftEnabled: state.reviewLeftEnabled,
+      }),
+    }
   )
 )
