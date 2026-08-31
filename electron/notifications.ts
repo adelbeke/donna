@@ -274,10 +274,12 @@ const fetchSection = async (section: NotificationSection): Promise<NotificationP
       searchQuery: buildSearchQuery(section, viewerLogin),
     })
     const nodes = res.data.search.nodes.map(toNotificationPR)
+    const selectedRepos =
+      section === 'review-requested' ? state.settings.selectedReposByCategory[section] : []
     return filterDrafts(
       filterSelectedRepos(
         filterMuted(nodes, state.settings.hiddenAuthors, state.settings.hiddenRepos),
-        state.settings.selectedReposByCategory[section]
+        selectedRepos
       ),
       state.settings.showDraftsByCategory[section]
     )
