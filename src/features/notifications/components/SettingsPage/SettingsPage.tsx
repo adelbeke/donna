@@ -45,7 +45,8 @@ export const SettingsPage = () => {
   const silent = useNotificationStore((s) => s.silent)
   const toggleSilent = useNotificationStore((s) => s.toggleSilent)
 
-  const isCustomSound = soundName !== null && !(SYSTEM_SOUNDS as readonly string[]).includes(soundName)
+  const isCustomSound =
+    soundName !== null && !(SYSTEM_SOUNDS as readonly string[]).includes(soundName)
 
   const handlePickSound = async () => {
     const fileName = await window.electronAPI?.notifications.pickSound()
@@ -168,9 +169,7 @@ export const SettingsPage = () => {
               onChange={(e) => setSoundName(e.target.value)}
               className="text-xs px-2 py-1.5 rounded border border-[var(--color-border-subtle)] bg-[var(--color-surface)] text-[var(--color-text-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isCustomSound && (
-                <option value={soundName ?? ''}>{soundName} (custom)</option>
-              )}
+              {isCustomSound && <option value={soundName ?? ''}>{soundName} (custom)</option>}
               {SYSTEM_SOUNDS.map((name) => (
                 <option key={name} value={name}>
                   {name}
