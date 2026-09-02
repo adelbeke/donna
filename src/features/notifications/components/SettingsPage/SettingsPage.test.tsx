@@ -17,6 +17,8 @@ beforeEach(() => {
     pollIntervalMs: 5 * 60_000,
     checksEnabled: { authored: false, assigned: false },
     reviewLeftEnabled: { authored: false, assigned: false },
+    soundName: 'Pop',
+    silent: false,
   })
 })
 
@@ -94,5 +96,24 @@ describe('SettingsPage', () => {
       authored: false,
       assigned: true,
     })
+  })
+
+  it('GIVEN the sound select WHEN changed THEN the store updates', () => {
+    renderSettingsPage()
+
+    fireEvent.change(screen.getByLabelText('Notification sound'), {
+      target: { value: 'Glass' },
+    })
+
+    expect(useNotificationStore.getState().soundName).toBe('Glass')
+  })
+
+  it('GIVEN silent unchecked WHEN toggled THEN the store updates and the sound controls disable', () => {
+    renderSettingsPage()
+
+    fireEvent.click(screen.getByLabelText('Silent (no sound)'))
+
+    expect(useNotificationStore.getState().silent).toBe(true)
+    expect(screen.getByLabelText('Notification sound')).toBeDisabled()
   })
 })

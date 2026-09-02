@@ -40,6 +40,8 @@ interface Window {
     notifications: {
       updateSettings: (partial: Partial<NotificationSettings>) => Promise<void>
       setActiveSection: (section: NotificationSection | null) => Promise<void>
+      pickSound: () => Promise<string | null>
+      test: () => Promise<void>
       onNavigate: (cb: (payload: NotificationNavigatePayload) => void) => () => void
     }
   }
@@ -59,6 +61,8 @@ type NotificationSettings = {
   showDraftsByCategory: Record<NotificationSection, boolean>
   checksEnabled: Record<ChecksSection, boolean>
   reviewLeftEnabled: Record<ChecksSection, boolean>
+  soundName: string | null
+  silent: boolean
 }
 
 type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
