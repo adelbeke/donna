@@ -29,6 +29,8 @@ export const AppLayout = () => {
   const pollIntervalMs = useNotificationStore((s) => s.pollIntervalMs)
   const checksEnabled = useNotificationStore((s) => s.checksEnabled)
   const reviewLeftEnabled = useNotificationStore((s) => s.reviewLeftEnabled)
+  const soundName = useNotificationStore((s) => s.soundName)
+  const silent = useNotificationStore((s) => s.silent)
   const showDraftsReviewRequested = usePRStore((s) => s.viewFilters['review-requested'].showDrafts)
   const showDraftsAssigned = usePRStore((s) => s.viewFilters.assigned.showDrafts)
   const showDraftsReviewed = usePRStore((s) => s.viewFilters.reviewed.showDrafts)
@@ -67,6 +69,8 @@ export const AppLayout = () => {
       pollIntervalMs,
       checksEnabled,
       reviewLeftEnabled,
+      soundName,
+      silent,
       showDraftsByCategory: {
         'review-requested': showDraftsReviewRequested,
         assigned: showDraftsAssigned,
@@ -86,6 +90,8 @@ export const AppLayout = () => {
     pollIntervalMs,
     checksEnabled,
     reviewLeftEnabled,
+    soundName,
+    silent,
     showDraftsReviewRequested,
     showDraftsAssigned,
     showDraftsReviewed,

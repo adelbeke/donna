@@ -50,6 +50,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.invoke('notifications:updateSettings', partial),
     setActiveSection: (section: NotificationSection | null): Promise<void> =>
       ipcRenderer.invoke('notifications:setActiveSection', section),
+    pickSound: (): Promise<string | null> => ipcRenderer.invoke('notifications:pickSound'),
+    test: (): Promise<void> => ipcRenderer.invoke('notifications:test'),
     onNavigate: (cb: (payload: NotificationNavigatePayload) => void) => {
       const listener = (_e: Electron.IpcRendererEvent, payload: NotificationNavigatePayload) =>
         cb(payload)

@@ -7,6 +7,8 @@ beforeEach(() => {
     pollIntervalMs: 5 * 60_000,
     checksEnabled: { authored: false, assigned: false },
     reviewLeftEnabled: { authored: false, assigned: false },
+    soundName: 'Pop',
+    silent: false,
   })
 })
 
@@ -63,5 +65,24 @@ describe('notificationStore', () => {
     useNotificationStore.getState().toggleReviewLeftEnabled('assigned')
 
     expect(useNotificationStore.getState().reviewLeftEnabled.assigned).toBe(false)
+  })
+
+  it('GIVEN a sound name WHEN setSoundName is called THEN the store updates', () => {
+    useNotificationStore.getState().setSoundName('Glass')
+
+    expect(useNotificationStore.getState().soundName).toBe('Glass')
+  })
+
+  it('GIVEN silent is off WHEN toggleSilent is called THEN it is enabled', () => {
+    useNotificationStore.getState().toggleSilent()
+
+    expect(useNotificationStore.getState().silent).toBe(true)
+  })
+
+  it('GIVEN silent is on WHEN toggled twice THEN it is back to disabled', () => {
+    useNotificationStore.getState().toggleSilent()
+    useNotificationStore.getState().toggleSilent()
+
+    expect(useNotificationStore.getState().silent).toBe(false)
   })
 })

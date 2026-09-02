@@ -6,10 +6,14 @@ export type NotificationStore = {
   pollIntervalMs: number
   checksEnabled: Record<ChecksSection, boolean>
   reviewLeftEnabled: Record<ChecksSection, boolean>
+  soundName: string | null
+  silent: boolean
   toggleCategory: (category: NotificationCategory) => void
   setPollIntervalMs: (ms: number) => void
   toggleChecksEnabled: (section: ChecksSection) => void
   toggleReviewLeftEnabled: (section: ChecksSection) => void
+  setSoundName: (soundName: string | null) => void
+  toggleSilent: () => void
 }
 
 const defaultEnabledCategories: NotificationCategory[] = ['review-requested', 'assigned']
@@ -21,6 +25,8 @@ export const useNotificationStore = create<NotificationStore>()(
       pollIntervalMs: 5 * 60_000,
       checksEnabled: { authored: false, assigned: false },
       reviewLeftEnabled: { authored: false, assigned: false },
+      soundName: 'Pop',
+      silent: false,
       toggleCategory: (category) =>
         set((state) => ({
           enabledCategories: state.enabledCategories.includes(category)
@@ -39,6 +45,8 @@ export const useNotificationStore = create<NotificationStore>()(
             [section]: !state.reviewLeftEnabled[section],
           },
         })),
+      setSoundName: (soundName) => set({ soundName }),
+      toggleSilent: () => set((state) => ({ silent: !state.silent })),
     }),
     {
       name: 'notification-preferences',
@@ -47,6 +55,8 @@ export const useNotificationStore = create<NotificationStore>()(
         pollIntervalMs: state.pollIntervalMs,
         checksEnabled: state.checksEnabled,
         reviewLeftEnabled: state.reviewLeftEnabled,
+        soundName: state.soundName,
+        silent: state.silent,
       }),
     }
   )

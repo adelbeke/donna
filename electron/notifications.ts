@@ -1,4 +1,4 @@
-import { app, ipcMain, BrowserWindow, Notification, shell } from 'electron'
+import { app, ipcMain, BrowserWindow, Notification, shell, dialog } from 'electron'
 import fs from 'node:fs'
 import path from 'node:path'
 import { runGh } from './gh'
@@ -37,6 +37,8 @@ export type NotificationSettings = {
   showDraftsByCategory: Record<NotificationSection, boolean>
   checksEnabled: Record<ChecksSection, boolean>
   reviewLeftEnabled: Record<ChecksSection, boolean>
+  soundName: string | null
+  silent: boolean
 }
 
 export type NotificationNavigatePayload = { route: string } | { section: NotificationCategory }
@@ -77,6 +79,8 @@ const DEFAULT_SETTINGS: NotificationSettings = {
   // active PR (every re-run), so we don't turn this on until the user asks for it in Settings
   checksEnabled: { authored: false, assigned: false },
   reviewLeftEnabled: { authored: false, assigned: false },
+  soundName: 'Pop',
+  silent: false,
 }
 
 type PersistedState = {
@@ -258,7 +262,12 @@ const fireNotification = (
   onClick: () => void,
   onDismiss: () => void = () => {}
 ) => {
-  const notification = new Notification({ title, body })
+  const notification = new Notification({
+    title,
+    body,
+    silent: state.settings.silent,
+    sound: state.settings.silent ? undefined : (state.settings.soundName ?? undefined),
+  })
   liveNotifications.add(notification)
   const release = () => liveNotifications.delete(notification)
   const handlers = createNotificationLifecycleHandlers({ onClick, onDismiss, release })
@@ -430,5 +439,23 @@ export const initNotifications = () => {
   })
   ipcMain.handle('notifications:setActiveSection', (_e, section: NotificationSection | null) => {
     setActiveSection(section)
+  })
+  ipcMain.handle('notifications:pickSound', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'Audio', extensions: ['aiff', 'aif', 'wav', 'caf', 'm4a', 'mp3'] }],
+    })
+    if (canceled || !filePaths[0]) return null
+    // ponytail: macOS only resolves notification sounds by name from a fixed set of
+    // directories (~/Library/Sounds among them) — an arbitrary path never plays, so the
+    // file has to be copied there first and referenced by its filename.
+    const soundsDir = path.join(app.getPath('home'), 'Library', 'Sounds')
+    fs.mkdirSync(soundsDir, { recursive: true })
+    const fileName = path.basename(filePaths[0])
+    fs.copyFileSync(filePaths[0], path.join(soundsDir, fileName))
+    return fileName
+  })
+  ipcMain.handle('notifications:test', () => {
+    fireNotification('Test notification', 'This is what your notifications sound like.', () => {})
   })
 }
