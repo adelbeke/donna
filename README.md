@@ -4,6 +4,7 @@
 
 Your GitHub companion — track PRs, manage branches and worktrees, all from a native macOS app.
 
+![Downloads](https://img.shields.io/github/downloads/adelbeke/donna/total)
 [![CI](https://github.com/adelbeke/donna/actions/workflows/ci.yml/badge.svg)](https://github.com/adelbeke/donna/actions/workflows/ci.yml)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
