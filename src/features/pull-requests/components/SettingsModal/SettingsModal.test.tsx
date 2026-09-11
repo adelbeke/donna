@@ -122,6 +122,21 @@ describe('SettingsModal', () => {
     expect(screen.queryByText('Organization')).not.toBeInTheDocument()
   })
 
+  it('GIVEN a selected repo no longer present in fetched repos WHEN opening settings THEN it remains selectable and can be deselected', () => {
+    usePRStore.setState({ section: 'review-requested' })
+    usePRStore.getState().setViewFilters('review-requested', { repos: ['acme/missing-repo'] })
+    mockUsePullRequests.mockReturnValue({ repos: ['acme/repo-a', 'other/repo-b'] } as never)
+
+    render(<SettingsModal />)
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }))
+
+    expect(screen.getByText('missing-repo')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('missing-repo'))
+
+    expect(usePRStore.getState().viewFilters['review-requested'].repos).toEqual([])
+  })
+
   it('GIVEN openPRsInDonna true WHEN the toggle is unchecked THEN the store updates', () => {
     usePRStore.setState({ section: 'authored', openPRsInDonna: true })
     mockUsePullRequests.mockReturnValue({ repos: ['org/repo'] } as never)

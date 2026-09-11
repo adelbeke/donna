@@ -29,7 +29,8 @@ export const SettingsModal = () => {
   const visibleRepos = repos.filter(
     (r) => !globalFilters.hiddenRepos.some((h) => isRepoMatchedBy(r, h))
   )
-  const orgs = [...new Set(visibleRepos.map((r) => r.split('/')[0]))]
+  const selectableRepos = [...new Set([...visibleRepos, ...currentView.repos])].sort()
+  const orgs = [...new Set(selectableRepos.map((r) => r.split('/')[0]))]
 
   const activeCount =
     currentView.repos.length +
@@ -46,7 +47,7 @@ export const SettingsModal = () => {
   }
 
   const toggleOrg = (org: string) => {
-    const orgRepos = visibleRepos.filter((r) => r.split('/')[0] === org)
+    const orgRepos = selectableRepos.filter((r) => r.split('/')[0] === org)
     const allSelected = orgRepos.every((r) => currentView.repos.includes(r))
     setViewFilters(section, {
       repos: allSelected
@@ -135,7 +136,7 @@ export const SettingsModal = () => {
             </p>
             <div className="flex flex-wrap gap-1 mb-3">
               {orgs.map((org) => {
-                const orgRepos = visibleRepos.filter((r) => r.split('/')[0] === org)
+                const orgRepos = selectableRepos.filter((r) => r.split('/')[0] === org)
                 const selected = orgRepos.every((r) => currentView.repos.includes(r))
                 return (
                   <button
@@ -168,7 +169,7 @@ export const SettingsModal = () => {
               )}
             </div>
             <div className="space-y-0.5 max-h-48 overflow-y-auto">
-              {visibleRepos.map((repo) => {
+              {selectableRepos.map((repo) => {
                 const selected = currentView.repos.includes(repo)
                 return (
                   <label
