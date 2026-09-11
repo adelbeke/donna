@@ -44,7 +44,11 @@ jobs:
     if: github.actor == 'adelbeke'
     permissions:
       contents: write
-    runs-on: macos-latest
+    # ponytail: pinned instead of macos-latest — that label jumped to a macOS 26
+    # image (20260907.0351) whose keychain behavior breaks electron-builder's
+    # codesign step (`security set-key-partition-list` fails to unlock the temp
+    # keychain). Bump deliberately once electron-builder is confirmed compatible.
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
         with:
