@@ -10,10 +10,11 @@ beforeEach(() => {
       authored: { repos: [], showDrafts: false, search: '' },
       reviewed: { repos: [], showDrafts: false, search: '' },
       assigned: { repos: [], showDrafts: false, search: '' },
+      merged: { repos: [], showDrafts: false, search: '' },
     },
     priorityIds: [],
     hiddenIds: [],
-    knownRepos: { 'review-requested': [], authored: [], reviewed: [], assigned: [] },
+    knownRepos: { 'review-requested': [], authored: [], reviewed: [], assigned: [], merged: [] },
   })
 })
 

@@ -14,6 +14,7 @@ const sectionLabels: Record<string, string> = {
   'review-requested': 'Review requested',
   authored: 'My pull requests',
   reviewed: 'Reviewed',
+  merged: 'Recently merged',
 }
 
 export const PRList = () => {

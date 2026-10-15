@@ -7,6 +7,7 @@ const SECTIONS: { id: PRSection; label: string }[] = [
   { id: 'review-requested', label: 'Review requested' },
   { id: 'assigned', label: 'Assigned' },
   { id: 'reviewed', label: 'Reviewed' },
+  { id: 'merged', label: 'Recently merged' },
 ]
 
 export const PRSectionsTabs = () => {

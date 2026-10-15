@@ -40,25 +40,29 @@ beforeEach(() => {
 })
 
 describe('PRSectionsTabs — section tabs', () => {
-  it('renders all four section tabs in order: My PRs, Review requested, Assigned, Reviewed', () => {
+  it('renders all five section tabs in order', () => {
     renderWithClient()
     const buttons = screen.getAllByRole('button')
     const myPRsBtn = screen.getByText('My PRs')
     const reviewRequestedBtn = screen.getByText('Review requested')
     const assignedBtn = screen.getByText('Assigned')
     const reviewedBtn = screen.getByText('Reviewed')
+    const mergedBtn = screen.getByText('Recently merged')
     expect(myPRsBtn).toBeInTheDocument()
     expect(reviewRequestedBtn).toBeInTheDocument()
     expect(assignedBtn).toBeInTheDocument()
     expect(reviewedBtn).toBeInTheDocument()
+    expect(mergedBtn).toBeInTheDocument()
     // Verify order
     const myPRsIndex = buttons.indexOf(myPRsBtn as HTMLButtonElement)
     const reviewRequestedIndex = buttons.indexOf(reviewRequestedBtn as HTMLButtonElement)
     const assignedIndex = buttons.indexOf(assignedBtn as HTMLButtonElement)
     const reviewedIndex = buttons.indexOf(reviewedBtn as HTMLButtonElement)
+    const mergedIndex = buttons.indexOf(mergedBtn as HTMLButtonElement)
     expect(myPRsIndex).toBeLessThan(reviewRequestedIndex)
     expect(reviewRequestedIndex).toBeLessThan(assignedIndex)
     expect(assignedIndex).toBeLessThan(reviewedIndex)
+    expect(reviewedIndex).toBeLessThan(mergedIndex)
   })
 
   it('active section tab has accent styling', () => {

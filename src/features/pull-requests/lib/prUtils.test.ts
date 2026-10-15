@@ -56,6 +56,11 @@ describe('buildSearchQuery', () => {
     expect(actual).toContain('-author:alice')
   })
 
+  it('GIVEN merged section WHEN called THEN searches merged PRs from the last 24 hours', () => {
+    const actual = buildSearchQuery('merged', 'alice', new Date('2024-01-02T12:00:00Z'))
+    expect(actual).toBe('is:merged is:pr archived:false merged:>=2024-01-01 sort:updated-desc')
+  })
+
   it('GIVEN unknown section WHEN called THEN falls back to review-requested', () => {
     const actual = buildSearchQuery('unknown', 'alice')
     expect(actual).toContain('review-requested:alice')

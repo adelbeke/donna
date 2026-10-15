@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type PRSection = 'review-requested' | 'authored' | 'reviewed' | 'assigned'
+export type PRSection = 'review-requested' | 'authored' | 'reviewed' | 'assigned' | 'merged'
 
 export type GlobalFilters = {
   hiddenAuthors: string[]
@@ -60,6 +60,7 @@ const defaultViewFiltersAll: Record<PRSection, ViewFilters> = {
   authored: { ...defaultViewFilters, showDrafts: true },
   reviewed: { ...defaultViewFilters },
   assigned: { ...defaultViewFilters },
+  merged: { ...defaultViewFilters },
 }
 
 const defaultKnownReposAll: Record<PRSection, string[]> = {
@@ -67,6 +68,7 @@ const defaultKnownReposAll: Record<PRSection, string[]> = {
   authored: [],
   reviewed: [],
   assigned: [],
+  merged: [],
 }
 
 // ponytail: persisted knownRepos can predate a section (e.g. `reviewed` added in #183) — merge
@@ -214,6 +216,7 @@ export const usePRStore = create<PRStore>()(
           'authored',
           'reviewed',
           'assigned',
+          'merged',
         ])
         return {
           ...current,

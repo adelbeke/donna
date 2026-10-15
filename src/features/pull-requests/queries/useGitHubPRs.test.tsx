@@ -156,10 +156,11 @@ describe('usePullRequests auto-select on new repo discovery', () => {
         authored: { repos: [], showDrafts: false, search: '' },
         reviewed: { repos: [], showDrafts: false, search: '' },
         assigned: { repos: [], showDrafts: false, search: '' },
+        merged: { repos: [], showDrafts: false, search: '' },
       },
       priorityIds: [],
       hiddenIds: [],
-      knownRepos: { 'review-requested': [], authored: [], reviewed: [], assigned: [] },
+      knownRepos: { 'review-requested': [], authored: [], reviewed: [], assigned: [], merged: [] },
     })
     useAuthStore.setState({ token: null, user: null })
   })
@@ -179,6 +180,7 @@ describe('usePullRequests auto-select on new repo discovery', () => {
         authored: [],
         reviewed: [],
         assigned: [],
+        merged: [],
       },
     })
     usePRStore.getState().setViewFilters('review-requested', {
@@ -204,6 +206,7 @@ describe('usePullRequests auto-select on new repo discovery', () => {
         authored: [],
         reviewed: [],
         assigned: [],
+        merged: [],
       },
     })
     usePRStore.getState().setViewFilters('review-requested', { repos: ['acme/repo-a'] })
@@ -234,7 +237,13 @@ describe('usePullRequests auto-select on new repo discovery', () => {
     setupAuth()
     usePRStore.setState({
       globalFilters: { hiddenAuthors: [], hiddenRepos: ['acme/repo-c'], showHidden: false },
-      knownRepos: { 'review-requested': ['acme/repo-a'], authored: [], reviewed: [], assigned: [] },
+      knownRepos: {
+        'review-requested': ['acme/repo-a'],
+        authored: [],
+        reviewed: [],
+        assigned: [],
+        merged: [],
+      },
     })
     usePRStore.getState().setViewFilters('review-requested', { repos: ['acme/repo-a'] })
     const graphql = vi.fn().mockResolvedValue(mockSearchResponse(['acme/repo-a', 'acme/repo-c']))
@@ -245,5 +254,30 @@ describe('usePullRequests auto-select on new repo discovery', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
     expect(usePRStore.getState().viewFilters['review-requested'].repos).toEqual(['acme/repo-a'])
     expect(usePRStore.getState().knownRepos['review-requested']).toEqual(['acme/repo-a'])
+  })
+
+  it('GIVEN merged PRs inside and outside the last 24 hours WHEN loaded THEN shows only recent merges', async () => {
+    setupAuth()
+    usePRStore.setState({ section: 'merged' })
+    const recentlyMerged = makePR('10', '2024-01-01T00:00:00Z')
+    recentlyMerged.mergedAt = new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString()
+    const olderMerge = makePR('11', '2024-01-01T00:00:00Z')
+    olderMerge.mergedAt = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString()
+    const graphql = vi.fn().mockResolvedValue({
+      data: {
+        search: {
+          issueCount: 2,
+          pageInfo: { hasNextPage: false, endCursor: '' },
+          nodes: [recentlyMerged, olderMerge],
+        },
+      },
+    })
+    window.electronAPI = { gh: { graphql } } as unknown as typeof window.electronAPI
+
+    const { result } = renderHook(() => usePullRequests(), { wrapper })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.allPRs.map((pr) => pr.id)).toEqual(['10'])
+    expect(graphql.mock.calls[0][1].searchQuery).toContain('is:merged')
   })
 })

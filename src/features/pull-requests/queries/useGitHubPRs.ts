@@ -3,7 +3,7 @@ import { useInfiniteQuery } from '@tanstack/react-query'
 import { createClient, PR_LIST_QUERY } from '@/providers/github'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 import { usePRStore } from '@/features/pull-requests/stores/prStore'
-import { buildSearchQuery, sortAndPartition } from '../lib/prUtils'
+import { buildSearchQuery, RECENT_MERGE_WINDOW_MS, sortAndPartition } from '../lib/prUtils'
 import { applyFilters, isRepoMatchedBy } from '../lib/prFilters'
 import type { PullRequest } from '@/types/github'
 
@@ -32,8 +32,6 @@ export const usePullRequests = () => {
   const setViewFilters = usePRStore((s) => s.setViewFilters)
   const setKnownRepos = usePRStore((s) => s.setKnownRepos)
 
-  const searchQuery = buildSearchQuery(section, user?.login ?? '')
-
   const query = useInfiniteQuery<SearchPage>({
     queryKey: ['prs', section, user?.login],
     enabled: !!token && !!user,
@@ -44,7 +42,7 @@ export const usePullRequests = () => {
       last.search.pageInfo.hasNextPage ? last.search.pageInfo.endCursor : undefined,
     queryFn: async ({ pageParam }) => {
       return createClient().request<SearchPage>(PR_LIST_QUERY, {
-        searchQuery,
+        searchQuery: buildSearchQuery(section, user?.login ?? ''),
         cursor: pageParam,
       })
     },
@@ -72,9 +70,15 @@ export const usePullRequests = () => {
       .filter((pr) => {
         if (seen.has(pr.id)) return false
         seen.add(pr.id)
-        return true
+        return (
+          section !== 'merged' ||
+          (pr.mergedAt !== null &&
+            pr.mergedAt !== undefined &&
+            query.dataUpdatedAt > 0 &&
+            new Date(pr.mergedAt).getTime() >= query.dataUpdatedAt - RECENT_MERGE_WINDOW_MS)
+        )
       })
-  }, [query.data, priorityIds, hiddenIds])
+  }, [query.data, query.dataUpdatedAt, priorityIds, hiddenIds, section])
 
   const currentView = viewFilters[section]
   const filtered = useMemo(

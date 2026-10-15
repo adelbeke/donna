@@ -52,6 +52,7 @@ export type PullRequest = {
   headRefName: string
   createdAt: string
   updatedAt: string
+  mergedAt?: string | null
   author: {
     login: string
     avatarUrl: string
