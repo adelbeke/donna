@@ -61,6 +61,7 @@ export const PR_LIST_QUERY = /* GraphQL */ `
           headRefName
           createdAt
           updatedAt
+          mergedAt
           additions
           deletions
           author {
