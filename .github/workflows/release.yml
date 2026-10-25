@@ -163,21 +163,8 @@ jobs:
             git push
           fi
 
-  cleanup:
-    needs: [bump, build, release]
-    if: failure() && needs.bump.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Delete release branch
-        run: git push origin --delete "${{ needs.bump.outputs.branch }}" || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  # ponytail: retain the release branch on failure so failed jobs can be retried;
+  # build/release check it out again, and the version-bump PR still needs it.
   pr:
     needs: [bump, release]
     if: github.actor == 'adelbeke'
