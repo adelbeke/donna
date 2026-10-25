@@ -7,6 +7,7 @@ import { useNotificationStore } from '@/features/notifications/exports'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useFeatures, type Feature } from '@/shared/features'
 import { Footer } from '@/shared/components/Footer/Footer'
+import { MaintenanceBanner } from '@/shared/components/MaintenanceBanner/MaintenanceBanner'
 import { useUpdateCheck, UpdateBanner } from '@/features/updates/exports'
 
 const NAV_TABS: { to: string; label: string; feature?: Feature }[] = [
@@ -170,6 +171,7 @@ export const AppLayout = () => {
         </div>
       </header>
 
+      <MaintenanceBanner />
       {latestVersion && <UpdateBanner version={latestVersion} />}
 
       {/* Main layout */}
