@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 
 const DISCUSSION_URL = 'https://github.com/adelbeke/donna/discussions/264'
+const DISMISSED_KEY = 'maintenance-banner-dismissed'
 
-// ponytail: dismissal is per session on purpose, the survey comes back on every launch
 export const MaintenanceBanner = () => {
-  const [dismissed, setDismissed] = useState(false)
+  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY) === 'true')
 
   if (dismissed) return null
   return (
@@ -24,7 +24,10 @@ export const MaintenanceBanner = () => {
         : Donna will keep minimal maintenance. Otherwise, the project will be archived.
       </span>
       <button
-        onClick={() => setDismissed(true)}
+        onClick={() => {
+          localStorage.setItem(DISMISSED_KEY, 'true')
+          setDismissed(true)
+        }}
         title="Dismiss"
         className="shrink-0 cursor-pointer rounded focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
       >
