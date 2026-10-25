@@ -11,8 +11,8 @@ export const MaintenanceBanner = () => {
   return (
     <div className="flex items-center justify-center gap-3 px-4 py-2 text-xs bg-[var(--color-warning-subtle)] text-[var(--color-warning)] border-b border-[var(--color-border)]">
       <span>
-        With the rise of new tools and the latest GitHub updates, I wonder if Donna is still
-        useful. If you still use it,{' '}
+        With the rise of new tools and the latest GitHub updates, I wonder if Donna is still useful.
+        If you still use it,{' '}
         <a
           href={DISCUSSION_URL}
           target="_blank"
