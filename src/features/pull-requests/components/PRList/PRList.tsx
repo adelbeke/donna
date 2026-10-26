@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { usePullRequests } from '../../queries/useGitHubPRs'
 import { usePRStore } from '../../stores/prStore'
 import { PRCard } from '../PRCard/PRCard'
+import { MergedPRRow } from '../MergedPRRow/MergedPRRow'
 import { PRListHeader } from '@/features/pull-requests/components/PRListHeader/PRListHeader.tsx'
 import { useFocusRefresh } from '../../hooks/useFocusRefresh'
 import { NewPRsBadge } from '../NewPRsBadge/NewPRsBadge'
@@ -146,17 +147,21 @@ export const PRList = () => {
 
       {!isLoading && !error && displayedPRs.length > 0 && (
         <div className="space-y-2">
-          {displayedPRs.map((pr) => (
-            <PRCard
-              key={pr.id}
-              pr={pr}
-              isAuthored={section === 'authored'}
-              showReviewerAvatars={section === 'authored' || section === 'assigned'}
-              showShortcut={section === 'authored' || section === 'assigned'}
-              showHideAndStar={section === 'review-requested'}
-              highlightActions={pr.id === spotlitPRId}
-            />
-          ))}
+          {displayedPRs.map((pr) =>
+            section === 'merged' ? (
+              <MergedPRRow key={pr.id} title={pr.title} url={pr.url} />
+            ) : (
+              <PRCard
+                key={pr.id}
+                pr={pr}
+                isAuthored={section === 'authored'}
+                showReviewerAvatars={section === 'authored' || section === 'assigned'}
+                showShortcut={section === 'authored' || section === 'assigned'}
+                showHideAndStar={section === 'review-requested'}
+                highlightActions={pr.id === spotlitPRId}
+              />
+            )
+          )}
         </div>
       )}
     </div>
