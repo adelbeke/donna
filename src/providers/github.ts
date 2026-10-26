@@ -45,7 +45,7 @@ export const VIEWER_QUERY = /* GraphQL */ `
 
 export const PR_LIST_QUERY = /* GraphQL */ `
   query GetPullRequests($searchQuery: String!, $cursor: String) {
-    search(query: $searchQuery, type: ISSUE, first: 20, after: $cursor) {
+    search(query: $searchQuery, type: ISSUE_ADVANCED, first: 20, after: $cursor) {
       issueCount
       pageInfo {
         hasNextPage

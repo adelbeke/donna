@@ -23,7 +23,7 @@ export type ReviewerSummary = {
 export const buildSearchQuery = (section: string, login: string, now = new Date()): string => {
   if (section === 'merged') {
     const since = new Date(now.getTime() - RECENT_MERGE_WINDOW_MS).toISOString().slice(0, 10)
-    return `is:merged is:pr archived:false merged:>=${since} sort:updated-desc`
+    return `is:merged is:pr archived:false (author:${login} OR assignee:${login}) merged:>=${since} sort:updated-desc`
   }
   const base = 'is:open is:pr archived:false sort:updated-desc'
   switch (section) {
