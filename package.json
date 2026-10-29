@@ -43,7 +43,7 @@
     "lucide-react": "^1.38.0",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.2.7",
-    "react-dom": "^19.3.0",
+    "react-dom": "^19.3.1",
     "react-markdown": "^10.1.0",
     "react-router": "^8.5.0",
     "rehype-raw": "^7.0.0",
