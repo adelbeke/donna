@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
+**Status: maintenance stopped.** The project is no longer maintained; do not plan new features or releases.
+
 Donna is an open source GitHub companion — filter, prioritise, and track review status across all your repositories. The **Electron app** (macOS) is the sole functional product: full features including the Branches tab, with auth and all GitHub calls delegated to the local `gh` CLI — no token is ever stored.
 
 The React renderer previously also shipped as a browser-only web app (GitHub Pages at `adelbeke.github.io/donna`), authenticating with a classic PAT kept in `localStorage`. That web app has been retired — GitHub Pages now serves a static `web-deprecated/index.html` pointing visitors to the latest release, built and deployed independently of the React app (see `.github/workflows/deploy.yml`). The renderer source no longer contains a web entry point (`WebContainer`/`AuthPage` were removed); `authStore` remains shared infrastructure used by the Electron app's `gh-cli` sentinel token flow.

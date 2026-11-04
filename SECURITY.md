@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-Only the latest commit on `main` is supported.
+Donna is no longer maintained. No security fixes will be issued; no version is supported.
 
 ## Reporting a Vulnerability
 
